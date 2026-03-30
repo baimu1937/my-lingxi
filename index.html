@@ -10,32 +10,23 @@
         .theme-dark { --bg-main: #111827; }
         .theme-eye { --bg-main: #e8f3e8; }
         .theme-retro { --bg-main: #f4ece0; }
-
-        body { background-color: var(--bg-main); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; transition: all 0.3s ease; }
+        body { background-color: var(--bg-main); font-family: "PingFang SC", sans-serif; transition: all 0.3s ease; }
         .custom-scroll::-webkit-scrollbar { width: 8px; display: block; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
-
         .sidebar { width: 320px; background: var(--bg-sidebar); color: white; box-shadow: 4px 0 20px rgba(0,0,0,0.2); z-index: 50; }
-        
         .msg-wrapper { margin-bottom: 2rem; display: flex; flex-direction: column; }
         .user-msg { background: var(--accent-blue); color: white; padding: 1rem; border-radius: 18px 18px 4px 18px; font-size: 15px; align-self: flex-end; max-width: 85%; }
         .ai-msg { background: white; color: #1e293b; padding: 1.2rem; border-radius: 18px 18px 18px 4px; font-size: 16px; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 95%; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        
         .copy-tag { font-weight: 900; font-size: 11px; margin-top: 8px; opacity: 0.5; cursor: pointer; color: #64748b; }
-        .copy-tag:hover { opacity: 1; color: #3b82f6; }
-
         .pk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; height: calc(100vh - 400px); min-height: 400px; margin-bottom: 20px; }
         .pk-column { background: white; border-radius: 20px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .pk-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; font-weight: 800; color: #3b82f6; font-size: 13px; }
+        .pk-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; font-weight: 800; color: #3b82f6; }
         .pk-body { flex: 1; overflow-y: scroll !important; padding: 24px; font-size: 15px; line-height: 1.8; color: #334155; }
-
         .btn-run { background: var(--accent-blue); }
         .btn-stop { background: #ef4444 !important; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-
-        #themeMenu { display: none; position: absolute; right: 40px; top: 70px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 10px; z-index: 100; border: 1px solid #eee; }
+        #themeMenu { display: none; position: absolute; right: 40px; top: 70px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; }
         .theme-dot { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 1px solid #ddd; }
-        
         .temp-slider { -webkit-appearance: none; width: 100px; height: 4px; background: #e2e8f0; border-radius: 5px; outline: none; }
         .temp-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: #3b82f6; border-radius: 50%; cursor: pointer; }
     </style>
@@ -57,10 +48,9 @@
         
         <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-8">
             <div class="flex bg-black/30 p-1.5 rounded-2xl border border-white/10">
-                <button id="modeChat" class="flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg transition-all">单人创作</button>
+                <button id="modeChat" class="flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg">单人创作</button>
                 <button id="modePK" class="flex-1 py-2 text-[12px] rounded-xl text-gray-400 hover:text-white transition-all">竞技擂台</button>
             </div>
-
             <section>
                 <div class="flex justify-between items-center mb-4 px-1">
                     <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📜 历史卷轴</span>
@@ -68,17 +58,15 @@
                 </div>
                 <div id="historyList" class="space-y-2"></div>
             </section>
-            
             <section>
                 <span class="text-[11px] font-black text-blue-500 uppercase tracking-widest mb-4 block px-1 text-center">⚔️ 创作兵器</span>
                 <div id="promptList" class="space-y-2"></div>
                 <div class="mt-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <input id="newPromptName" type="text" placeholder="兵器名称" class="w-full bg-transparent border-b border-white/20 pb-1 text-sm outline-none mb-3 text-white">
+                    <input id="newPromptName" type="text" placeholder="名称" class="w-full bg-transparent border-b border-white/20 pb-1 text-sm outline-none mb-3 text-white">
                     <textarea id="newPromptContent" placeholder="内容..." class="w-full bg-transparent text-sm h-20 outline-none resize-none text-gray-400 custom-scroll"></textarea>
-                    <button id="addPromptBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-3 mt-2 rounded-xl text-[12px] font-bold">收纳兵器</button>
+                    <button id="addPromptBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-3 mt-2 rounded-xl text-[12px] font-bold transition-all">收纳兵器</button>
                 </div>
             </section>
-
             <section class="pb-10">
                 <div class="flex justify-between items-center mb-3 px-1">
                     <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📖 例文参照</span>
@@ -92,163 +80,94 @@
 
     <div class="flex-1 flex flex-col overflow-hidden">
         <header class="h-20 bg-white border-b border-gray-100 flex items-center px-10 justify-between z-10">
-            <div class="flex items-center gap-4">
-                <div class="w-1.5 h-6 bg-blue-500 rounded-full"></div>
-                <h2 id="workTitle" class="text-lg font-bold text-gray-700 italic text-center">单人创作模式</h2>
-            </div>
+            <div class="flex items-center gap-4"><div class="w-1.5 h-6 bg-blue-500 rounded-full"></div><h2 id="workTitle" class="text-lg font-bold text-gray-700 italic">单人创作模式</h2></div>
             <div class="flex items-center gap-6 relative">
-                <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100 shadow-sm">
-                    <span class="text-[10px] font-bold text-gray-400 italic">🌡️ 灵感</span>
-                    <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="temp-slider">
-                    <span id="tempValue" class="text-[10px] font-mono font-bold text-blue-500 w-6">0.7</span>
-                </div>
-
-                <div id="singleSelectBox" class="flex items-center">
-                    <select id="singleModel" class="bg-gray-50 border border-gray-200 py-2 px-6 rounded-full text-[13px] font-bold outline-none"></select>
-                </div>
-                <div id="pkSelectBox" class="hidden flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100 text-[11px] font-bold text-blue-600">
-                    A: <select id="modelA" class="bg-transparent outline-none"></select>
-                    B: <select id="modelB" class="bg-transparent outline-none"></select>
-                </div>
-                
-                <button id="themeToggle" class="text-xl p-2 hover:bg-gray-100 rounded-full transition">🎨</button>
-                <div id="themeMenu" class="flex gap-2">
-                    <div onclick="setTheme('')" class="theme-dot bg-white border"></div>
-                    <div onclick="setTheme('theme-dark')" class="theme-dot bg-gray-800"></div>
-                    <div onclick="setTheme('theme-eye')" class="theme-dot bg-green-100"></div>
-                    <div onclick="setTheme('theme-retro')" class="theme-dot bg-orange-100"></div>
-                </div>
+                <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100 shadow-sm"><span class="text-[10px] font-bold text-gray-400 italic">🌡️ 灵感</span><input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="temp-slider"><span id="tempValue" class="text-[10px] font-mono font-bold text-blue-500 w-6">0.7</span></div>
+                <div id="singleSelectBox" class="flex items-center"><select id="singleModel" class="bg-gray-50 border border-gray-200 py-2 px-6 rounded-full text-[13px] font-bold outline-none"></select></div>
+                <div id="pkSelectBox" class="hidden flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100 text-[11px] font-bold text-blue-600">A: <select id="modelA" class="bg-transparent outline-none"></select> B: <select id="modelB" class="bg-transparent outline-none"></select></div>
+                <button id="themeToggle" class="text-xl p-2 hover:bg-gray-100 rounded-full">🎨</button>
+                <div id="themeMenu" class="flex gap-2"><div onclick="setTheme('')" class="theme-dot bg-white border"></div><div onclick="setTheme('theme-dark')" class="theme-dot bg-gray-800"></div><div onclick="setTheme('theme-eye')" class="theme-dot bg-green-100"></div><div onclick="setTheme('theme-retro')" class="theme-dot bg-orange-100"></div></div>
                 <button id="openSettings" class="text-xl p-2 hover:bg-gray-100 rounded-full">⚙️</button>
                 <button id="clearChatBtn" class="text-xl p-2 hover:bg-gray-100 rounded-full">🧹</button>
             </div>
         </header>
-
         <main id="displayArea" class="flex-1 overflow-y-auto p-12 custom-scroll"></main>
-
         <footer class="p-8 bg-white border-t border-gray-100">
             <div class="max-w-4xl mx-auto">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="text-[12px] font-black text-gray-400 uppercase italic">选用兵器:</span>
-                    <select id="promptSelect" class="bg-blue-50 text-blue-600 py-1 px-4 rounded-xl text-[13px] font-bold border border-blue-100 outline-none"></select>
-                </div>
+                <div class="flex items-center gap-3 mb-4"><span class="text-[12px] font-black text-gray-400 uppercase italic">选用兵器:</span><select id="promptSelect" class="bg-blue-50 text-blue-600 py-1 px-4 rounded-xl text-[13px] font-bold border border-blue-100 outline-none"></select></div>
                 <div class="bg-gray-50 border-2 border-gray-200 rounded-3xl p-2 focus-within:bg-white focus-within:border-blue-500 transition-all shadow-sm">
                     <textarea id="userInput" class="w-full bg-transparent border-none px-6 py-4 text-base outline-none custom-scroll min-h-[100px]" placeholder="在此挥笔创作..."></textarea>
-                    <div class="flex justify-end p-2 border-t border-gray-100 mt-2">
-                        <button id="sendBtn" class="btn-run text-white px-12 py-3 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">开始执行</button>
-                    </div>
+                    <div class="flex justify-end p-2 border-t border-gray-100 mt-2"><button id="sendBtn" class="btn-run text-white px-12 py-3 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">开始执行</button></div>
                 </div>
             </div>
         </footer>
     </div>
 
     <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-6">
-        <div class="bg-white rounded-[40px] p-12 w-full max-w-2xl shadow-2xl">
-            <h3 class="text-2xl font-black mb-8 italic text-center border-b pb-4 text-slate-800">⚙️ 配置创作大脑</h3>
+        <div class="bg-white rounded-[40px] p-12 w-full max-w-2xl">
+            <h3 class="text-2xl font-black mb-8 italic text-center border-b pb-4">⚙️ 配置大脑</h3>
             <div class="grid grid-cols-2 gap-10">
-                <div class="space-y-4">
-                    <h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2">官方直连</h4>
-                    <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-2xl px-5 py-3 text-sm outline-none">
-                    <input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-2xl px-5 py-3 text-sm outline-none">
-                </div>
-                <div class="space-y-4">
-                    <h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2">中转及其他</h4>
-                    <input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-2xl px-5 py-3 text-sm outline-none">
-                    <input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-2xl px-5 py-3 text-sm outline-none">
-                    <textarea id="proxy_models" placeholder="模型列表(英文逗号分隔)..." class="w-full bg-gray-50 border rounded-2xl px-5 py-3 text-[11px] h-24 outline-none focus:border-purple-400"></textarea>
-                </div>
+                <div class="space-y-4 text-sm"><h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2">官方直连</h4><input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"></div>
+                <div class="space-y-4 text-sm"><h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2">中转/其他</h4><input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><textarea id="proxy_models" placeholder="模型列表..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs h-20 outline-none"></textarea></div>
             </div>
-            <div class="flex gap-4 mt-10 pt-6 border-t"><button id="saveSettings" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl">激活大脑</button><button id="closeSettings" class="flex-1 bg-gray-100 font-bold py-4 rounded-2xl">关闭</button></div>
+            <div class="flex gap-4 mt-10"><button id="saveSettings" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl">激活大脑</button><button id="closeSettings" class="flex-1 bg-gray-100 font-bold py-4 rounded-2xl text-gray-500">关闭</button></div>
         </div>
     </div>
 
     <script>
         const DOMESTIC_MAP = { 'deepseek-chat': '深度求索 V3', 'qwen-plus': '通义千问 Plus' };
         const API_URLS = { 'deepseek-chat': 'https://api.deepseek.com/v1/chat/completions', 'qwen-plus': 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions' };
-        
         let flowConfig = JSON.parse(localStorage.getItem('lingxi_flow')) || { ds_key:'', qw_key:'', db_key:'', proxy_url:'', proxy_key:'', proxy_models:'gpt-4o,claude-3-5-sonnet-20240620' };
         let prompts = JSON.parse(localStorage.getItem('lingxi_prompts')) || { "灵犀助手": "你是一个充满智慧的创作助手。" };
         let history = JSON.parse(localStorage.getItem('lingxi_history')) || [];
-        let sampleLibrary = []; let activeSampleIndex = -1; let isPKMode = false; let currentChatId = null;
-        let abortController = null; let isGenerating = false;
+        let sampleLibrary = []; let activeSampleIndex = -1; let isPKMode = false; let currentChatId = null; let abortController = null; let isGenerating = false;
 
-        function init() {
-            renderPromptList(); renderSelect(); updateModelDropdowns(); renderHistory();
-            Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; });
-        }
-
-        const tempSlider = document.getElementById('tempSlider');
-        const tempValue = document.getElementById('tempValue');
-        tempSlider.oninput = () => { tempValue.innerText = tempSlider.value; };
-
-        const modeChat = document.getElementById('modeChat');
-        const modePK = document.getElementById('modePK');
-        modeChat.onclick = () => switchMode(false);
-        modePK.onclick = () => switchMode(true);
-        function switchMode(pk) {
-            isPKMode = pk;
-            modeChat.className = pk ? "flex-1 py-2 text-[12px] rounded-xl text-gray-400" : "flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg";
-            modePK.className = !pk ? "flex-1 py-2 text-[12px] rounded-xl text-gray-400" : "flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg";
-            document.getElementById('singleSelectBox').classList.toggle('hidden', pk);
-            document.getElementById('pkSelectBox').classList.toggle('hidden', !pk);
-            document.getElementById('workTitle').innerText = pk ? "竞技擂台模式" : "单人创作模式";
-            document.getElementById('displayArea').innerHTML = ''; currentChatId = null;
-        }
-
+        function init() { renderPromptList(); renderSelect(); updateModelDropdowns(); renderHistory(); Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; }); }
+        const tempSlider = document.getElementById('tempSlider'); const tempValue = document.getElementById('tempValue'); tempSlider.oninput = () => { tempValue.innerText = tempSlider.value; };
+        const modeChat = document.getElementById('modeChat'); const modePK = document.getElementById('modePK');
+        modeChat.onclick = () => switchMode(false); modePK.onclick = () => switchMode(true);
+        function switchMode(pk) { isPKMode = pk; modeChat.className = pk ? "flex-1 py-2 text-[12px] rounded-xl text-gray-400" : "flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg"; modePK.className = !pk ? "flex-1 py-2 text-[12px] rounded-xl text-gray-400" : "flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg"; document.getElementById('singleSelectBox').classList.toggle('hidden', pk); document.getElementById('pkSelectBox').classList.toggle('hidden', !pk); document.getElementById('workTitle').innerText = pk ? "竞技擂台模式" : "单人创作模式"; document.getElementById('displayArea').innerHTML = ''; currentChatId = null; }
         document.getElementById('newChatBtn').onclick = () => { currentChatId = null; document.getElementById('displayArea').innerHTML = ''; document.getElementById('userInput').value = ''; renderHistory(); };
         document.getElementById('themeToggle').onclick = (e) => { e.stopPropagation(); const m = document.getElementById('themeMenu'); m.style.display = m.style.display==='flex'?'none':'flex'; };
         window.onclick = () => document.getElementById('themeMenu').style.display = 'none';
-        window.setTheme = (t) => { document.body.className = 'h-screen flex overflow-hidden ' + t; localStorage.setItem('lingxi_theme', t); };
-        setTheme(localStorage.getItem('lingxi_theme') || '');
+        window.setTheme = (t) => { document.body.className = 'h-screen flex overflow-hidden ' + t; localStorage.setItem('lingxi_theme', t); }; setTheme(localStorage.getItem('lingxi_theme') || '');
 
-        function addCopy(container, text) {
-            const btn = document.createElement('div'); btn.className = 'copy-tag'; btn.innerText = '复制内容';
-            btn.onclick = () => { navigator.clipboard.writeText(text).then(() => { btn.innerText = '已复制√'; setTimeout(() => btn.innerText = '复制内容', 2000); }); };
-            container.appendChild(btn);
-        }
+        function addCopy(container, text) { const btn = document.createElement('div'); btn.className = 'copy-tag'; btn.innerText = '复制内容'; btn.onclick = () => { navigator.clipboard.writeText(text).then(() => { btn.innerText = '已复制√'; setTimeout(() => btn.innerText = '复制内容', 2000); }); }; container.appendChild(btn); }
 
-        // 🌟 核心修复：净化文本并加强指令
+        // 🌟 核心：XML 标签硬隔离
         document.getElementById('sendBtn').onclick = async () => {
-            const btn = document.getElementById('sendBtn');
-            if (isGenerating) { abortController.abort(); isGenerating = false; btn.innerText = "开始执行"; btn.classList.remove('btn-stop'); return; }
-
-            const input = document.getElementById('userInput'); const text = input.value.trim();
-            if(!text) return;
+            const btn = document.getElementById('sendBtn'); if (isGenerating) { abortController.abort(); isGenerating = false; btn.innerText = "开始执行"; btn.classList.remove('btn-stop'); return; }
+            const input = document.getElementById('userInput'); const text = input.value.trim(); if(!text) return;
 
             const weaponName = document.getElementById('promptSelect').value;
             const baseSys = prompts[weaponName] || "";
-            // 🌟 净化函数：剔除不可见字符，防止 AI 误判为乱码
-            const cleanContent = (str) => str.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, "").trim();
-            const rawSample = activeSampleIndex !== -1 ? sampleLibrary[activeSampleIndex].text : "";
-            const sampleTxt = cleanContent(rawSample);
+            const currentSample = activeSampleIndex !== -1 ? sampleLibrary[activeSampleIndex].text : "";
             const currentTemp = parseFloat(tempSlider.value);
             
-            const buildStrongSys = (mName) => {
-                // 🌟 通义千问（Qwen）专项加强：明确声明这是中文小说
-                let isQwen = mName.toLowerCase().includes('qwen') || mName.toLowerCase().includes('plus');
-                let s = isQwen ? `【重要声明：以下提供的例文是标准 UTF-8 编码的中文小说，绝非乱码。请务必逐字阅读分析。】\n` : ``;
-                s += `【系统最高指令】\n${baseSys}\n\n`;
-                if(sampleTxt) {
-                    s += `【参考例文内容（中文）】：\n${sampleTxt}\n\n`;
-                    s += `【操作要求】：请严格基于上方提供的中文例文进行创作或分析，禁止产生“这是乱码”的幻觉。`;
+            // 🌟 核心：改变发送逻辑，把指令放在最后，例文包裹在标签里
+            const buildCombinedPrompt = () => {
+                let p = `### 角色指令 ###\n${baseSys}\n\n`;
+                if(currentSample) {
+                    p += `### 待参考的例文内容 ###\n<REFERENCE_TEXT>\n${currentSample}\n</REFERENCE_TEXT>\n\n`;
+                    p += `注意：上面的 <REFERENCE_TEXT> 标签内就是你必须参考的真实文字。请务必逐字理解，不要报错。`;
                 }
-                return s;
+                p += `\n\n### 当前用户具体任务 ###\n${text}`;
+                return p;
             };
 
             isGenerating = true; btn.innerText = "立即停止"; btn.classList.add('btn-stop');
             abortController = new AbortController();
-            
             const display = document.getElementById('displayArea');
+            const finalPromptForAI = buildCombinedPrompt();
+
             if(isPKMode) {
-                const modelA = document.getElementById('modelA').value;
-                const modelB = document.getElementById('modelB').value;
+                const mA = document.getElementById('modelA').value; const mB = document.getElementById('modelB').value;
                 const pkGrid = document.createElement('div'); pkGrid.className = "pk-grid";
-                const colA = createPKCol(modelA);
-                const colB = createPKCol(modelB);
+                const colA = createPKCol(mA); const colB = createPKCol(mB);
                 pkGrid.append(colA, colB); display.appendChild(pkGrid);
-                
                 await Promise.all([
-                    streamCallAI(modelA, buildStrongSys(modelA), text, colA.querySelector('.pk-body'), currentTemp),
-                    streamCallAI(modelB, buildStrongSys(modelB), text, colB.querySelector('.pk-body'), currentTemp)
+                    streamCallAI(mA, "你是一个极其严格的创作助手。", finalPromptForAI, colA.querySelector('.pk-body'), currentTemp),
+                    streamCallAI(mB, "你是一个极其严格的创作助手。", finalPromptForAI, colB.querySelector('.pk-body'), currentTemp)
                 ]);
                 addCopy(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').innerText);
                 addCopy(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').innerText);
@@ -256,18 +175,13 @@
                 const modelS = document.getElementById('singleModel').value;
                 const uW = appendMsg('user', text); addCopy(uW, text);
                 const aW = appendMsg('ai', "思考中...");
-                await streamCallAI(modelS, buildStrongSys(modelS), text, aW.querySelector('.msg-body'), currentTemp);
+                await streamCallAI(modelS, "你是一个极其严格的创作助手。", finalPromptForAI, aW.querySelector('.msg-body'), currentTemp);
                 addCopy(aW, aW.querySelector('.msg-body').innerText);
             }
             isGenerating = false; btn.innerText = "开始执行"; btn.classList.remove('btn-stop'); input.value = ''; saveHistory();
         };
 
-        function createPKCol(mName) {
-            const col = document.createElement('div'); col.className = "pk-column";
-            col.innerHTML = `<div class="pk-header">${mName}</div><div class="pk-body custom-scroll"></div>`;
-            return col;
-        }
-
+        function createPKCol(mName) { const col = document.createElement('div'); col.className = "pk-column"; col.innerHTML = `<div class="pk-header">${mName}</div><div class="pk-body custom-scroll"></div>`; return col; }
         async function streamCallAI(modelName, sys, text, targetElement, temp) {
             let apiUrl = ""; let apiKey = ""; 
             if (modelName === 'deepseek-chat') { apiUrl = API_URLS[modelName]; apiKey = flowConfig.ds_key; }
@@ -285,88 +199,23 @@
             } catch (e) { targetElement.innerText += e.name === 'AbortError' ? "\n[已停止]" : "\n[错误]: " + e.message; }
         }
 
-        function appendMsg(s, t) {
-            const c = document.getElementById('displayArea');
-            const w = document.createElement('div'); w.className = 'msg-wrapper ' + (s==='user'?'items-end':'items-start');
-            w.innerHTML = `<div class="${s}-msg"><div class="msg-body">${t}</div></div>`;
-            c.appendChild(w); c.scrollTop = c.scrollHeight; return w;
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList'); list.innerHTML = '';
-            history.slice(-10).forEach((chat) => {
-                const div = document.createElement('div');
-                div.className = `group p-3 rounded-xl text-[12px] cursor-pointer transition-all ${currentChatId === chat.id ? 'bg-blue-600 text-white font-bold' : 'text-gray-400 hover:bg-white/5'}`;
-                div.onclick = () => { currentChatId = chat.id; document.getElementById('displayArea').innerHTML = chat.content; renderHistory(); };
-                div.innerHTML = `<div class="flex justify-between items-center"><span class="truncate pr-2 italic"># ${chat.title}</span><button onclick="event.stopPropagation(); history=history.filter(h=>h.id!=='${chat.id}'); localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory();" class="text-red-400 opacity-0 group-hover:opacity-100">×</button></div>`;
-                list.prepend(div);
-            });
-        }
-        function saveHistory() {
-            const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return;
-            if(!currentChatId) { currentChatId = Date.now().toString(); const title = document.querySelector('.user-msg')?.innerText.slice(0, 8) || "新对话"; history.push({ id: currentChatId, title, content }); }
-            else { const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) history[idx].content = content; }
-            localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory();
-        }
-
-        function updateModelDropdowns() {
-            const custom = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(m => m);
-            const all = [...Object.keys(DOMESTIC_MAP), ...custom];
-            ['singleModel', 'modelA', 'modelB'].forEach(id => {
-                const el = document.getElementById(id); el.innerHTML = '';
-                all.forEach(m => { el.innerHTML += `<option value="${m}">${DOMESTIC_MAP[m] || m.toUpperCase()}</option>`; });
-            });
-        }
-
+        function appendMsg(s, t) { const c = document.getElementById('displayArea'); const w = document.createElement('div'); w.className = 'msg-wrapper ' + (s==='user'?'items-end':'items-start'); w.innerHTML = `<div class="${s}-msg"><div class="msg-body">${t}</div></div>`; c.appendChild(w); c.scrollTop = c.scrollHeight; return w; }
+        function renderHistory() { const list = document.getElementById('historyList'); list.innerHTML = ''; history.slice(-10).forEach((chat) => { const div = document.createElement('div'); div.className = `group p-3 rounded-xl text-[12px] cursor-pointer transition-all ${currentChatId === chat.id ? 'bg-blue-600 text-white font-bold' : 'text-gray-400 hover:bg-white/5'}`; div.onclick = () => { currentChatId = chat.id; document.getElementById('displayArea').innerHTML = chat.content; renderHistory(); }; div.innerHTML = `<div class="flex justify-between items-center"><span class="truncate pr-2 italic"># ${chat.title}</span><button onclick="event.stopPropagation(); history=history.filter(h=>h.id!=='${chat.id}'); localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory();" class="text-red-400 opacity-0 group-hover:opacity-100">×</button></div>`; list.prepend(div); }); }
+        function saveHistory() { const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return; if(!currentChatId) { currentChatId = Date.now().toString(); const title = document.querySelector('.user-msg')?.innerText.slice(0, 8) || "新对话"; history.push({ id: currentChatId, title, content }); } else { const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) history[idx].content = content; } localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory(); }
+        function updateModelDropdowns() { const custom = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(m => m); const all = [...Object.keys(DOMESTIC_MAP), ...custom]; ['singleModel', 'modelA', 'modelB'].forEach(id => { const el = document.getElementById(id); el.innerHTML = ''; all.forEach(m => { el.innerHTML += `<option value="${m}">${DOMESTIC_MAP[m] || m.toUpperCase()}</option>`; }); }); }
         document.getElementById('exportBtn').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({prompts, flowConfig})], {type: "application/json"})); a.download = "备份.json"; a.click(); };
         document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
-        document.getElementById('importFile').onchange = (e) => {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader(); reader.onload = (ev) => {
-                const data = JSON.parse(ev.target.result);
-                if(data.prompts) prompts = data.prompts; if(data.flowConfig) flowConfig = data.flowConfig;
-                localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig));
-                init(); alert("恢复成功！");
-            }; reader.readAsText(file);
-        };
-        document.getElementById('fileInput').onchange = async (e) => {
-            for (let file of e.target.files) {
-                let content = file.name.endsWith('.docx') ? (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value : await file.text();
-                sampleLibrary.push({ name: file.name, text: content });
-            }
-            activeSampleIndex = sampleLibrary.length - 1; renderSampleLibrary();
-        };
-        function renderSampleLibrary() {
-            const container = document.getElementById('sampleLibrary'); container.innerHTML = '';
-            sampleLibrary.forEach((s, i) => {
-                const div = document.createElement('div');
-                div.className = `p-3 rounded-xl border text-[11px] cursor-pointer mb-1 flex justify-between ${activeSampleIndex === i ? 'bg-blue-600/10 border-blue-500 text-blue-400 font-bold' : 'bg-white/5 border-white/5 text-gray-500'}`;
-                div.onclick = () => { activeSampleIndex = i; renderSampleLibrary(); };
-                div.innerHTML = `<span>${s.name}</span><button onclick="event.stopPropagation(); sampleLibrary.splice(${i},1); renderSampleLibrary();" class="text-red-400">×</button>`;
-                container.appendChild(div);
-            });
-        }
+        document.getElementById('importFile').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); if(data.prompts) prompts = data.prompts; if(data.flowConfig) flowConfig = data.flowConfig; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); init(); alert("恢复成功！"); }; reader.readAsText(file); };
+        document.getElementById('fileInput').onchange = async (e) => { for (let file of e.target.files) { let content = file.name.endsWith('.docx') ? (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value : await file.text(); sampleLibrary.push({ name: file.name, text: content }); } activeSampleIndex = sampleLibrary.length - 1; renderSampleLibrary(); };
+        function renderSampleLibrary() { const container = document.getElementById('sampleLibrary'); container.innerHTML = ''; sampleLibrary.forEach((s, i) => { const div = document.createElement('div'); div.className = `p-3 rounded-xl border text-[11px] cursor-pointer mb-1 flex justify-between ${activeSampleIndex === i ? 'bg-blue-600/10 border-blue-500 text-blue-400 font-bold' : 'bg-white/5 border-white/5 text-gray-500'}`; div.onclick = () => { activeSampleIndex = i; renderSampleLibrary(); }; div.innerHTML = `<span>${s.name}</span><button onclick="event.stopPropagation(); sampleLibrary.splice(${i},1); renderSampleLibrary();" class="text-red-400">×</button>`; container.appendChild(div); }); }
         document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
         document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
-        document.getElementById('saveSettings').onclick = () => {
-            Object.keys(flowConfig).forEach(id => flowConfig[id] = document.getElementById(id).value.trim());
-            localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns();
-            document.getElementById('settingsModal').classList.add('hidden'); alert("激活！");
-        };
+        document.getElementById('saveSettings').onclick = () => { Object.keys(flowConfig).forEach(id => flowConfig[id] = document.getElementById(id).value.trim()); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); document.getElementById('settingsModal').classList.add('hidden'); alert("激活！"); };
         document.getElementById('clearChatBtn').onclick = () => { if(confirm("清空？")) document.getElementById('displayArea').innerHTML = ''; };
         window.previewPrompt = (k) => { document.getElementById('newPromptName').value = k; document.getElementById('newPromptContent').value = prompts[k]; };
-        function renderPromptList() {
-            const l = document.getElementById('promptList'); l.innerHTML = '';
-            Object.keys(prompts).forEach(k => {
-                l.innerHTML += `<div onclick="previewPrompt('${k}')" class="bg-white/5 p-3 rounded-xl border border-white/5 flex justify-between items-center group cursor-pointer hover:border-blue-500 transition-all">
-                    <span class="text-[13px] font-bold"><span class="text-blue-500 mr-2">✦</span>${k}</span>
-                    <button onclick="event.stopPropagation(); delete prompts['${k}']; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect();" class="opacity-0 group-hover:opacity-100 text-red-500">×</button>
-                </div>`;
-            });
-        }
+        function renderPromptList() { const l = document.getElementById('promptList'); l.innerHTML = ''; Object.keys(prompts).forEach(k => { l.innerHTML += `<div onclick="previewPrompt('${k}')" class="bg-white/5 p-3 rounded-xl border border-white/5 flex justify-between items-center group cursor-pointer hover:border-blue-500 transition-all"><span class="text-[13px] font-bold"><span class="text-blue-500 mr-2">✦</span>${k}</span><button onclick="event.stopPropagation(); delete prompts['${k}']; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect();" class="opacity-0 group-hover:opacity-100 text-red-400">×</button></div>`; }); }
         function renderSelect() { const s = document.getElementById('promptSelect'); s.innerHTML = ''; Object.keys(prompts).forEach(k => s.innerHTML += `<option value="${k}">${k}</option>`); }
         document.getElementById('addPromptBtn').onclick = () => { const n = document.getElementById('newPromptName').value.trim(); const c = document.getElementById('newPromptContent').value.trim(); if(n && c) { prompts[n] = c; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect(); } };
-        
         init();
     </script>
 </body>
