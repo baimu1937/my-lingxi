@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>灵犀 v32.5 - 妙笔千般意</title>
+    <title>灵犀 v32.6 - 妙笔千般意</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
@@ -80,12 +80,15 @@
                 <h2 id="workTitle" class="text-lg font-bold text-gray-700 italic">单人创作模式</h2>
                 <button id="toggleSpace" class="bg-gray-100 hover:bg-blue-50 text-blue-600 px-6 py-2 rounded-full text-sm font-black transition-all border border-blue-100 shadow-sm">✍️ 分屏创作</button>
                 <button id="newChatBtn" class="text-blue-500 font-black text-sm px-4 py-2 hover:bg-gray-50 rounded-lg">+ 新开篇</button>
+                
+                <div class="w-px h-5 bg-gray-200 mx-1"></div>
+                
+                <button onclick="document.getElementById('importWorkspaceInput').click()" class="text-gray-500 hover:text-blue-600 font-bold text-sm px-3 py-2 rounded-lg transition-all">📂 导入</button>
+                <button id="exportWorkspaceBtn" class="text-gray-500 hover:text-blue-600 font-bold text-sm px-3 py-2 rounded-lg transition-all">💾 导出</button>
+                <input type="file" id="importWorkspaceInput" class="hidden" accept=".txt,.md">
             </div>
             
             <div class="flex items-center gap-5 relative">
-                <div id="tokenWatcher" class="bg-slate-900 text-amber-400 px-3 py-1.5 rounded-xl font-mono text-[11px] cursor-pointer">
-                    灵石: <span id="totalTokens">0</span>
-                </div>
                 <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
                     <span class="text-[10px] font-black text-gray-400">🌡️ 灵感</span>
                     <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="w-16 h-1 accent-blue-500">
@@ -160,15 +163,42 @@
         let prompts = JSON.parse(localStorage.getItem('lingxi_prompts')) || { "灵犀助手": "你是一个智慧创作助手。" };
         let history = JSON.parse(localStorage.getItem('lingxi_history')) || [];
         let sampleLibrary = JSON.parse(localStorage.getItem('lingxi_samples')) || [];
-        let selectedSampleIndices = []; let totalTokens = parseInt(localStorage.getItem('lingxi_tokens')) || 0;
+        let selectedSampleIndices = []; 
         let currentChatId = null; let isGenerating = false; let abortController = null;
 
         function init() { 
-            renderPromptList(); renderSelect(); updateModelDropdowns(); updateTokenDisplay(); renderSampleLibrary(); renderHistorySelect();
+            renderPromptList(); renderSelect(); updateModelDropdowns(); renderSampleLibrary(); renderHistorySelect();
             Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; });
             document.getElementById('workspace').value = localStorage.getItem('lingxi_workspace') || '';
             setTheme(localStorage.getItem('lingxi_theme') || '');
         }
+
+        // 导入逻辑 (工作区)
+        document.getElementById('importWorkspaceInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const text = event.target.result;
+                document.getElementById('workspace').value = text;
+                localStorage.setItem('lingxi_workspace', text);
+                
+                // 导入后自动展开分屏工作区，方便查看
+                if(!document.getElementById('mainEditor').classList.contains('editor-active')) {
+                    document.getElementById('toggleSpace').click();
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // 重置 file input
+        };
+
+        // 导出逻辑 (工作区)
+        document.getElementById('exportWorkspaceBtn').onclick = () => {
+            const content = document.getElementById('workspace').value;
+            if(!content.trim()) { alert("工作区目前是空的，没有内容可导出！"); return; }
+            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, `灵犀_导出文本_${Date.now()}.txt`);
+        };
 
         // 3. 调色盘逻辑
         document.getElementById('themeToggle').onclick = (e) => { e.stopPropagation(); const m = document.getElementById('themeMenu'); m.style.display = m.style.display==='flex'?'none':'flex'; };
@@ -232,10 +262,13 @@
                 combinedRef += `\n【参考基因/内容《${s.name}》】\n${s.gene || s.text.slice(0, 800)}\n`;
             });
             const finalFullPrompt = `### 参考风格 ###\n${combinedRef || "自由风格"}\n\n### 指令 ###\n${prompts[document.getElementById('promptSelect').value]}\n\n### 任务 ###\n${text}`;
+            
+            const isPKMode = !document.getElementById('pkSelectBox').classList.contains('hidden');
+            
             isGenerating = true; document.getElementById('sendBtn').innerText = "停止"; abortController = new AbortController();
             if(isPKMode) {
                 const mA = document.getElementById('modelA').value; const mB = document.getElementById('modelB').value;
-                const pkGrid = document.createElement('div'); pkGrid.className = "pk-grid";
+                const pkGrid = document.createElement('div'); pkGrid.className = "pk-grid flex gap-4 w-full";
                 const colA = createPKCol(mA); const colB = createPKCol(mB);
                 pkGrid.append(colA, colB); document.getElementById('displayArea').appendChild(pkGrid);
                 await Promise.all([ streamCallAI(mA, "仿写专家", finalFullPrompt, colA.querySelector('.pk-body'), parseFloat(document.getElementById('tempSlider').value)), streamCallAI(mB, "仿写专家", finalFullPrompt, colB.querySelector('.pk-body'), parseFloat(document.getElementById('tempSlider').value)) ]);
@@ -248,13 +281,12 @@
             isGenerating = false; document.getElementById('sendBtn').innerText = "开始执行"; input.value = ''; saveHistory(); renderHistorySelect();
         };
 
-        // 基础函数 (Token, Word, 侧边栏等)
-        function updateTokenDisplay() { document.getElementById('totalTokens').innerText = totalTokens.toLocaleString(); localStorage.setItem('lingxi_tokens', totalTokens); }
+        // 基础函数 (侧边栏等)
         async function streamCallAI(modelName, sys, text, targetElement, temp) {
             let apiUrl = ""; let apiKey = ""; 
             if (modelName.startsWith('ep-') || modelName.includes('doubao')) { apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; apiKey = flowConfig.db_key; }
-            else if (modelName === 'deepseek-chat') { apiUrl = API_URLS[modelName]; apiKey = flowConfig.ds_key; }
-            else if (modelName === 'qwen-plus') { apiUrl = API_URLS[modelName]; apiKey = flowConfig.qw_key; }
+            else if (modelName === 'deepseek-chat') { apiUrl = "https://api.deepseek.com/v1/chat/completions"; apiKey = flowConfig.ds_key; }
+            else if (modelName === 'qwen-plus') { apiUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"; apiKey = flowConfig.qw_key; }
             else { apiUrl = flowConfig.proxy_url.trim().replace(/\/$/, '') + '/chat/completions'; apiKey = flowConfig.proxy_key; }
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` }, body: JSON.stringify({ model: modelName, messages: [{role:"system", content: sys}, {role:"user", content: text}], stream: true, temperature: temp }), signal: abortController.signal });
@@ -264,7 +296,7 @@
                     const chunk = decoder.decode(value); const lines = chunk.split('\n');
                     for (const line of lines) { if (line.trim().startsWith('data: ')) { 
                         const d = line.replace('data: ', '').trim(); if (d === '[DONE]') break; 
-                        try { const j = JSON.parse(d); const c = j.choices[0].delta.content; if (c) { targetElement.innerText += c; targetElement.scrollTop = targetElement.scrollHeight; totalTokens += 1; updateTokenDisplay(); } } catch(e) {} 
+                        try { const j = JSON.parse(d); const c = j.choices[0].delta.content; if (c) { targetElement.innerText += c; targetElement.scrollTop = targetElement.scrollHeight; } } catch(e) {} 
                     } }
                 }
             } catch (e) { targetElement.innerText += e.name === 'AbortError' ? "\n[已停止]" : "\n[错误]: " + e.message; }
@@ -324,7 +356,7 @@
             w.innerHTML = `<div class="${s}-msg"><div class="msg-body">${t}</div></div>`;
             c.appendChild(w); c.scrollTop = c.scrollHeight; return w;
         }
-        function createPKCol(mName) { const col = document.createElement('div'); col.className = "pk-column shadow-xl"; col.innerHTML = `<div class="pk-header">${mName}</div><div class="pk-body custom-scroll"></div>`; return col; }
+        function createPKCol(mName) { const col = document.createElement('div'); col.className = "pk-column shadow-xl flex-1 bg-white rounded-xl overflow-hidden border border-gray-100"; col.innerHTML = `<div class="pk-header bg-gray-50 font-bold p-3 border-b text-center text-sm text-gray-600">${mName}</div><div class="pk-body custom-scroll p-4 text-sm"></div>`; return col; }
         function saveHistory() {
             const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return;
             const now = new Date(); const timeStr = `${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
