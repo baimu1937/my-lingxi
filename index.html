@@ -14,30 +14,23 @@
         .custom-scroll::-webkit-scrollbar { width: 8px; display: block; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
         .sidebar { width: 320px; background: var(--bg-sidebar); color: white; box-shadow: 4px 0 20px rgba(0,0,0,0.2); z-index: 50; }
-        
         .section-title-lg { font-size: 18px !important; font-weight: 900; letter-spacing: 2px; }
         .btn-new-chat { font-size: 16px !important; font-weight: 800; color: #60a5fa; }
-        
         .history-item { font-size: 15px !important; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; background: rgba(255,255,255,0.03); }
         .history-active { background: #3b82f6 !important; color: white !important; font-weight: 800; box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
         .history-time { font-size: 10px; opacity: 0.6; font-family: monospace; display: block; margin-top: 4px; }
-
         .weapon-rack-title { font-size: 24px !important; font-weight: 900; text-align: center; color: #3b82f6; text-shadow: 0 0 15px rgba(59, 130, 246, 0.3); margin-top: 10px; margin-bottom: 20px; }
-
         .msg-wrapper { margin-bottom: 2rem; display: flex; flex-direction: column; }
         .user-msg { background: var(--accent-blue); color: white; padding: 1rem; border-radius: 18px 18px 4px 18px; font-size: 15px; align-self: flex-end; max-width: 85%; }
         .ai-msg { background: white; color: #1e293b; padding: 1.2rem; border-radius: 18px 18px 18px 4px; font-size: 16px; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 95%; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .copy-tag { font-weight: 900; font-size: 11px; margin-top: 8px; opacity: 0.5; cursor: pointer; color: #64748b; }
-        
         .pk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; height: calc(100vh - 400px); min-height: 400px; margin-bottom: 20px; }
         .pk-column { background: white; border-radius: 20px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         .pk-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; font-weight: 800; color: #3b82f6; }
         .pk-body { flex: 1; overflow-y: scroll !important; padding: 24px; font-size: 15px; line-height: 1.8; }
-        
         .btn-run { background: var(--accent-blue); }
         .btn-stop { background: #ef4444 !important; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        
         #themeMenu { display: none; position: absolute; right: 40px; top: 70px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; }
         .theme-dot { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 1px solid #ddd; }
         .temp-slider { -webkit-appearance: none; width: 100px; height: 4px; background: #e2e8f0; border-radius: 5px; outline: none; }
@@ -51,8 +44,8 @@
             <div class="flex justify-between items-center mb-2">
                 <h1 class="text-3xl font-black text-blue-400 italic">灵犀</h1>
                 <div class="flex gap-3">
-                    <button id="exportBtn" title="备份" class="text-xl">💾</button>
-                    <button id="importBtn" title="恢复" class="text-xl">📂</button>
+                    <button id="exportBtn" title="备份" class="text-xl hover:scale-110 transition">💾</button>
+                    <button id="importBtn" title="恢复" class="text-xl hover:scale-110 transition">📂</button>
                     <input type="file" id="importFile" class="hidden" accept=".json">
                 </div>
             </div>
@@ -64,7 +57,6 @@
                 <button id="modeChat" class="flex-1 py-2 text-[12px] rounded-xl font-bold bg-blue-600 text-white shadow-lg">单人创作</button>
                 <button id="modePK" class="flex-1 py-2 text-[12px] rounded-xl text-gray-400 hover:text-white transition">竞技擂台</button>
             </div>
-
             <section>
                 <div class="flex justify-between items-end mb-4 px-1 border-b border-white/5 pb-2">
                     <span class="section-title-lg text-gray-400 italic">📜 历史卷轴</span>
@@ -72,7 +64,6 @@
                 </div>
                 <div id="historyList" class="space-y-3"></div>
             </section>
-            
             <section>
                 <h3 class="weapon-rack-title">⚔️兵器架⚔️</h3>
                 <div id="promptList" class="space-y-2"></div>
@@ -82,7 +73,6 @@
                     <button id="addPromptBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-3 mt-4 rounded-xl text-[14px] font-black transition-all shadow-lg">打造兵器</button>
                 </div>
             </section>
-
             <section class="pb-10">
                 <div class="flex justify-between items-center mb-3 px-1">
                     <span class="text-[12px] font-black text-gray-500 uppercase tracking-widest">📖 例文参照</span>
@@ -112,7 +102,7 @@
             <div class="max-w-4xl mx-auto">
                 <div class="flex items-center gap-3 mb-4"><span class="text-[12px] font-black text-gray-400 uppercase italic">选用兵器:</span><select id="promptSelect" class="bg-blue-50 text-blue-600 py-1 px-4 rounded-xl text-[13px] font-bold border border-blue-100 outline-none"></select></div>
                 <div class="bg-gray-50 border-2 border-gray-200 rounded-3xl p-2 focus-within:bg-white focus-within:border-blue-500 transition-all shadow-sm">
-                    <textarea id="userInput" class="w-full bg-transparent border-none px-6 py-4 text-base outline-none custom-scroll min-h-[100px]" placeholder="在此挥笔创作... (Enter键开始，Shift+Enter换行)"></textarea>
+                    <textarea id="userInput" class="w-full bg-transparent border-none px-6 py-4 text-base outline-none custom-scroll min-h-[100px]" placeholder="在此挥笔创作... (Enter发送)"></textarea>
                     <div class="flex justify-end p-2 border-t border-gray-100 mt-2"><button id="sendBtn" class="btn-run text-white px-12 py-3 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">开始执行</button></div>
                 </div>
             </div>
@@ -123,18 +113,8 @@
         <div class="bg-white rounded-[40px] p-12 w-full max-w-2xl shadow-2xl">
             <h3 class="text-2xl font-black mb-8 italic text-center border-b pb-4 text-slate-800">⚙️ 配置大脑</h3>
             <div class="grid grid-cols-2 gap-10">
-                <div class="space-y-4 text-sm">
-                    <h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                    <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none">
-                    <input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none">
-                    <input id="db_key" type="password" placeholder="豆包官方 Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none">
-                </div>
-                <div class="space-y-4 text-sm">
-                    <h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转及其他</h4>
-                    <input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none">
-                    <input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none">
-                    <textarea id="proxy_models" placeholder="模型列表..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs h-20 outline-none"></textarea>
-                </div>
+                <div class="space-y-4 text-sm"><h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4><input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><input id="db_key" type="password" placeholder="豆包官方 Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"></div>
+                <div class="space-y-4 text-sm"><h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转及其他</h4><input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2.5 outline-none"><textarea id="proxy_models" placeholder="模型列表..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs h-20 outline-none"></textarea></div>
             </div>
             <div class="flex gap-4 mt-10"><button id="saveSettings" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl">激活</button><button id="closeSettings" class="flex-1 bg-gray-100 font-bold py-4 rounded-2xl text-gray-500">关闭</button></div>
         </div>
@@ -172,8 +152,8 @@
             const currentTemp = parseFloat(tempSlider.value);
             const buildPrompt = () => {
                 let p = `### 指令 ###\n${baseSys}\n\n`;
-                if(currentSample) p += `### 例文 ###\n<REFERENCE_TEXT>\n${currentSample}\n</REFERENCE_TEXT>\n\n注意：基于上方例文执行以下任务。\n`;
-                p += `### 任务 ###\n${text}`;
+                if(currentSample) p += `### 核心参考例文 ###\n<REFERENCE_TEXT>\n${currentSample}\n</REFERENCE_TEXT>\n\n注意：你现在是一个文本分析与创作专家，请严格基于上方 <REFERENCE_TEXT> 标签内的中文内容执行以下任务，绝对禁止编造乱码内容。\n`;
+                p += `### 当前具体任务 ###\n${text}`;
                 return p;
             };
             isGenerating = true; btn.innerText = "立即停止"; btn.classList.add('btn-stop');
@@ -184,13 +164,13 @@
                 const pkGrid = document.createElement('div'); pkGrid.className = "pk-grid";
                 const colA = createPKCol(mA); const colB = createPKCol(mB);
                 pkGrid.append(colA, colB); document.getElementById('displayArea').appendChild(pkGrid);
-                await Promise.all([ streamCallAI(mA, "创作助手", finalPrompt, colA.querySelector('.pk-body'), currentTemp), streamCallAI(mB, "创作助手", finalPrompt, colB.querySelector('.pk-body'), currentTemp) ]);
+                await Promise.all([ streamCallAI(mA, "创作专家", finalPrompt, colA.querySelector('.pk-body'), currentTemp), streamCallAI(mB, "创作专家", finalPrompt, colB.querySelector('.pk-body'), currentTemp) ]);
                 addCopy(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').innerText); addCopy(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').innerText);
             } else {
                 const modelS = document.getElementById('singleModel').value;
                 const uW = appendMsg('user', text); addCopy(uW, text);
-                const aW = appendMsg('ai', "思考中...");
-                await streamCallAI(modelS, "创作助手", finalPrompt, aW.querySelector('.msg-body'), currentTemp);
+                const aW = appendMsg('ai', "正在思考...");
+                await streamCallAI(modelS, "创作专家", finalPrompt, aW.querySelector('.msg-body'), currentTemp);
                 addCopy(aW, aW.querySelector('.msg-body').innerText);
             }
             isGenerating = false; btn.innerText = "开始执行"; btn.classList.remove('btn-stop'); input.value = ''; saveHistory();
@@ -220,10 +200,46 @@
         function saveHistory() { const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return; const now = new Date(); const timeStr = `${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`; if(!currentChatId) { currentChatId = Date.now().toString(); const title = document.querySelector('.user-msg')?.innerText.slice(0, 10) || "新对话"; history.push({ id: currentChatId, title, content, time: timeStr }); } else { const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) { history[idx].content = content; history[idx].time = timeStr; } } localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory(); }
         window.deleteH = (id) => { if(confirm("抹除这段记忆？")) { history = history.filter(h => h.id !== id); localStorage.setItem('lingxi_history', JSON.stringify(history)); if(currentChatId === id) { currentChatId = null; document.getElementById('displayArea').innerHTML = ''; } renderHistory(); } };
         function updateModelDropdowns() { const custom = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(m => m); const all = [...Object.keys(DOMESTIC_MAP), ...custom]; ['singleModel', 'modelA', 'modelB'].forEach(id => { const el = document.getElementById(id); el.innerHTML = ''; all.forEach(m => { el.innerHTML += `<option value="${m}">${DOMESTIC_MAP[m] || m.toUpperCase()}</option>`; }); }); }
-        document.getElementById('exportBtn').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({prompts, flowConfig, sampleLibrary})], {type: "application/json"})); a.download = "灵犀全量备份.json"; a.click(); };
+        document.getElementById('exportBtn').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({prompts, flowConfig, sampleLibrary})], {type: "application/json"})); a.download = "全量备份.json"; a.click(); };
         document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
-        document.getElementById('importFile').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); if(data.prompts) prompts = data.prompts; if(data.flowConfig) flowConfig = data.flowConfig; if(data.sampleLibrary) sampleLibrary = data.sampleLibrary; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); init(); alert("归位成功！"); }; reader.readAsText(file); };
-        document.getElementById('fileInput').onchange = async (e) => { for (let file of e.target.files) { let content = file.name.endsWith('.docx') ? (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value : await file.text(); sampleLibrary.push({ name: file.name, text: content }); } activeSampleIndex = sampleLibrary.length - 1; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); localStorage.setItem('lingxi_active_sample', activeSampleIndex); renderSampleLibrary(); };
+        document.getElementById('importFile').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { const data = JSON.parse(ev.target.result); if(data.prompts) prompts = data.prompts; if(data.flowConfig) flowConfig = data.flowConfig; if(data.sampleLibrary) sampleLibrary = data.sampleLibrary; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); init(); alert("同步成功！"); }; reader.readAsText(file); };
+        
+        // 🌟 核心修复：自动检测编码的 TXT 读取逻辑
+        document.getElementById('fileInput').onchange = async (e) => {
+            for (let file of e.target.files) {
+                if (file.name.endsWith('.docx')) {
+                    let content = (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value;
+                    sampleLibrary.push({ name: file.name, text: content });
+                } else {
+                    // TXT 文件采用智能编码检测
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        const content = evt.target.result;
+                        // 如果读出来包含乱码标识符，尝试用 GBK 重新读
+                        if (content.includes('')) {
+                            const readerGBK = new FileReader();
+                            readerGBK.onload = function(e2) { 
+                                sampleLibrary.push({ name: file.name, text: e2.target.result });
+                                finalizeSamples();
+                            };
+                            readerGBK.readAsText(file, 'GBK');
+                        } else {
+                            sampleLibrary.push({ name: file.name, text: content });
+                            finalizeSamples();
+                        }
+                    };
+                    reader.readAsText(file, 'UTF-8');
+                }
+            }
+        };
+
+        function finalizeSamples() {
+            activeSampleIndex = sampleLibrary.length - 1;
+            localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary));
+            localStorage.setItem('lingxi_active_sample', activeSampleIndex);
+            renderSampleLibrary();
+        }
+
         function renderSampleLibrary() { const container = document.getElementById('sampleLibrary'); container.innerHTML = ''; sampleLibrary.forEach((s, i) => { const isSelected = activeSampleIndex === i; const div = document.createElement('div'); div.className = `p-3 rounded-xl border text-[11px] cursor-pointer mb-1 flex justify-between transition-all ${isSelected ? 'bg-blue-600/20 border-blue-500 text-blue-400 font-black' : 'bg-white/5 border-white/5 text-gray-500'}`; div.onclick = () => { activeSampleIndex = i; localStorage.setItem('lingxi_active_sample', i); renderSampleLibrary(); }; div.innerHTML = `<span>${isSelected ? '✅ ' : ''}${s.name}</span><button onclick="event.stopPropagation(); sampleLibrary.splice(${i},1); if(activeSampleIndex===${i})activeSampleIndex=-1; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); localStorage.setItem('lingxi_active_sample', activeSampleIndex); renderSampleLibrary();" class="text-red-400">×</button>`; container.appendChild(div); }); }
         document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
         document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
