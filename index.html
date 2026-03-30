@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>灵犀 v32.6 - 妙笔千般意</title>
+    <title>灵犀 v32.6 - 妙笔千般意 (全量备份版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
@@ -17,8 +17,7 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.3); border-radius: 10px; }
         .sidebar { width: 300px; background: var(--bg-sidebar); color: white; z-index: 50; }
         
-        /* 1. 江湖风按钮优化 */
-        .mode-btn { flex: 1; py-3; font-size: 16px !important; font-weight: 900; italic; transition: all 0.3s; border-radius: 12px; }
+        .mode-btn { flex: 1; padding-top: 0.75rem; padding-bottom: 0.75rem; font-size: 16px !important; font-weight: 900; font-style: italic; transition: all 0.3s; border-radius: 12px; }
         .mode-btn-active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
         
         .weapon-rack-title { font-size: 24px !important; font-weight: 900; text-align: center; color: #3b82f6; margin: 20px 0; }
@@ -27,14 +26,13 @@
         .ai-msg { background: white; color: #1e293b; padding: 1.5rem; border-radius: 18px 18px 18px 4px; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 95%; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         
         /* 调色盘菜单 */
-        #themeMenu { display: none; position: absolute; right: 40px; top: 60px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #themeMenu { display: none; position: absolute; right: 40px; top: 60px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.1); flex-direction: row; gap: 0.75rem; }
         .theme-dot { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 1px solid #ddd; }
         
         .editor-container { flex: 1; display: none; background: white; border-right: 1px solid #e2e8f0; }
         .editor-active { display: flex !important; }
         .writing-area { width: 100%; height: 100%; padding: 40px; font-size: 18px; line-height: 2; outline: none; border: none; }
         
-        /* 滑块数字显示 */
         #tempValueDisplay { font-family: monospace; font-weight: 900; color: #3b82f6; font-size: 14px; min-width: 25px; }
     </style>
 </head>
@@ -81,11 +79,10 @@
                 <button id="toggleSpace" class="bg-gray-100 hover:bg-blue-50 text-blue-600 px-6 py-2 rounded-full text-sm font-black transition-all border border-blue-100 shadow-sm">✍️ 分屏创作</button>
                 <button id="newChatBtn" class="text-blue-500 font-black text-sm px-4 py-2 hover:bg-gray-50 rounded-lg">+ 新开篇</button>
                 
-                <div class="w-px h-5 bg-gray-200 mx-1"></div>
-                
-                <button onclick="document.getElementById('importWorkspaceInput').click()" class="text-gray-500 hover:text-blue-600 font-bold text-sm px-3 py-2 rounded-lg transition-all">📂 导入</button>
-                <button id="exportWorkspaceBtn" class="text-gray-500 hover:text-blue-600 font-bold text-sm px-3 py-2 rounded-lg transition-all">💾 导出</button>
-                <input type="file" id="importWorkspaceInput" class="hidden" accept=".txt,.md">
+                <div class="w-px h-5 bg-gray-200 mx-2"></div>
+                <button onclick="document.getElementById('importSystemInput').click()" class="text-amber-600 hover:bg-amber-50 font-black text-sm px-3 py-2 rounded-lg transition-all" title="导入神兵档案 JSON">📂 导入</button>
+                <button id="exportSystemBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-700 font-black text-sm px-3 py-2 rounded-lg transition-all shadow-sm" title="导出全量备份 JSON">💾 导出</button>
+                <input type="file" id="importSystemInput" class="hidden" accept=".json">
             </div>
             
             <div class="flex items-center gap-5 relative">
@@ -100,8 +97,8 @@
                     A: <select id="modelA" class="bg-transparent outline-none"></select> | B: <select id="modelB" class="bg-transparent outline-none"></select>
                 </div>
                 
-                <button id="themeToggle" class="text-2xl hover:scale-110 transition">🎨</button>
-                <div id="themeMenu" class="flex gap-3">
+                <button id="themeToggle" class="text-2xl hover:scale-110 transition cursor-pointer">🎨</button>
+                <div id="themeMenu">
                     <div onclick="setTheme('')" class="theme-dot bg-white" title="经典"></div>
                     <div onclick="setTheme('theme-dark')" class="theme-dot bg-gray-800" title="深空"></div>
                     <div onclick="setTheme('theme-eye')" class="theme-dot bg-green-100" title="护眼"></div>
@@ -166,49 +163,112 @@
         let selectedSampleIndices = []; 
         let currentChatId = null; let isGenerating = false; let abortController = null;
 
+        // 系统初始化
         function init() { 
             renderPromptList(); renderSelect(); updateModelDropdowns(); renderSampleLibrary(); renderHistorySelect();
             Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; });
             document.getElementById('workspace').value = localStorage.getItem('lingxi_workspace') || '';
-            setTheme(localStorage.getItem('lingxi_theme') || '');
+            setTheme(localStorage.getItem('lingxi_theme') || ''); // 恢复主题
         }
 
-        // 导入逻辑 (工作区)
-        document.getElementById('importWorkspaceInput').onchange = (e) => {
+        // ==========================================
+        // 1. 修复的调色盘功能 (Theme)
+        // ==========================================
+        document.getElementById('themeToggle').onclick = (e) => { 
+            e.stopPropagation(); 
+            const m = document.getElementById('themeMenu'); 
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; 
+        };
+        window.onclick = () => document.getElementById('themeMenu').style.display = 'none';
+        
+        window.setTheme = (t) => { 
+            // 确保保留 Tailwind 的基础结构类名，只切换颜色主题
+            document.body.className = 'h-screen flex overflow-hidden ' + t; 
+            localStorage.setItem('lingxi_theme', t); 
+        };
+
+        // ==========================================
+        // 2. 导出/导入神兵档案 (JSON 备份逻辑)
+        // ==========================================
+        document.getElementById('exportSystemBtn').onclick = () => {
+            const systemData = {
+                flowConfig: flowConfig,
+                prompts: prompts,
+                sampleLibrary: sampleLibrary,
+                history: history,
+                workspace: document.getElementById('workspace').value
+            };
+            const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: "application/json;charset=utf-8" });
+            saveAs(blob, `灵犀_神兵档案_${Date.now()}.json`);
+        };
+
+        document.getElementById('importSystemInput').onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(event) {
-                const text = event.target.result;
-                document.getElementById('workspace').value = text;
-                localStorage.setItem('lingxi_workspace', text);
-                
-                // 导入后自动展开分屏工作区，方便查看
-                if(!document.getElementById('mainEditor').classList.contains('editor-active')) {
-                    document.getElementById('toggleSpace').click();
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.flowConfig) { flowConfig = data.flowConfig; localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); }
+                    if (data.prompts) { prompts = data.prompts; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); }
+                    if (data.sampleLibrary) { sampleLibrary = data.sampleLibrary; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); }
+                    if (data.history) { history = data.history; localStorage.setItem('lingxi_history', JSON.stringify(history)); }
+                    if (data.workspace !== undefined) { document.getElementById('workspace').value = data.workspace; localStorage.setItem('lingxi_workspace', data.workspace); }
+                    
+                    alert("✨ 档案读取成功！系统数据已全面复原。");
+                    init(); // 重新加载界面
+                } catch (err) {
+                    alert("❌ 导入失败：神兵档案格式不正确或已损坏！\n错误信息: " + err.message);
                 }
             };
             reader.readAsText(file);
-            e.target.value = ''; // 重置 file input
+            e.target.value = ''; 
         };
 
-        // 导出逻辑 (工作区)
-        document.getElementById('exportWorkspaceBtn').onclick = () => {
-            const content = document.getElementById('workspace').value;
-            if(!content.trim()) { alert("工作区目前是空的，没有内容可导出！"); return; }
-            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, `灵犀_导出文本_${Date.now()}.txt`);
+        // ==========================================
+        // 3. 静默定时自动备份 (防崩溃机制)
+        // ==========================================
+        const AUTO_BACKUP_INTERVAL = 5 * 60 * 1000; // 5 分钟
+        function performAutoBackup() {
+            const systemData = {
+                flowConfig: flowConfig, prompts: prompts, sampleLibrary: sampleLibrary,
+                history: history, workspace: document.getElementById('workspace').value,
+                timestamp: new Date().toLocaleString()
+            };
+            localStorage.setItem('lingxi_auto_backup_snapshot', JSON.stringify(systemData));
+            showToast(`✨ 数据已于 ${systemData.timestamp} 自动存入本地快照`);
+        }
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-800/90 text-white px-6 py-2.5 rounded-full shadow-2xl z-[300] transition-opacity duration-700 text-xs font-bold backdrop-blur-sm border border-white/10";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+            setTimeout(() => { toast.remove(); }, 3200);
+        }
+        setInterval(performAutoBackup, AUTO_BACKUP_INTERVAL);
+
+        // 控制台输入 restoreAutoBackup() 一键复原
+        window.restoreAutoBackup = function() {
+            const snapshot = localStorage.getItem('lingxi_auto_backup_snapshot');
+            if(!snapshot) { alert("⚠️ 暂无自动备份快照！"); return; }
+            if(confirm("⚠️ 确定要用最近一次的【自动备份】覆盖当前所有数据吗？")) {
+                const data = JSON.parse(snapshot);
+                if (data.flowConfig) { flowConfig = data.flowConfig; localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); }
+                if (data.prompts) { prompts = data.prompts; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); }
+                if (data.sampleLibrary) { sampleLibrary = data.sampleLibrary; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); }
+                if (data.history) { history = data.history; localStorage.setItem('lingxi_history', JSON.stringify(history)); }
+                if (data.workspace !== undefined) { document.getElementById('workspace').value = data.workspace; localStorage.setItem('lingxi_workspace', data.workspace); }
+                alert("✨ 自动备份恢复成功！快照时间: " + data.timestamp);
+                init();
+            }
         };
 
-        // 3. 调色盘逻辑
-        document.getElementById('themeToggle').onclick = (e) => { e.stopPropagation(); const m = document.getElementById('themeMenu'); m.style.display = m.style.display==='flex'?'none':'flex'; };
-        window.onclick = () => document.getElementById('themeMenu').style.display = 'none';
-        window.setTheme = (t) => { document.body.className = 'h-screen flex overflow-hidden ' + t; localStorage.setItem('lingxi_theme', t); };
-
-        // 5. 灵感度显示逻辑
+        // ==========================================
+        // 核心交互逻辑与 AI 调用
+        // ==========================================
         document.getElementById('tempSlider').oninput = (e) => { document.getElementById('tempValueDisplay').innerText = e.target.value; };
 
-        // 2. 历史记录下拉逻辑
         function renderHistorySelect() {
             const sel = document.getElementById('historySelect');
             sel.innerHTML = '<option value="">-- 点击选择回溯 --</option>';
@@ -238,6 +298,7 @@
                 container.appendChild(div);
             });
         }
+        
         function toggleSample(idx) { 
             if (selectedSampleIndices.includes(idx)) selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx);
             else selectedSampleIndices.push(idx); renderSampleLibrary(); 
@@ -281,7 +342,7 @@
             isGenerating = false; document.getElementById('sendBtn').innerText = "开始执行"; input.value = ''; saveHistory(); renderHistorySelect();
         };
 
-        // 基础函数 (侧边栏等)
+        // 流式响应核心，已摘除 Token 计算
         async function streamCallAI(modelName, sys, text, targetElement, temp) {
             let apiUrl = ""; let apiKey = ""; 
             if (modelName.startsWith('ep-') || modelName.includes('doubao')) { apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; apiKey = flowConfig.db_key; }
@@ -316,15 +377,18 @@
             this.innerText = isActive ? "📔 关闭空间" : "✍️ 分屏创作";
             this.className = isActive ? "bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-black transition-all border border-blue-100 shadow-md" : "bg-gray-100 hover:bg-blue-50 text-blue-600 px-6 py-2 rounded-full text-sm font-black transition-all border border-blue-100 shadow-sm";
         };
+        
         document.getElementById('workspace').oninput = (e) => localStorage.setItem('lingxi_workspace', e.target.value);
         document.getElementById('modeChat').onclick = () => switchMode(false);
         document.getElementById('modePK').onclick = () => switchMode(true);
+        
         function switchMode(pk) {
             document.getElementById('modeChat').className = pk ? "mode-btn text-gray-400" : "mode-btn mode-btn-active";
             document.getElementById('modePK').className = !pk ? "mode-btn text-gray-400" : "mode-btn mode-btn-active";
             document.getElementById('singleSelectBox').classList.toggle('hidden', pk);
             document.getElementById('pkSelectBox').classList.toggle('hidden', !pk);
         }
+        
         function updateModelDropdowns() {
             const custom = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(m => m);
             const all = ['deepseek-chat', 'qwen-plus', ...custom];
@@ -333,30 +397,37 @@
                 all.forEach(m => el.innerHTML += `<option value="${m}">${m}</option>`);
             });
         }
+        
         document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
         document.getElementById('saveSettings').onclick = () => { Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) flowConfig[id] = document.getElementById(id).value.trim(); }); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); document.getElementById('settingsModal').classList.add('hidden'); alert("大脑已激活"); };
         document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
         document.getElementById('newChatBtn').onclick = () => { currentChatId = null; document.getElementById('displayArea').innerHTML = ''; };
-        document.getElementById('addPromptBtn').onclick = () => { const n = document.getElementById('newPromptName').value.trim(); const c = document.getElementById('newPromptContent').value.trim(); if(n && c) { prompts[n] = c; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect(); } };
+        document.getElementById('clearChatBtn').onclick = () => { if(confirm("确定清空当前屏幕内容吗？")) { document.getElementById('displayArea').innerHTML = ''; } };
+        document.getElementById('addPromptBtn').onclick = () => { const n = document.getElementById('newPromptName').value.trim(); const c = document.getElementById('newPromptContent').value.trim(); if(n && c) { prompts[n] = c; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect(); document.getElementById('newPromptName').value=''; document.getElementById('newPromptContent').value=''; } };
+        
         function renderPromptList() {
             const l = document.getElementById('promptList'); l.innerHTML = '';
-            Object.keys(prompts).forEach(k => { l.innerHTML += `<div class="bg-white/5 p-2 rounded-lg border border-white/5 flex justify-between items-center text-[12px]"><span>${k}</span></div>`; });
+            Object.keys(prompts).forEach(k => { l.innerHTML += `<div class="bg-white/5 p-2 rounded-lg border border-white/5 flex justify-between items-center text-[12px] text-gray-300"><span>${k}</span></div>`; });
         }
         function renderSelect() { const s = document.getElementById('promptSelect'); s.innerHTML = ''; Object.keys(prompts).forEach(k => s.innerHTML += `<option value="${k}">${k}</option>`); }
         function deleteSample(i) { sampleLibrary.splice(i,1); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); renderSampleLibrary(); }
+        
         document.getElementById('fileInput').onchange = async (e) => {
             for (let file of e.target.files) {
                 if (file.name.endsWith('.docx')) { let content = (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value; sampleLibrary.push({ name: file.name, text: content }); }
                 else { const reader = new FileReader(); reader.onload = function() { sampleLibrary.push({ name: file.name, text: reader.result }); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); renderSampleLibrary(); }; reader.readAsText(file); }
             }
         };
+        
         function appendMsg(s, t) {
             const c = document.getElementById('displayArea'); const w = document.createElement('div');
             w.className = 'msg-wrapper ' + (s==='user'?'items-end':'items-start');
             w.innerHTML = `<div class="${s}-msg"><div class="msg-body">${t}</div></div>`;
             c.appendChild(w); c.scrollTop = c.scrollHeight; return w;
         }
+        
         function createPKCol(mName) { const col = document.createElement('div'); col.className = "pk-column shadow-xl flex-1 bg-white rounded-xl overflow-hidden border border-gray-100"; col.innerHTML = `<div class="pk-header bg-gray-50 font-bold p-3 border-b text-center text-sm text-gray-600">${mName}</div><div class="pk-body custom-scroll p-4 text-sm"></div>`; return col; }
+        
         function saveHistory() {
             const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return;
             const now = new Date(); const timeStr = `${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
