@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>灵犀 - 我的兵器库(终极稳固版)</title>
+    <title>灵犀 - 妙笔千般意</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <style>
@@ -24,9 +24,6 @@
         .user-msg { background: #e0f2fe; color: #0369a1; align-self: flex-end; border-radius: 20px 20px 4px 20px; border: 1px solid #bae6fd; padding: 1.25rem; max-width: 85%; }
         .ai-msg { background: white; color: #374151; align-self: flex-start; border-radius: 20px 20px 20px 4px; border: 1px solid #f3f4f6; padding: 1.25rem; max-width: 85%; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         
-        .theme-dark .ai-msg { background: #374151; color: #f3f4f6; border-color: #4b5563; }
-        .theme-dark .user-msg { background: #1e3a8a; color: #dbeafe; border-color: #1e40af; }
-
         .copy-btn { font-size: 13px; font-weight: 800; cursor: pointer; opacity: 0.6; transition: all 0.2s; padding: 6px 16px; border-radius: 8px; width: fit-content; margin-top: 4px; background: rgba(0,0,0,0.05); }
         .copy-btn:hover { opacity: 1; transform: scale(1.05); background: #3b82f6; color: white !important; }
         .user-copy { align-self: flex-end; color: #0369a1; }
@@ -42,11 +39,11 @@
         <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-950/50">
             <div>
                 <h1 class="text-2xl font-black text-blue-400 italic">灵犀</h1>
-                <p class="text-[10px] text-blue-400/80 font-bold tracking-tighter mt-1 italic">身无彩凤双飞翼，心有灵犀一点通</p>
+                <p class="text-[11px] text-blue-400/90 font-bold mt-1.5 italic tracking-tight">妙笔千般意，灵犀一点通</p>
             </div>
             <div class="flex gap-2">
-                <button id="exportBtn" title="备份兵器库" class="p-1.5 bg-gray-800 hover:bg-blue-600 rounded-lg">💾</button>
-                <button id="importBtn" title="恢复兵器库" class="p-1.5 bg-gray-800 hover:bg-blue-600 rounded-lg">📂</button>
+                <button id="exportBtn" title="全量备份" class="p-1.5 bg-gray-800 hover:bg-blue-600 rounded-lg transition-all">💾</button>
+                <button id="importBtn" title="一键恢复" class="p-1.5 bg-gray-800 hover:bg-blue-600 rounded-lg transition-all">📂</button>
                 <input type="file" id="importFile" class="hidden" accept=".json">
             </div>
         </div>
@@ -54,10 +51,10 @@
         <div class="flex-1 overflow-y-auto custom-scroll p-4 space-y-6">
             <section>
                 <div class="grid grid-cols-4 gap-2 mb-4">
-                    <button onclick="setTheme('')" class="h-6 rounded bg-white border border-gray-600"></button>
-                    <button onclick="setTheme('theme-dark')" class="h-6 rounded bg-gray-800 border border-gray-600"></button>
-                    <button onclick="setTheme('theme-eye')" class="h-6 rounded bg-green-100 border border-green-600"></button>
-                    <button onclick="setTheme('theme-retro')" class="h-6 rounded bg-orange-100 border border-orange-600"></button>
+                    <button onclick="setTheme('')" class="h-6 rounded bg-white border border-gray-600" title="白天"></button>
+                    <button onclick="setTheme('theme-dark')" class="h-6 rounded bg-gray-800 border border-gray-600" title="夜晚"></button>
+                    <button onclick="setTheme('theme-eye')" class="h-6 rounded bg-green-100 border border-green-600" title="护眼"></button>
+                    <button onclick="setTheme('theme-retro')" class="h-6 rounded bg-orange-100 border border-orange-600" title="复古"></button>
                 </div>
                 <div class="flex bg-gray-800 p-1 rounded-xl border border-gray-700">
                     <button id="modeChat" class="flex-1 py-1.5 text-xs rounded-lg font-bold transition">单人创作</button>
@@ -74,17 +71,14 @@
                 <h3 class="text-xs font-bold text-blue-400 mb-3 uppercase tracking-widest italic">⚔️ 可用兵器</h3>
                 <div id="promptList" class="space-y-2 mb-3"></div>
                 <div class="bg-gray-800 p-3 rounded-xl border border-gray-700 shadow-inner">
-                    <input id="newPromptName" type="text" placeholder="名称" class="w-full bg-gray-950/50 border border-gray-700 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500 mb-2">
-                    <textarea id="newPromptContent" placeholder="秘籍内容..." class="w-full bg-gray-950/50 border border-gray-700 rounded-lg px-3 py-1.5 text-xs h-16 outline-none resize-none custom-scroll"></textarea>
-                    <button id="addPromptBtn" class="w-full bg-blue-600 text-xs font-bold py-2 mt-2 rounded-lg active:scale-95 transition-all">放入兵器库</button>
+                    <input id="newPromptName" type="text" placeholder="兵器名称" class="w-full bg-gray-950/50 border border-gray-700 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500 mb-2">
+                    <textarea id="newPromptContent" placeholder="内容..." class="w-full bg-gray-950/50 border border-gray-700 rounded-lg px-3 py-1.5 text-xs h-24 outline-none resize-none custom-scroll"></textarea>
+                    <button id="addPromptBtn" class="w-full bg-blue-600 text-xs font-bold py-2 mt-2 rounded-lg active:scale-95 transition-all">保存/覆盖</button>
                 </div>
             </section>
 
             <section class="pt-4 border-t border-gray-800 pb-8">
-                <h3 class="text-xs font-bold text-gray-400 mb-2 flex justify-between items-center">
-                    <span>📖 例文参照</span>
-                    <button onclick="document.getElementById('fileInput').click()" class="text-blue-400 text-[10px]">+ 上传例文</button>
-                </h3>
+                <h3 class="text-xs font-bold text-gray-400 mb-2 flex justify-between items-center"><span>📖 例文参照</span><button onclick="document.getElementById('fileInput').click()" class="text-blue-400 text-[10px]">+ 上传</button></h3>
                 <input type="file" id="fileInput" class="hidden" multiple accept=".txt,.docx">
                 <div id="sampleLibrary" class="space-y-2 max-h-32 overflow-y-auto custom-scroll"></div>
             </section>
@@ -93,7 +87,7 @@
 
     <div class="flex-1 flex flex-col main-content overflow-hidden">
         <header class="h-16 border-b flex items-center px-8 justify-between card-bg z-10 shadow-sm">
-            <h2 id="viewTitle" class="font-bold italic opacity-80 uppercase tracking-tighter">灵犀创作工作台</h2>
+            <h2 class="font-bold italic opacity-80 uppercase tracking-tighter">灵犀创作工作台</h2>
             <div class="flex items-center gap-4">
                 <select id="singleModel" class="bg-gray-100 py-1.5 px-5 rounded-full text-xs font-bold outline-none text-gray-800 border-none"></select>
                 <div id="pkModelInfo" class="hidden items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
@@ -110,34 +104,32 @@
         <footer class="p-6 card-bg border-t">
             <div class="max-w-4xl mx-auto space-y-4">
                 <div class="flex items-center gap-3">
-                    <span class="text-[14px] font-black uppercase text-gray-500 italic">当前兵器:</span>
+                    <span class="text-[14px] font-black uppercase text-gray-500 italic">选用兵器:</span>
                     <select id="promptSelect" class="bg-blue-50 text-blue-700 py-1.5 px-4 rounded-lg text-[14px] font-black outline-none border border-blue-100"></select>
                 </div>
                 <div class="relative bg-opacity-50 bg-gray-100 rounded-2xl border border-gray-200 focus-within:bg-white focus-within:shadow-lg p-1 transition-all">
-                    <textarea id="userInput" class="w-full bg-transparent border-none px-4 py-3 text-[15px] outline-none custom-scroll text-gray-800" placeholder="开始创作..."></textarea>
-                    <div class="flex justify-end p-2">
-                        <button id="sendBtn" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all">开始执行</button>
-                    </div>
+                    <textarea id="userInput" class="w-full bg-transparent border-none px-4 py-3 text-[15px] outline-none custom-scroll text-gray-800" placeholder="写下你的指令..."></textarea>
+                    <div class="flex justify-end p-2"><button id="sendBtn" class="bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all">开始执行</button></div>
                 </div>
             </div>
         </footer>
     </div>
 
     <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2rem] p-10 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll text-gray-800 text-sm">
-            <h3 class="text-2xl font-black mb-6 italic border-b pb-4">⚙️ 配置大脑</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-medium">
+        <div class="bg-white rounded-[2rem] p-10 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll text-gray-800 text-sm font-medium">
+            <h3 class="text-2xl font-black mb-6 italic border-b pb-4 text-center">⚙️ 配置分流大脑</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                    <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs">
-                    <input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs">
-                    <input id="db_key" type="password" placeholder="豆包官方 sk-..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs">
+                    <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs outline-none">
+                    <input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs outline-none">
+                    <input id="db_key" type="password" placeholder="豆包官方 sk-..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs outline-none">
                 </div>
                 <div class="space-y-4">
-                    <h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转配置</h4>
-                    <input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs">
-                    <input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs">
-                    <textarea id="proxy_models" placeholder="模型 ID 列表..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-[10px] h-20 outline-none"></textarea>
+                    <h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转及模型</h4>
+                    <input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs outline-none">
+                    <input id="proxy_key" type="password" placeholder="中转 API Key" class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-xs outline-none">
+                    <textarea id="proxy_models" placeholder="模型列表..." class="w-full bg-gray-50 border rounded-xl px-4 py-2 text-[10px] h-20 outline-none"></textarea>
                 </div>
             </div>
             <div class="flex gap-4 mt-8 pt-6 border-t"><button id="saveSettings" class="flex-1 bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl">激活</button><button id="closeSettings" class="flex-1 bg-gray-100 font-bold py-4 rounded-2xl">取消</button></div>
@@ -162,11 +154,9 @@
             Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; });
         }
 
-        // 🌟 核心：镜像复制按钮
         function addCopyFeature(container, text, type) {
             const btn = document.createElement('div');
-            btn.className = `copy-btn ${type === 'user' ? 'user-copy' : 'ai-copy'}`;
-            btn.innerText = '复制';
+            btn.className = `copy-btn ${type === 'user' ? 'user-copy' : 'ai-copy'}`; btn.innerText = '复制';
             btn.onclick = () => { navigator.clipboard.writeText(text).then(() => { btn.innerText = '已复制√'; setTimeout(() => btn.innerText = '复制', 2000); }); };
             container.appendChild(btn);
         }
@@ -175,167 +165,104 @@
             const list = document.getElementById('historyList'); list.innerHTML = '';
             history.forEach((chat) => {
                 const div = document.createElement('div');
-                div.className = `group flex flex-col p-2.5 rounded-lg text-[11px] cursor-pointer transition-all mb-1.5 ${currentChatId === chat.id ? 'bg-blue-600 text-white font-bold shadow-md' : 'text-gray-400 hover:bg-gray-800'}`;
+                div.className = `group flex flex-col p-2.5 rounded-lg text-[11px] cursor-pointer transition-all mb-1.5 ${currentChatId === chat.id ? 'bg-blue-600 text-white font-bold' : 'text-gray-400 hover:bg-gray-800'}`;
                 div.onclick = () => loadChat(chat.id);
-                div.innerHTML = `<div class="flex justify-between items-center w-full"><span class="truncate pr-1 italic"># ${chat.title}</span><button onclick="event.stopPropagation(); deleteHistory('${chat.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 font-black px-1">×</button></div><div class="text-[9px] opacity-60 mt-0.5">${chat.time || ''}</div>`;
+                div.innerHTML = `<div class="flex justify-between items-center w-full"><span class="truncate pr-1 italic"># ${chat.title}</span><button onclick="event.stopPropagation(); deleteHistory('${chat.id}')" class="opacity-0 group-hover:opacity-100 text-red-400 font-black px-1">×</button></div><div class="text-[9px] opacity-60 mt-0.5 font-mono">${chat.time || ''}</div>`;
                 list.prepend(div);
             });
         }
 
-        function loadChat(id) { 
-            currentChatId = id; const chat = history.find(h => h.id === id); 
-            const display = document.getElementById('displayArea');
-            display.innerHTML = chat ? chat.content : ''; 
-            display.querySelectorAll('.copy-btn').forEach(btn => {
-                const isUser = btn.classList.contains('user-copy');
-                const targetText = btn.previousElementSibling.innerText;
-                btn.onclick = () => navigator.clipboard.writeText(targetText).then(() => { btn.innerText = '已复制√'; setTimeout(() => btn.innerText = '复制', 2000); });
-            });
-            renderHistory(); 
-        }
-
-        function saveCurrentToHistory() {
+        function loadChat(id) { currentChatId = id; const chat = history.find(h => h.id === id); const display = document.getElementById('displayArea'); display.innerHTML = chat ? chat.content : ''; display.querySelectorAll('.copy-btn').forEach(btn => { const targetText = btn.previousElementSibling.innerText; btn.onclick = () => navigator.clipboard.writeText(targetText).then(() => { btn.innerText = '已复制√'; setTimeout(() => btn.innerText = '复制', 2000); }); }); renderHistory(); }
+        
+        function saveCurrentToHistory() { 
             const content = document.getElementById('displayArea').innerHTML; if(!content.trim()) return;
-            const now = new Date();
-            const timeStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-            if(!currentChatId) {
-                currentChatId = Date.now().toString();
-                const title = document.querySelector('.user-msg')?.innerText.slice(0, 10) || "新对话";
-                history.push({ id: currentChatId, title, content, time: timeStr });
-            } else {
-                const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) { history[idx].content = content; history[idx].time = timeStr; }
-            }
+            const now = new Date(); const timeStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            if(!currentChatId) { currentChatId = Date.now().toString(); const title = document.querySelector('.user-msg')?.innerText.slice(0, 10) || "新对话"; history.push({ id: currentChatId, title, content, time: timeStr }); }
+            else { const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) { history[idx].content = content; history[idx].time = timeStr; } }
             localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory();
         }
 
-        // 🌟 核心：导入功能加固
+        // 全量导出
+        document.getElementById('exportBtn').onclick = () => { 
+            const data = { prompts, flowConfig };
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type: "application/json"})); a.download = "灵犀全量备份.json"; a.click(); 
+        };
+
+        // 一键恢复
         document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
         document.getElementById('importFile').onchange = (e) => {
             const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
+            const reader = new FileReader(); reader.onload = (ev) => {
                 try {
                     const data = JSON.parse(ev.target.result);
-                    prompts = { "灵犀助手": "创作助手。", ...data };
+                    if(data.prompts) prompts = data.prompts; else prompts = data;
+                    if(data.flowConfig) { flowConfig = data.flowConfig; localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); }
                     localStorage.setItem('lingxi_prompts', JSON.stringify(prompts));
-                    renderPromptList(); renderSelect(); alert("📂 兵器库已恢复！");
-                } catch(e) { alert("文件格式错误"); }
-            };
-            reader.readAsText(file); e.target.value = '';
+                    renderPromptList(); renderSelect(); init(); alert("📂 兵器库与配置已同步！");
+                } catch(e) { alert("格式不兼容"); }
+            }; reader.readAsText(file); e.target.value = '';
         };
 
-        // 🌟 核心：例文管理与删除
-        document.getElementById('fileInput').onchange = async (e) => {
-            for (let file of e.target.files) {
-                let content = file.name.endsWith('.docx') ? (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value : await file.text();
-                sampleLibrary.push({ name: file.name, text: content });
-            }
-            activeSampleIndex = sampleLibrary.length - 1; renderSampleLibrary(); e.target.value = '';
-        };
-
-        function renderSampleLibrary() {
-            const container = document.getElementById('sampleLibrary'); container.innerHTML = '';
-            sampleLibrary.forEach((s, i) => {
-                const isActive = (activeSampleIndex === i);
-                const div = document.createElement('div');
-                div.className = `group flex justify-between items-center p-2 rounded-lg border border-gray-700 text-[10px] cursor-pointer mb-1 transition-all ${isActive ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-gray-800/40 text-gray-400'}`;
-                div.onclick = () => { activeSampleIndex = (activeSampleIndex === i) ? -1 : i; renderSampleLibrary(); };
-                div.innerHTML = `<span class="truncate pr-2">${isActive ? '✅ ' : ''}${s.name}</span><button onclick="event.stopPropagation(); deleteSample(${i})" class="opacity-0 group-hover:opacity-100 text-red-500 font-bold px-1 transition-all">×</button>`;
-                container.appendChild(div);
-            });
-        }
+        document.getElementById('fileInput').onchange = async (e) => { for (let file of e.target.files) { let content = file.name.endsWith('.docx') ? (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value : await file.text(); sampleLibrary.push({ name: file.name, text: content }); } activeSampleIndex = sampleLibrary.length - 1; renderSampleLibrary(); e.target.value = ''; };
+        function renderSampleLibrary() { const container = document.getElementById('sampleLibrary'); container.innerHTML = ''; sampleLibrary.forEach((s, i) => { const div = document.createElement('div'); div.className = `group flex justify-between items-center p-2 rounded-lg border border-gray-700 text-[10px] cursor-pointer mb-1 transition-all ${activeSampleIndex === i ? 'bg-blue-600/20 border-blue-500 text-white font-bold' : 'bg-gray-800/40 text-gray-400'}`; div.onclick = () => { activeSampleIndex = (activeSampleIndex === i) ? -1 : i; renderSampleLibrary(); }; div.innerHTML = `<span>${activeSampleIndex === i ? '✅ ' : ''}${s.name}</span><button onclick="event.stopPropagation(); deleteSample(${i})" class="opacity-0 group-hover:opacity-100 text-red-500 font-bold px-1 transition-all">×</button>`; container.appendChild(div); }); }
         window.deleteSample = (i) => { sampleLibrary.splice(i, 1); if(activeSampleIndex === i) activeSampleIndex = -1; renderSampleLibrary(); };
 
         document.getElementById('sendBtn').onclick = async () => {
-            const btn = document.getElementById('sendBtn');
-            if (isGenerating && abortController) { abortController.abort(); isGenerating = false; btn.innerText = "开始执行"; btn.className = "bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg"; saveCurrentToHistory(); return; }
-
+            const btn = document.getElementById('sendBtn'); if (isGenerating && abortController) { abortController.abort(); isGenerating = false; btn.innerText = "开始执行"; btn.className = "bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg"; saveCurrentToHistory(); return; }
             const input = document.getElementById('userInput'); const text = input.value.trim(); if(!text) return;
             const sys = prompts[document.getElementById('promptSelect').value] || "创作助手";
             const fullSys = sys + (activeSampleIndex !== -1 ? `\n\n【例文参考】\n${sampleLibrary[activeSampleIndex].text}` : "");
-            
             input.value = ''; isGenerating = true; btn.innerText = "立即中断"; btn.className = "bg-red-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-all";
             abortController = new AbortController();
-
             if(isPKMode) {
                 const pkBox = document.createElement('div'); pkBox.className = "pk-grid mb-6";
-                const colA = document.createElement('div'); colA.className = "pk-column custom-scroll";
-                const colB = document.createElement('div'); colB.className = "pk-column custom-scroll";
-                colA.innerHTML = `<div class="model-tag">${document.getElementById('modelA').value}</div><div class="ai-content">等待中...</div>`;
-                colB.innerHTML = `<div class="model-tag">${document.getElementById('modelB').value}</div><div class="ai-content">等待中...</div>`;
+                const colA = document.createElement('div'); colA.className = "pk-column custom-scroll"; const colB = document.createElement('div'); colB.className = "pk-column custom-scroll";
+                colA.innerHTML = `<div class="model-tag">${document.getElementById('modelA').value}</div><div class="ai-content">执行中...</div>`; colB.innerHTML = `<div class="model-tag">${document.getElementById('modelB').value}</div><div class="ai-content">执行中...</div>`;
                 pkBox.append(colA, colB); document.getElementById('displayArea').appendChild(pkBox);
                 await Promise.all([streamCallAI(document.getElementById('modelA').value, fullSys, text, colA.querySelector('.ai-content')), streamCallAI(document.getElementById('modelB').value, fullSys, text, colB.querySelector('.ai-content'))]);
-                addCopyFeature(colA, colA.querySelector('.ai-content').innerText, 'ai');
-                addCopyFeature(colB, colB.querySelector('.ai-content').innerText, 'ai');
+                addCopyFeature(colA, colA.querySelector('.ai-content').innerText, 'ai'); addCopyFeature(colB, colB.querySelector('.ai-content').innerText, 'ai');
             } else {
                 const wrapper = appendMessage('user', text); addCopyFeature(wrapper, text, 'user');
-                const aiWrapper = appendMessage('ai', "开始执行...");
-                await streamCallAI(document.getElementById('singleModel').value, fullSys, text, aiWrapper.querySelector('.msg-body'));
+                const aiWrapper = appendMessage('ai', "开始执行..."); await streamCallAI(document.getElementById('singleModel').value, fullSys, text, aiWrapper.querySelector('.msg-body'));
                 addCopyFeature(aiWrapper, aiWrapper.querySelector('.msg-body').innerText, 'ai');
             }
             isGenerating = false; btn.innerText = "开始执行"; btn.className = "bg-blue-600 text-white px-12 py-3 rounded-xl font-bold shadow-lg"; saveCurrentToHistory();
         };
 
         async function streamCallAI(modelName, sys, text, targetElement) {
-            let apiUrl = ""; let apiKey = "";
-            const isDoubao = modelName.startsWith('ep-') || modelName.includes('doubao');
+            let apiUrl = ""; let apiKey = ""; const isDoubao = modelName.startsWith('ep-') || modelName.includes('doubao');
             if (isDoubao) { apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; apiKey = flowConfig.db_key; }
             else if (API_URLS[modelName]) { apiUrl = API_URLS[modelName]; apiKey = modelName.includes('deepseek') ? flowConfig.ds_key : flowConfig.qw_key; }
             else { apiUrl = flowConfig.proxy_url.replace(/\/$/, ''); if (!apiUrl.endsWith('/chat/completions')) apiUrl += '/chat/completions'; apiKey = flowConfig.proxy_key; }
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` }, body: JSON.stringify({ model: modelName, messages: [{role:"system", content: sys}, {role:"user", content: text}], stream: true }), signal: abortController.signal });
-                const reader = response.body.getReader(); const decoder = new TextDecoder("utf-8");
-                targetElement.innerText = '';
+                const reader = response.body.getReader(); const decoder = new TextDecoder("utf-8"); targetElement.innerText = '';
                 while (true) {
                     const { done, value } = await reader.read(); if (done) break;
                     const chunk = decoder.decode(value); const lines = chunk.split('\n');
-                    for (const line of lines) {
-                        if (line.trim().startsWith('data: ')) {
-                            const d = line.replace('data: ', '').trim(); if (d === '[DONE]') break;
-                            try { const j = JSON.parse(d); const c = j.choices[0].delta.content; if (c) { targetElement.innerText += c; targetElement.scrollTop = targetElement.scrollHeight; } } catch(e) {}
-                        }
-                    }
+                    for (const line of lines) { if (line.trim().startsWith('data: ')) { const d = line.replace('data: ', '').trim(); if (d === '[DONE]') break; try { const j = JSON.parse(d); const c = j.choices[0].delta.content; if (c) { targetElement.innerText += c; targetElement.scrollTop = targetElement.scrollHeight; } } catch(e) {} } }
                 }
             } catch (e) { if (e.name === 'AbortError') targetElement.innerText += "\n[⚠️ 已被手动中断]"; else targetElement.innerText += "\n执行失败: " + e.message; }
         }
 
-        function appendMessage(s, t) {
-            const c = document.getElementById('displayArea'); const wrapper = document.createElement('div');
-            wrapper.className = 'msg-wrapper';
-            const msg = document.createElement('div'); msg.className = s === 'user' ? 'user-msg' : 'ai-msg';
-            msg.innerHTML = `<div class="msg-body">${t}</div>`;
-            wrapper.appendChild(msg); c.appendChild(wrapper); c.scrollTop = c.scrollHeight; return wrapper;
-        }
-
-        function updateModelDropdowns() {
-            const custom = flowConfig.proxy_models.split(/[，,]/).map(m => m.trim()).filter(m => m !== '');
-            const all = [...Object.keys(DOMESTIC_MAP), ...custom];
-            ['singleModel', 'modelA', 'modelB'].forEach(id => {
-                const el = document.getElementById(id); if(!el) return;
-                const val = el.value; el.innerHTML = '';
-                all.forEach(m => {
-                    let label = DOMESTIC_MAP[m] || m.toUpperCase();
-                    if (m.startsWith('ep-')) label = "字节豆包 (直连)";
-                    el.innerHTML += `<option value="${m}">${label}</option>`;
-                });
-                if(all.includes(val)) el.value = val;
-            });
-        }
-
+        function appendMessage(s, t) { const c = document.getElementById('displayArea'); const wrapper = document.createElement('div'); wrapper.className = 'msg-wrapper'; const msg = document.createElement('div'); msg.className = s === 'user' ? 'user-msg' : 'ai-msg'; msg.innerHTML = `<div class="msg-body">${t}</div>`; wrapper.appendChild(msg); c.appendChild(wrapper); c.scrollTop = c.scrollHeight; return wrapper; }
+        function updateModelDropdowns() { const custom = flowConfig.proxy_models.split(/[，,]/).map(m => m.trim()).filter(m => m !== ''); const all = [...Object.keys(DOMESTIC_MAP), ...custom]; ['singleModel', 'modelA', 'modelB'].forEach(id => { const el = document.getElementById(id); if(!el) return; const val = el.value; el.innerHTML = ''; all.forEach(m => { let label = DOMESTIC_MAP[m] || m.toUpperCase(); if (m.startsWith('ep-')) label = "字节豆包 (直连)"; el.innerHTML += `<option value="${m}">${label}</option>`; }); if(all.includes(val)) el.value = val; }); }
         document.getElementById('userInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('sendBtn').click(); } });
         document.getElementById('newChatBtn').onclick = () => { saveCurrentToHistory(); currentChatId = null; document.getElementById('displayArea').innerHTML = ''; renderHistory(); };
         const modeChat = document.getElementById('modeChat'); const modePK = document.getElementById('modePK');
         modeChat.onclick = () => switchMode(false); modePK.onclick = () => switchMode(true);
         function switchMode(pk) { isPKMode = pk; modeChat.className = pk ? "flex-1 py-1.5 text-xs rounded-lg text-gray-400" : "flex-1 py-1.5 text-xs rounded-lg bg-blue-600 font-bold text-white shadow-lg"; modePK.className = !pk ? "flex-1 py-1.5 text-xs rounded-lg text-gray-400" : "flex-1 py-1.5 text-xs rounded-lg bg-blue-600 font-bold text-white shadow-lg"; document.getElementById('pkModelInfo').classList.toggle('hidden', !pk); document.getElementById('singleModel').classList.toggle('hidden', pk); document.getElementById('displayArea').innerHTML = ''; currentChatId = null; renderHistory(); }
-        document.getElementById('saveSettings').onclick = () => { Object.keys(flowConfig).forEach(id => { flowConfig[id] = document.getElementById(id).value.trim(); }); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); alert("大脑配置已激活！"); document.getElementById('settingsModal').classList.add('hidden'); };
+        document.getElementById('saveSettings').onclick = () => { Object.keys(flowConfig).forEach(id => { flowConfig[id] = document.getElementById(id).value.trim(); }); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); alert("激活！"); document.getElementById('settingsModal').classList.add('hidden'); };
         document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
         document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
-        document.getElementById('clearChatBtn').onclick = () => { if(confirm("抹除当前对话？")) { document.getElementById('displayArea').innerHTML = ''; currentChatId = null; renderHistory(); } };
-        function renderPromptList() { const l = document.getElementById('promptList'); l.innerHTML = ''; Object.keys(prompts).forEach(k => { const isF = (k === "灵犀助手"); l.innerHTML += `<div class="bg-gray-800/60 p-3 rounded-xl border border-gray-700 flex justify-between items-center group shadow-sm hover:border-blue-500 transition-all cursor-default"><span class="text-[11px] ${isF ? 'text-blue-400 font-bold italic' : 'text-gray-300'}">${isF ? '🛡️ ' : ''}${k}</span>${!isF ? `<button onclick="deleteP('${k}')" class="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all font-black">×</button>` : ''}</div>`; }); }
+        document.getElementById('clearChatBtn').onclick = () => { if(confirm("抹除显示？")) { document.getElementById('displayArea').innerHTML = ''; currentChatId = null; renderHistory(); } };
+        
+        window.previewPrompt = (k) => { document.getElementById('newPromptName').value = k; document.getElementById('newPromptContent').value = prompts[k]; document.getElementById('newPromptName').focus(); };
+        function renderPromptList() { const l = document.getElementById('promptList'); l.innerHTML = ''; Object.keys(prompts).forEach(k => { const isF = (k === "灵犀助手"); l.innerHTML += `<div onclick="previewPrompt('${k}')" class="bg-gray-800/60 p-3 rounded-xl border border-gray-700 flex justify-between items-center group shadow-sm hover:border-blue-500 transition-all cursor-pointer"><span class="text-[11px] ${isF ? 'text-blue-400 font-bold italic' : 'text-gray-300'}">${isF ? '🛡️ ' : ''}${k}</span>${!isF ? `<button onclick="event.stopPropagation(); deleteP('${k}')" class="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all font-black">×</button>` : ''}</div>`; }); }
         function renderSelect() { const s = document.getElementById('promptSelect'); s.innerHTML = ''; Object.keys(prompts).forEach(k => { s.innerHTML += `<option value="${k}">${k}</option>`; }); }
         document.getElementById('addPromptBtn').onclick = () => { const n = document.getElementById('newPromptName').value.trim(); const c = document.getElementById('newPromptContent').value.trim(); if(!n || !c) return; prompts[n] = c; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect(); document.getElementById('newPromptName').value = ''; document.getElementById('newPromptContent').value = ''; };
+        window.deleteP = (k) => { if(confirm("抹除？")) { delete prompts[k]; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); renderPromptList(); renderSelect(); } };
         window.deleteHistory = (id) => { if(!confirm("确定抹除？")) return; history = history.filter(h => h.id !== id); if(currentChatId === id) { currentChatId = null; document.getElementById('displayArea').innerHTML = ''; } localStorage.setItem('lingxi_history', JSON.stringify(history)); renderHistory(); };
-        document.getElementById('exportBtn').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(prompts)], {type: "application/json"})); a.download = "兵器库备份.json"; a.click(); };
         init();
     </script>
 </body>
