@@ -44,13 +44,7 @@
             --card-bg: #ffffff;
             --footer-bg: #fff8e6;
         }
-
-        /* 侧边栏日间模式 */
-        .sidebar-light {
-            background-color: #ffffff !important;
-            border-right: 1px solid #e2e8f0;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-        }
+        .sidebar-light { background-color: #ffffff !important; border-right: 1px solid #e2e8f0; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
         .sidebar-light .sidebar-title  { color: #3b82f6 !important; }
         .sidebar-light .sidebar-sub    { color: rgba(59,130,246,0.5) !important; }
         .sidebar-light .text-gray-200  { color: #475569 !important; }
@@ -58,79 +52,30 @@
         .sidebar-light .text-gray-500  { color: #94a3b8 !important; }
         .sidebar-light .text-blue-300  { color: #3b82f6 !important; }
         .sidebar-light .text-blue-400  { color: #2563eb !important; }
-        .sidebar-light .border-white\/5  { border-color: #e2e8f0 !important; }
+        .sidebar-light .border-white\/5 { border-color: #e2e8f0 !important; }
         .sidebar-light .bg-black\/20   { background-color: #f1f5f9 !important; }
         .sidebar-light .bg-white\/5    { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
         .sidebar-light .bg-blue-500\/10 { background-color: rgba(59,130,246,0.08) !important; }
         .sidebar-light .bg-blue-500\/20 { background-color: rgba(59,130,246,0.15) !important; }
-        .sidebar-light .mode-btn       { color: #475569 !important; }
+        .sidebar-light .mode-btn        { color: #475569 !important; }
         .sidebar-light .mode-btn-active { color: #ffffff !important; }
-        .sidebar-light .book-item      { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
-        .sidebar-light .book-item-text { color: #1e293b !important; }
-
+        .sidebar-light .book-item       { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
+        .sidebar-light .book-item-text  { color: #1e293b !important; }
         body {
             background-color: var(--bg-main);
             color: var(--text-primary);
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-
-        /* 滚动条 */
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.4); }
-
-        .sidebar {
-            width: 280px;
-            min-width: 280px;
-            background: var(--bg-sidebar);
-            color: white;
-            z-index: 50;
-            transition: all 0.3s;
-            height: 100vh;
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 0.6rem 0;
-            font-size: 14px;
-            font-weight: 900;
-            font-style: italic;
-            transition: all 0.3s;
-            border-radius: 8px;
-            color: #9ca3af;
-        }
-        .mode-btn-active {
-            background: #3b82f6;
-            color: white !important;
-            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
-        }
-
-        /* 消息气泡 */
+        .sidebar { width: 280px; min-width: 280px; background: var(--bg-sidebar); color: white; z-index: 50; transition: all 0.3s; height: 100vh; }
+        .mode-btn { flex: 1; padding: 0.6rem 0; font-size: 14px; font-weight: 900; font-style: italic; transition: all 0.3s; border-radius: 8px; color: #9ca3af; }
+        .mode-btn-active { background: #3b82f6; color: white !important; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
         .msg-wrapper { margin-bottom: 1.8rem; display: flex; flex-direction: column; }
-        .user-msg {
-            background: var(--accent-blue);
-            color: white;
-            padding: 1rem 1.4rem;
-            border-radius: 20px 20px 4px 20px;
-            align-self: flex-end;
-            max-width: 80%;
-            line-height: 1.8;
-            box-shadow: 0 4px 15px rgba(59,130,246,0.2);
-        }
-        .ai-msg {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            padding: 1.4rem 1.8rem;
-            border-radius: 20px 20px 20px 4px;
-            border: 1px solid var(--border-color);
-            align-self: flex-start;
-            max-width: 92%;
-            line-height: 1.8;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-        }
-
-        /* Markdown 渲染样式 */
+        .user-msg { background: var(--accent-blue); color: white; padding: 1rem 1.4rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.2); }
+        .ai-msg { background: var(--card-bg); color: var(--text-primary); padding: 1.4rem 1.8rem; border-radius: 20px 20px 20px 4px; border: 1px solid var(--border-color); align-self: flex-start; max-width: 92%; line-height: 1.8; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
         .msg-body h1,.msg-body h2,.msg-body h3 { font-weight: 800; margin: 0.8em 0 0.4em; }
         .msg-body h1 { font-size: 1.3em; }
         .msg-body h2 { font-size: 1.15em; }
@@ -138,216 +83,53 @@
         .msg-body p  { margin: 0.5em 0; }
         .msg-body ul,.msg-body ol { padding-left: 1.4em; margin: 0.4em 0; }
         .msg-body li { margin: 0.2em 0; }
-        .msg-body code {
-            background: rgba(59,130,246,0.1);
-            padding: 0.1em 0.4em;
-            border-radius: 4px;
-            font-size: 0.88em;
-            font-family: monospace;
-        }
-        .msg-body pre {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 1em;
-            border-radius: 10px;
-            overflow-x: auto;
-            margin: 0.6em 0;
-        }
+        .msg-body code { background: rgba(59,130,246,0.1); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.88em; font-family: monospace; }
+        .msg-body pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 10px; overflow-x: auto; margin: 0.6em 0; }
         .msg-body pre code { background: none; padding: 0; color: inherit; }
-        .msg-body blockquote {
-            border-left: 3px solid #3b82f6;
-            padding-left: 0.8em;
-            color: var(--text-secondary);
-            margin: 0.4em 0;
-        }
+        .msg-body blockquote { border-left: 3px solid #3b82f6; padding-left: 0.8em; color: var(--text-secondary); margin: 0.4em 0; }
         .msg-body strong { font-weight: 700; }
         .msg-body hr { border: none; border-top: 1px solid var(--border-color); margin: 0.8em 0; }
-
-        /* 主题菜单 */
-        #themeMenu {
-            display: none;
-            position: absolute;
-            right: 16px;
-            top: 60px;
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 12px 14px;
-            z-index: 9999;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-            flex-direction: row;
-            gap: 10px;
-            align-items: center;
-        }
-        .theme-dot {
-            width: 28px; height: 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
+        #themeMenu { display: none; position: absolute; right: 16px; top: 60px; background: var(--card-bg); border-radius: 14px; padding: 12px 14px; z-index: 9999; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.12); flex-direction: row; gap: 10px; align-items: center; }
+        .theme-dot { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         .theme-dot:hover { transform: scale(1.15); border-color: #3b82f6; }
         .theme-dot.classic { background: linear-gradient(135deg,#f8fafc,#e2e8f0); }
         .theme-dot.dark    { background: linear-gradient(135deg,#0f172a,#1e293b); }
         .theme-dot.eye     { background: linear-gradient(135deg,#f0f9f0,#d1e7d1); }
         .theme-dot.retro   { background: linear-gradient(135deg,#fff8e6,#ffdead); }
-
-        /* 编辑器分屏 */
-        .editor-container {
-            flex: 0 0 380px;
-            display: none;
-            background: var(--card-bg);
-            border-right: 1px solid var(--border-color);
-            flex-direction: column;
-        }
+        .editor-container { flex: 0 0 380px; display: none; background: var(--card-bg); border-right: 1px solid var(--border-color); flex-direction: column; }
         .editor-active { display: flex !important; }
-        .writing-area {
-            width: 100%; height: 100%;
-            padding: 32px;
-            font-size: 15px; line-height: 2;
-            outline: none; border: none;
-            background: transparent;
-            color: var(--text-primary);
-            resize: none;
-        }
-
-        /* Header */
-        header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* Footer */
-        .chat-footer {
-            background: var(--footer-bg);
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* 输入框主题适配 */
-        textarea, input[type="text"], input[type="password"], select {
-            background-color: var(--card-bg) !important;
-            color: var(--text-primary) !important;
-            border-color: var(--border-color) !important;
-        }
+        .writing-area { width: 100%; height: 100%; padding: 32px; font-size: 15px; line-height: 2; outline: none; border: none; background: transparent; color: var(--text-primary); resize: none; }
+        header { background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .chat-footer { background: var(--footer-bg); border-top: 1px solid var(--border-color); }
+        textarea, input[type="text"], input[type="password"], select { background-color: var(--card-bg) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
         textarea::placeholder, input::placeholder { color: var(--text-secondary) !important; opacity: 0.7; }
-
-        /* pill按钮 */
-        .pill-btn {
-            padding: 0.45rem 1.1rem;
-            border-radius: 9999px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            transition: all 0.25s;
-            background-color: var(--bg-main);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-        }
-        .pill-btn:hover {
-            background-color: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
-            transform: translateY(-1px);
-        }
-
-        /* 温度滑块显示 */
-        #tempValueDisplay {
-            font-family: monospace;
-            font-weight: 900;
-            color: #3b82f6;
-            font-size: 13px;
-            min-width: 28px;
-            text-align: center;
-        }
-
-        /* 弹窗通用 */
-        .modal-box {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-        .modal-input {
-            background-color: var(--bg-main) !important;
-            color: var(--text-primary) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: 12px;
-            padding: 0.6rem 1rem;
-            outline: none;
-            width: 100%;
-            transition: border-color 0.2s;
-        }
+        .pill-btn { padding: 0.45rem 1.1rem; border-radius: 9999px; font-size: 0.82rem; font-weight: 700; transition: all 0.25s; background-color: var(--bg-main); color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer; }
+        .pill-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.3); transform: translateY(-1px); }
+        #tempValueDisplay { font-family: monospace; font-weight: 900; color: #3b82f6; font-size: 13px; min-width: 28px; text-align: center; }
+        .modal-box { background: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .modal-input { background-color: var(--bg-main) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; border-radius: 12px; padding: 0.6rem 1rem; outline: none; width: 100%; transition: border-color 0.2s; }
         .modal-input:focus { border-color: #3b82f6 !important; }
-
-        /* 流式输出光标 */
-        .streaming-cursor::after {
-            content: '▌';
-            animation: blink 0.8s infinite;
-            color: #3b82f6;
-            font-weight: 100;
-        }
+        .streaming-cursor::after { content: '▌'; animation: blink 0.8s infinite; color: #3b82f6; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-        /* PK列 */
-        .pk-col {
-            flex: 1;
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-        .pk-col-header {
-            padding: 0.6rem 1rem;
-            background: var(--bg-main);
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .pk-body {
-            padding: 1rem;
-            font-size: 13px;
-            min-height: 280px;
-            white-space: pre-wrap;
-            color: var(--text-primary);
-        }
-
-        /* 神兵武库提示词卡片 */
-        .prompt-card {
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 0.6rem 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .pk-col { flex: 1; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
+        .pk-col-header { padding: 0.6rem 1rem; background: var(--bg-main); font-size: 11px; font-weight: 800; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+        .pk-body { padding: 1rem; font-size: 13px; min-height: 280px; white-space: pre-wrap; color: var(--text-primary); }
+        .prompt-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.6rem 0.8rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .prompt-card:hover { border-color: #3b82f6; background: rgba(59,130,246,0.04); }
         .prompt-card.active-prompt { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
-
-        /* 书稿卡片 */
-        .book-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 0.7rem 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .book-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.7rem 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .book-card:hover { border-color: rgba(59,130,246,0.5); }
+        /* 快捷指令标签 */
+        .quick-tag { padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
+        .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+        /* 存储监控条 */
+        #storageBar { height: 3px; border-radius: 9999px; transition: width 0.5s; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-<!-- ===================== 左侧边栏 ===================== -->
+<!-- 左侧边栏 -->
 <div class="sidebar flex flex-col shadow-2xl">
-    <!-- Logo区 -->
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
             <h1 class="text-2xl font-black text-blue-400 italic tracking-wider sidebar-title">灵犀</h1>
@@ -355,35 +137,28 @@
         </div>
         <button id="sidebarDarkToggle" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="边栏日夜模式">🌞</button>
     </div>
-
     <div class="flex-1 overflow-y-auto custom-scroll p-5 space-y-6">
-        <!-- 模式切换 -->
         <div class="flex bg-black/20 p-1 rounded-xl border border-white/5 gap-1">
             <button id="modeChat" class="mode-btn mode-btn-active">✍️ 创作</button>
-            <button id="modePK" class="mode-btn">⚔️ 竞技擂台</button>
+            <button id="modePK"   class="mode-btn">⚔️ 竞技擂台</button>
         </div>
-
-        <!-- 神兵武库 -->
         <section>
             <button id="openPromptModalBtn" class="w-full bg-gradient-to-r from-blue-600/10 to-blue-400/10 hover:from-blue-600 hover:to-blue-500 border border-blue-500/20 hover:border-blue-400 text-blue-300 hover:text-white py-3.5 rounded-xl font-black transition-all duration-300 flex items-center justify-center gap-2 group">
                 <span>🗡️ 神兵武库</span>
                 <span id="promptCountBadge" class="bg-blue-500/30 group-hover:bg-white/20 px-2 py-0.5 rounded-md text-[10px]">0件</span>
             </button>
         </section>
-
-        <!-- 书稿管理 -->
         <section>
             <div class="flex justify-between items-center mb-2 px-0.5">
                 <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
                 <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
-            <div id="bookLibrary" class="space-y-1.5 max-h-48 overflow-y-auto custom-scroll"></div>
+           
+            <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
             <button onclick="saveDraftToBook()" class="w-full mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-[11px] font-bold py-2 rounded-xl transition">
                 💾 保存草稿为新书稿
             </button>
         </section>
-
-        <!-- 例文克隆 -->
         <section class="pb-8">
             <div class="flex justify-between items-center mb-2 px-0.5">
                 <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🧬 例文克隆中心</span>
@@ -393,28 +168,32 @@
             <div id="sampleLibrary" class="space-y-1.5"></div>
         </section>
     </div>
+    <!-- 存储监控 -->
+    <div class="px-4 py-2 border-t border-white/5">
+        <div class="flex justify-between items-center mb-1">
+            <span class="text-[10px] text-gray-500">本地存储</span>
+            <span id="storageText" class="text-[10px] text-gray-500">0MB / 5MB</span>
+        </div>
+        <div class="w-full bg-white/10 rounded-full h-1">
+            <div id="storageBar" class="bg-blue-500 h-1 rounded-full" style="width:0%"></div>
+        </div>
+    </div>
 </div>
 
-<!-- ===================== 主内容区 ===================== -->
+<!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
-
-    <!-- Header -->
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
             <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
         </div>
-
         <div class="flex items-center gap-4 relative">
-            <!-- 灵感温度 -->
-            <div class="flex items-center gap-2 bg-gray-50/80 px-3 py-1.5 rounded-full border border-gray-200/80" style="background:var(--bg-main);border-color:var(--border-color)">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border" style="background:var(--bg-main);border-color:var(--border-color)">
                 <span class="text-[10px] font-black" style="color:var(--text-secondary)">灵感</span>
                 <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="w-14 h-1 accent-blue-500 cursor-pointer">
                 <span id="tempValueDisplay">0.7</span>
             </div>
-
-            <!-- 模型选择 -->
             <div id="singleSelectBox">
                 <select id="singleModel" class="border py-1.5 px-3 rounded-full text-xs font-bold outline-none cursor-pointer" style="background:var(--bg-main);border-color:var(--border-color);color:var(--text-primary)"></select>
             </div>
@@ -423,15 +202,11 @@
                 &nbsp;|&nbsp;
                 B: <select id="modelB" class="bg-transparent outline-none cursor-pointer"></select>
             </div>
-
-            <!-- 工具按钮 -->
             <div class="flex items-center gap-3 border-l pl-4" style="border-color:var(--border-color)">
                 <button id="themeToggle"  class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="更换主题">🎨</button>
                 <button id="openSettings" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="配置中心">⚙️</button>
                 <button id="clearChatBtn" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="清空对话">🧹</button>
             </div>
-
-            <!-- 主题菜单 -->
             <div id="themeMenu">
                 <span class="text-[10px] font-black" style="color:var(--text-secondary)">主题</span>
                 <div class="theme-dot classic" onclick="setTheme('')"            title="经典白"></div>
@@ -442,29 +217,36 @@
         </div>
     </header>
 
-    <!-- 工作区 -->
     <div class="flex-1 flex overflow-hidden">
-
-        <!-- 左侧分屏编辑器 -->
         <div id="mainEditor" class="editor-container">
             <div class="flex items-center justify-between px-4 py-2 border-b" style="border-color:var(--border-color);background:var(--bg-main)">
-                <span class="text-xs font-black" style="color:var(--text-secondary)">✍️ 草稿区（不自动覆盖）</span>
-                <span id="workspaceWordCount" class="text-xs font-bold text-blue-500">0字</span>
+                <span class="text-xs font-black" style="color:var(--text-secondary)">✍️ 草稿区</span>
+                <div class="flex items-center gap-3">
+                    <span id="workspaceWordCount" class="text-xs font-bold text-blue-500">0字</span>
+                    <!-- 草稿发给AI按钮 -->
+                    <button id="draftToAIBtn" class="text-[11px] font-bold text-purple-500 hover:text-white hover:bg-purple-500 px-2 py-1 rounded-lg border border-purple-300 hover:border-purple-500 transition" title="将草稿内容发给AI分析">
+                        📤 发给AI
+                    </button>
+                </div>
             </div>
             <textarea id="workspace" class="writing-area custom-scroll flex-1" placeholder="在此自由创作，左侧AI对话不会覆盖这里..."></textarea>
         </div>
 
-        <!-- 右侧对话区 -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
+                <!-- 空白引导页 -->
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
-                    <div class="text-5xl mb-5 opacity-20">✨</div>
-                    <h2 class="text-xl font-black tracking-widest opacity-30 italic">灵犀一点通</h2>
-                    <p class="text-sm mt-2 opacity-25">在下方输入指令，或从神兵武库选择提示词开始创作</p>
+                    <div class="text-6xl mb-6 opacity-20">✨</div>
+                    <h2 class="text-2xl font-black tracking-widest opacity-30 italic mb-4">灵犀一点通</h2>
+                    <div class="flex flex-wrap gap-3 justify-center opacity-25 pointer-events-none">
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🗡️ 选择神兵武库提示词</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚡ 使用快捷指令</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🧬 导入例文提取基因</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚔️ 竞技擂台对比模型</div>
+                    </div>
                 </div>
             </main>
 
-            <!-- Footer输入区 -->
             <footer class="chat-footer p-5 pb-6 flex-shrink-0">
                 <div class="max-w-4xl mx-auto">
                     <!-- 工具栏 -->
@@ -479,9 +261,18 @@
                             <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)">
                                 <option value="">-- 选择历史 --</option>
                             </select>
+                            <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
-
+                    <!-- 快捷指令标签 -->
+                    <div class="flex gap-2 mb-2.5 flex-wrap">
+                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持相同风格和人物设定')">⚡ 续写</button>
+                        <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
+                        <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
+                        <button class="quick-tag" onclick="fillInput('请将以上内容改为第一人称视角')">🔄 换视角</button>
+                        <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
+                        <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
+                    </div>
                     <!-- 输入框 -->
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -500,7 +291,7 @@
     </div>
 </div>
 
-<!-- ===================== 书稿编辑弹窗 ===================== -->
+<!-- 书稿弹窗 -->
 <div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
@@ -521,23 +312,23 @@
     </div>
 </div>
 
-<!-- ===================== 配置中心弹窗 ===================== -->
+<!-- 配置中心弹窗 -->
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl">
         <h3 class="text-lg font-black mb-5 text-center pb-4 border-b" style="border-color:var(--border-color)">⚙️ 配置中心</h3>
         <div class="grid grid-cols-2 gap-6 mb-5">
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                <input id="ds_key"  type="password" placeholder="DeepSeek API Key" class="modal-input text-sm">
-                <input id="qw_key"  type="password" placeholder="通义千问 Qwen Key" class="modal-input text-sm">
-                <input id="db_key"  type="password" placeholder="豆包 Doubao Key" class="modal-input text-sm">
-                <input id="db_model" type="text"    placeholder="豆包模型ID (ep-xxxxx)" class="modal-input text-sm">
+                <input id="ds_key"   type="password" placeholder="DeepSeek API Key"    class="modal-input text-sm">
+                <input id="qw_key"   type="password" placeholder="通义千问 Qwen Key"   class="modal-input text-sm">
+                <input id="db_key"   type="password" placeholder="豆包 Doubao Key"     class="modal-input text-sm">
+                <input id="db_model" type="text"     placeholder="豆包模型ID (ep-xxx)" class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
-                <input id="proxy_url" type="text"     placeholder="Base URL (含 /v1)" class="modal-input text-sm">
-                <input id="proxy_key" type="password" placeholder="中转 Key" class="modal-input text-sm">
-                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: gpt-4o,claude-3-5-sonnet" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
+                <input id="proxy_url" type="text"     placeholder="Base URL (含/v1)"   class="modal-input text-sm">
+                <input id="proxy_key" type="password" placeholder="中转 Key"           class="modal-input text-sm">
+                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: gpt-4o,claude-sonnet-4-6" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
             </div>
         </div>
         <div class="flex gap-2.5 mb-5">
@@ -552,50 +343,43 @@
     </div>
 </div>
 
-<!-- ===================== 神兵武库弹窗 ===================== -->
+<!-- 神兵武库弹窗 -->
 <div id="promptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col" style="height:82vh">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
-            <h3 class="text-lg font-black text-blue-500 italic flex items-center gap-2">🗡️ 神兵武库管理</h3>
+            <h3 class="text-lg font-black text-blue-500 italic">🗡️ 神兵武库管理</h3>
             <button id="closePromptModal" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
         </div>
-
         <div class="flex-1 flex gap-5 overflow-hidden">
-            <!-- 左侧列表 -->
             <div class="w-[36%] flex flex-col rounded-2xl border overflow-hidden" style="border-color:var(--border-color)">
                 <div class="px-3 py-2 flex justify-between items-center border-b flex-shrink-0" style="background:var(--bg-main);border-color:var(--border-color)">
                     <span class="text-[11px] font-black" style="color:var(--text-secondary)">📜 库中存根</span>
                     <div class="flex items-center gap-2">
                         <span id="modalListCount" class="text-blue-600 bg-blue-100/50 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
-                        <!-- ✅ 新增"添加新提示词"按钮 -->
                         <button id="addNewPromptBtn" title="新建提示词" class="text-blue-500 hover:text-white hover:bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center font-black text-sm transition">+</button>
                     </div>
                 </div>
                 <div id="modalPromptList" class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5"></div>
             </div>
-
-            <!-- 右侧编辑器 -->
             <div class="flex-1 flex flex-col">
                 <div class="flex items-center gap-2 mb-3 flex-shrink-0">
                     <span id="promptEditorIcon" class="text-blue-500 text-base">✨</span>
                     <h4 id="promptEditorTitle" class="text-sm font-black" style="color:var(--text-primary)">锻造新兵器</h4>
                 </div>
                 <input id="modalPromptName" type="text" placeholder="给这件兵器起个响亮的名字..." class="modal-input mb-3 text-sm font-bold flex-shrink-0">
-                <textarea id="modalPromptContent" placeholder="在此注入核心系统指令，支持长篇复杂逻辑...&#10;&#10;例如：你是一位专注于古风言情的顶级小说家，擅长用细腻的笔触描绘人物内心世界..." class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
+                <textarea id="modalPromptContent" placeholder="在此注入核心系统指令..." class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
                 <div class="flex gap-3 mt-3 flex-shrink-0">
+                    
                     <button id="savePromptBtn"  class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存入库</button>
-                    <button id="resetPromptBtn" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-70" style="background:var(--bg-main);color:var(--text-secondary)">清空重写</button>
+                    <button id="resetPromptBtn" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-70" style="background:var(--bg-main);color:var(--text-secondary)">清空</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===================== JavaScript ===================== -->
 <script>
-// ─────────────────────────────────────────
-//  常量
-// ─────────────────────────────────────────
+// ─── 常量 ───
 const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
 1. 叙事结构与情节逻辑
 2. 人物塑造与对话风格
@@ -605,58 +389,33 @@ const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风�
 请用简洁的语言归纳，便于后续仿写参考。`;
 
 const SK = {
-    flow:        'lingxi_flow',
-    prompts:     'lingxi_prompts',
-    samples:     'lingxi_samples',
-    history:     'lingxi_history',
-    workspace:   'lingxi_workspace',
-    theme:       'lingxi_theme',
-    sidebarDark: 'lingxi_sidebar_dark',
-    autoBackup:  'lingxi_auto_backup',
-    books:       'lingxi_books'
+    flow:'lingxi_flow', prompts:'lingxi_prompts', samples:'lingxi_samples',
+    history:'lingxi_history', workspace:'lingxi_workspace', theme:'lingxi_theme',
+    sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
 
-// ─────────────────────────────────────────
-//  全局状态
-// ─────────────────────────────────────────
-let flowConfig    = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
-let prompts       = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
-let history       = loadJSON(SK.history) || [];
-let sampleLibrary = loadJSON(SK.samples) || [];
-let bookLibrary   = loadJSON(SK.books)   || [];
-let currentEditingBookId   = null;
-let editingOldPromptName   = null;
-let selectedSampleIndices  = [];
-let isGenerating         = false;
-let conversationHistory  = [];   // ✅ 新增：多轮对话上下文
+// ─── 全局状态 ───
+let flowConfig       = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let prompts          = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
+let history          = loadJSON(SK.history) || [];
+let sampleLibrary    = loadJSON(SK.samples) || [];
+let bookLibrary      = loadJSON(SK.books)   || [];
+let conversationHistory = [];
+let currentEditingBookId  = null;
+let editingOldPromptName  = null;
+let selectedSampleIndices = [];
+let isGenerating    = false;
 let abortController = null;
 let autoBackupTimer = null;
 let dom = {};
 
-// ─────────────────────────────────────────
-//  工具函数
-// ─────────────────────────────────────────
-function loadJSON(key) {
-    try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
-}
-
-function saveJSON(key, data) {
-    try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {
-        showToast('⚠️ 存储空间不足，请导出备份后清理历史记录');
-    }
-}
-
-// 防抖
-function debounce(fn, delay) {
-    let t;
-    return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), delay); };
-}
-
+// ─── 工具函数 ───
+function loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+function saveJSON(key, data) { try { localStorage.setItem(key, JSON.stringify(data)); } catch { showToast('⚠️ 存储空间不足，请导出备份后清理'); } }
+function debounce(fn, d) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this,a), d); }; }
 const debouncedSaveWorkspace = debounce((val) => saveJSON(SK.workspace, val), 600);
 
-// ─────────────────────────────────────────
-//  初始化
-// ─────────────────────────────────────────
+// ─── 初始化 ───
 function init() {
     cacheDom();
     initTheme();
@@ -671,241 +430,194 @@ function init() {
     updateSidebarPromptBadge();
     checkEmptyState();
     initAutoBackup();
+    updateStorageBar();
     bindEvents();
 }
 
 function cacheDom() {
     dom = {
-        displayArea:   document.getElementById('displayArea'),
-        emptyState:    document.getElementById('emptyState'),
-        workspace:     document.getElementById('workspace'),
-        userInput:     document.getElementById('userInput'),
-        sendBtn:       document.getElementById('sendBtn'),
-        tempSlider:    document.getElementById('tempSlider'),
-        tempVal:       document.getElementById('tempValueDisplay'),
-        themeMenu:     document.getElementById('themeMenu'),
-        themeToggle:   document.getElementById('themeToggle'),
-        charCount:     document.getElementById('charCount'),
-        wsWordCount:   document.getElementById('workspaceWordCount'),
-        promptSelect:  document.getElementById('promptSelect'),
+        displayArea:  document.getElementById('displayArea'),
+        emptyState:   document.getElementById('emptyState'),
+        workspace:    document.getElementById('workspace'),
+        userInput:    document.getElementById('userInput'),
+        sendBtn:      document.getElementById('sendBtn'),
+        tempSlider:   document.getElementById('tempSlider'),
+        tempVal:      document.getElementById('tempValueDisplay'),
+        themeMenu:    document.getElementById('themeMenu'),
+        themeToggle:  document.getElementById('themeToggle'),
+        charCount:    document.getElementById('charCount'),
+        wsWordCount:  document.getElementById('workspaceWordCount'),
+        promptSelect: document.getElementById('promptSelect'),
     };
 }
 
-// ─────────────────────────────────────────
-//  主题
-// ─────────────────────────────────────────
-function initTheme() {
-    const saved = localStorage.getItem(SK.theme) || '';
-    applyTheme(saved);
+// ─── 存储监控 ───
+function updateStorageBar() {
+    let total = 0;
+    for (let k in localStorage) {
+        if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length * 2);
+    }
+    const usedMB  = (total / 1024 / 1024).toFixed(2);
+    const pct     = Math.min((usedMB / 5) * 100, 100);
+    document.getElementById('storageText').textContent = `${usedMB}MB / 5MB`;
+    const bar = document.getElementById('storageBar');
+    bar.style.width = pct + '%';
+    bar.style.background = pct > 80 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#3b82f6';
+    if (pct > 80) showToast('⚠️ 本地存储已超80%，建议导出备份并清理历史');
+}
 
+// ─── 主题 ───
+function initTheme() {
+    applyTheme(localStorage.getItem(SK.theme) || '');
     dom.themeToggle.addEventListener('click', e => {
         e.stopPropagation();
-        const menu = dom.themeMenu;
-        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        dom.themeMenu.style.display = dom.themeMenu.style.display === 'flex' ? 'none' : 'flex';
     });
     document.addEventListener('click', () => { dom.themeMenu.style.display = 'none'; });
     dom.themeMenu.addEventListener('click', e => e.stopPropagation());
 }
-
-function applyTheme(themeClass) {
-    document.body.className = document.body.className
-        .replace(/theme-\S+/g, '').trim();
-    document.body.classList.add('h-screen', 'flex', 'overflow-hidden');
-    if (themeClass) document.body.classList.add(themeClass);
+function applyTheme(t) {
+    document.body.className = document.body.className.replace(/theme-\S+/g,'').trim();
+    document.body.classList.add('h-screen','flex','overflow-hidden');
+    if (t) document.body.classList.add(t);
 }
-
-window.setTheme = function(themeClass) {
-    applyTheme(themeClass);
-    localStorage.setItem(SK.theme, themeClass);
+window.setTheme = function(t) {
+    applyTheme(t);
+    localStorage.setItem(SK.theme, t);
     dom.themeMenu.style.display = 'none';
-    const names = {'':'经典白','theme-dark':'深空黑','theme-eye':'护眼绿','theme-retro':'复古黄'};
-    showToast(`🎨 已切换：${names[themeClass] || themeClass}`);
+    showToast(`🎨 已切换：${{'':'经典白','theme-dark':'深空黑','theme-eye':'护眼绿','theme-retro':'复古黄'}[t]}`);
 };
 
-// ─────────────────────────────────────────
-//  侧边栏日夜模式
-// ─────────────────────────────────────────
-function initSidebarDarkMode() {
-    const isLight = localStorage.getItem(SK.sidebarDark) === '1';
-    setSidebarLight(isLight);
-}
-
+// ─── 侧边栏日夜 ───
+function initSidebarDarkMode() { setSidebarLight(localStorage.getItem(SK.sidebarDark) === '1'); }
 function setSidebarLight(isLight) {
-    const sidebar = document.querySelector('.sidebar');
-    const btn     = document.getElementById('sidebarDarkToggle');
-    sidebar.classList.toggle('sidebar-light', isLight);
-    btn.textContent = isLight ? '🌙' : '🌞';
+    document.querySelector('.sidebar').classList.toggle('sidebar-light', isLight);
+    document.getElementById('sidebarDarkToggle').textContent = isLight ? '🌙' : '🌞';
     localStorage.setItem(SK.sidebarDark, isLight ? '1' : '0');
 }
+function toggleSidebarDarkMode() { setSidebarLight(!document.querySelector('.sidebar').classList.contains('sidebar-light')); }
 
-function toggleSidebarDarkMode() {
-    const isLight = !document.querySelector('.sidebar').classList.contains('sidebar-light');
-    setSidebarLight(isLight);
-}
-
-// ─────────────────────────────────────────
-//  书稿管理
-// ─────────────────────────────────────────
-function renderBookLibrary() {
+// ─── 书稿管理 ───
+function renderBookLibrary(keyword = '') {
+    const list = keyword
+        ? bookLibrary.filter(b => b.name.includes(keyword) || (b.content||'').includes(keyword))
+        : bookLibrary;
     const container = document.getElementById('bookLibrary');
     const fragment  = document.createDocumentFragment();
-
-    bookLibrary.forEach((book, index) => {
+    list.forEach((book, i) => {
+        const realIndex = bookLibrary.indexOf(book);
         const item = document.createElement('div');
         item.className = 'book-card book-item';
-
         const left = document.createElement('div');
         left.className = 'book-item-text text-[11px] font-bold truncate flex-1 pr-2';
-        left.textContent = `${book.name} (${(book.content || '').length}字)`;
-
+        left.textContent = `${book.name} (${(book.content||'').length}字)`;
         const btns = document.createElement('div');
         btns.className = 'flex gap-1 flex-shrink-0';
-        btns.appendChild(makeBtn('✏️', 'text-blue-400 hover:bg-blue-500/20', () => editBook(index)));
-        btns.appendChild(makeBtn('🗑️', 'text-red-400 hover:bg-red-500/20',  () => deleteBook(index)));
-
+        btns.appendChild(makeBtn('✏️','text-blue-400 hover:bg-blue-500/20', () => editBook(realIndex)));
+        btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-500/20',  () => deleteBook(realIndex)));
         item.append(left, btns);
-        item.onclick = (e) => { if (!e.target.closest('button')) editBook(index); };
+        item.onclick = e => { if (!e.target.closest('button')) editBook(realIndex); };
         fragment.appendChild(item);
     });
-
     container.innerHTML = '';
     container.appendChild(fragment);
 }
-
 window.addNewBook = function() {
     autoSaveDraftToTempBook();
     currentEditingBookId = null;
-    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`;
-    document.getElementById('bookContent').value   = '';
+    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length+1}`;
+    document.getElementById('bookContent').value = '';
     document.getElementById('bookWordCount').textContent = '0';
     document.getElementById('bookModal').classList.remove('hidden');
 };
-
-window.editBook = function(index) {
+window.editBook = function(i) {
     autoSaveDraftToTempBook();
-    const book = bookLibrary[index];
-    currentEditingBookId = index;
-    document.getElementById('bookNameInput').value = book.name;
-    document.getElementById('bookContent').value   = book.content || '';
-    document.getElementById('bookWordCount').textContent = (book.content || '').length;
+    currentEditingBookId = i;
+    document.getElementById('bookNameInput').value = bookLibrary[i].name;
+    document.getElementById('bookContent').value   = bookLibrary[i].content || '';
+    document.getElementById('bookWordCount').textContent = (bookLibrary[i].content||'').length;
     document.getElementById('bookModal').classList.remove('hidden');
 };
-
-window.deleteBook = function(index) {
-    if (!confirm(`确认删除书稿【${bookLibrary[index].name}】？`)) return;
-    bookLibrary.splice(index, 1);
-    saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
+window.deleteBook = function(i) {
+    if (!confirm(`确认删除【${bookLibrary[i].name}】？`)) return;
+    bookLibrary.splice(i,1); saveJSON(SK.books, bookLibrary); renderBookLibrary();
 };
-
 window.saveCurrentBook = function() {
-    const name    = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
+    const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
     const content = document.getElementById('bookContent').value;
-    if (currentEditingBookId !== null) {
-        bookLibrary[currentEditingBookId] = { name, content };
-    } else {
-        bookLibrary.push({ name, content });
-    }
-    saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
-    closeBookModal();
+    if (currentEditingBookId !== null) bookLibrary[currentEditingBookId] = {name,content};
+    else bookLibrary.push({name,content});
+    saveJSON(SK.books, bookLibrary); renderBookLibrary(); closeBookModal();
     showToast(`✅ 书稿【${name}】已保存`);
 };
-
-window.closeBookModal = function() {
-    document.getElementById('bookModal').classList.add('hidden');
-};
-
+window.closeBookModal  = function() { document.getElementById('bookModal').classList.add('hidden'); };
 window.appendBookToDraft = function() {
-    const content = document.getElementById('bookContent').value;
-    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + content;
-    debouncedSaveWorkspace(dom.workspace.value);
-    showToast('📝 已追加到草稿区');
+    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + document.getElementById('bookContent').value;
+    debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
 };
-
 window.saveDraftToBook = function() {
     const draft = dom.workspace.value.trim();
     if (!draft) { showToast('⚠️ 草稿区为空'); return; }
-    bookLibrary.push({ name: `草稿_${new Date().toLocaleString()}`, content: draft });
-    saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
-    showToast('💾 草稿已保存为新书稿');
+    bookLibrary.push({name:`草稿_${new Date().toLocaleString()}`, content:draft});
+    saveJSON(SK.books, bookLibrary); renderBookLibrary(); showToast('💾 草稿已保存为新书稿');
 };
-
 function autoSaveDraftToTempBook() {
-    const draft = dom.workspace.value.trim();
-    if (!draft) return;
+    const draft = dom.workspace.value.trim(); if (!draft) return;
     const tmp = bookLibrary.find(b => b.name === '临时草稿（自动保存）');
-    if (tmp) { tmp.content = draft; }
-    else     { bookLibrary.unshift({ name: '临时草稿（自动保存）', content: draft }); }
-    saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
+    if (tmp) tmp.content = draft;
+    else bookLibrary.unshift({name:'临时草稿（自动保存）', content:draft});
+    saveJSON(SK.books, bookLibrary); renderBookLibrary();
 }
 
-// ─────────────────────────────────────────
-//  一键排版（修复逻辑顺序）
-// ─────────────────────────────────────────
+// ─── 一键排版 ───
 function typesetContent() {
     let text = dom.workspace.value.trim();
     if (!text) { showToast('⚠️ 草稿区为空'); return; }
-
-    // 步骤1：统一换行符
-    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    // 步骤2：句末自动换行（句号/感叹号/问号/省略号后接非引号则换行）
-    text = text.replace(/([。！？…]+[」"']?)\s*/g, '$1\n');
-    // 步骤3：段落间保留一个空行，去除多余空行
-    text = text.replace(/\n{3,}/g, '\n\n');
-    // 步骤4：清理行内多余空格（保留换行）
-    text = text.replace(/[ \t]+/g, ' ');
-    // 步骤5：每段首行前去除空格
-    text = text.split('\n').map(l => l.trimStart()).join('\n');
-    text = text.trim();
-
+    text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    text = text.replace(/([。！？…]+[」"']?)\s*/g,'$1\n');
+    text = text.replace(/\n{3,}/g,'\n\n');
+    text = text.replace(/[ \t]+/g,' ');
+    text = text.split('\n').map(l=>l.trimStart()).join('\n').trim();
     dom.workspace.value = text;
     debouncedSaveWorkspace(text);
     showToast('📝 智能排版完成');
 }
 
-// ─────────────────────────────────────────
-//  神兵武库
-// ─────────────────────────────────────────
-function updateSidebarPromptBadge() {
-    const count = Object.keys(prompts).length;
-    document.getElementById('promptCountBadge').textContent = count + '件';
-    const badge = document.getElementById('modalListCount');
-    if (badge) badge.textContent = count;
+// ─── 快捷指令 ───
+function fillInput(text) {
+    dom.userInput.value = text;
+    dom.userInput.focus();
+    dom.charCount.textContent = text.length + '字';
 }
 
+// ─── 神兵武库 ───
+function updateSidebarPromptBadge() {
+    const c = Object.keys(prompts).length;
+    document.getElementById('promptCountBadge').textContent = c + '件';
+    const b = document.getElementById('modalListCount');
+    if (b) b.textContent = c;
+}
 function renderModalPromptList() {
-    const list     = document.getElementById('modalPromptList');
-    const fragment = document.createDocumentFragment();
-
+    const list = document.getElementById('modalPromptList');
+    const frag = document.createDocumentFragment();
     Object.keys(prompts).forEach(name => {
         const item = document.createElement('div');
-        item.className = 'prompt-card';
-        if (name === editingOldPromptName) item.classList.add('active-prompt');
-
+        item.className = 'prompt-card' + (name === editingOldPromptName ? ' active-prompt' : '');
         const title = document.createElement('span');
         title.className = 'text-xs font-bold truncate flex-1 pointer-events-none';
         title.style.color = 'var(--text-primary)';
         title.textContent = name;
-
         const btns = document.createElement('div');
         btns.className = 'flex gap-1 ml-2 flex-shrink-0';
-        btns.appendChild(makeBtn('✏️', 'text-blue-500 hover:bg-blue-100/50', () => loadPromptInEditor(name)));
-        btns.appendChild(makeBtn('🗑️', 'text-red-400 hover:bg-red-100/50',  () => deletePrompt(name)));
-
+        btns.appendChild(makeBtn('✏️','text-blue-500 hover:bg-blue-100/50', () => loadPromptInEditor(name)));
+        btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-100/50',  () => deletePrompt(name)));
         item.append(title, btns);
-        item.onclick = (e) => { if (!e.target.closest('button')) loadPromptInEditor(name); };
-        fragment.appendChild(item);
+        item.onclick = e => { if (!e.target.closest('button')) loadPromptInEditor(name); };
+        frag.appendChild(item);
     });
-
-    list.innerHTML = '';
-    list.appendChild(fragment);
-    updateSidebarPromptBadge();
-    renderSelect();
+    list.innerHTML = ''; list.appendChild(frag);
+    updateSidebarPromptBadge(); renderSelect();
 }
-
 function loadPromptInEditor(name) {
     editingOldPromptName = name;
     document.getElementById('modalPromptName').value    = name;
@@ -914,10 +626,9 @@ function loadPromptInEditor(name) {
     document.getElementById('promptEditorTitle').textContent = '修改兵器';
     const btn = document.getElementById('savePromptBtn');
     btn.textContent = '保存修改';
-    btn.className   = btn.className.replace('bg-blue-600', 'bg-amber-500').replace('hover:bg-blue-500', 'hover:bg-amber-400');
+    btn.className = btn.className.replace('bg-blue-600','bg-amber-500').replace('hover:bg-blue-500','hover:bg-amber-400');
     renderModalPromptList();
 }
-
 function resetPromptEditor() {
     editingOldPromptName = null;
     document.getElementById('modalPromptName').value    = '';
@@ -926,280 +637,175 @@ function resetPromptEditor() {
     document.getElementById('promptEditorTitle').textContent = '锻造新兵器';
     const btn = document.getElementById('savePromptBtn');
     btn.textContent = '保存入库';
-    btn.className   = btn.className.replace('bg-amber-500', 'bg-blue-600').replace('hover:bg-amber-400', 'hover:bg-blue-500');
+    btn.className = btn.className.replace('bg-amber-500','bg-blue-600').replace('hover:bg-amber-400','hover:bg-blue-500');
     renderModalPromptList();
 }
-
 function savePrompt() {
-    const newName    = document.getElementById('modalPromptName').value.trim();
-    const newContent = document.getElementById('modalPromptContent').value.trim();
-    if (!newName || !newContent) { showToast('⚠️ 名称和内容均不能为空'); return; }
-    if (editingOldPromptName && editingOldPromptName !== newName) {
-        delete prompts[editingOldPromptName];
-    }
-    prompts[newName] = newContent;
+    const name    = document.getElementById('modalPromptName').value.trim();
+    const content = document.getElementById('modalPromptContent').value.trim();
+    if (!name || !content) { showToast('⚠️ 名称和内容均不能为空'); return; }
+    if (editingOldPromptName && editingOldPromptName !== name) delete prompts[editingOldPromptName];
+    prompts[name] = content;
     saveJSON(SK.prompts, prompts);
-    showToast(`✨ 兵器【${newName}】已锻造完成`);
+    showToast(`✨ 兵器【${name}】已锻造完成`);
     resetPromptEditor();
 }
-
 window.deletePrompt = function(name) {
     if (Object.keys(prompts).length <= 1) { showToast('⚠️ 至少保留一个提示词'); return; }
-    if (!confirm(`确认销毁兵器【${name}】？`)) return;
-    delete prompts[name];
-    saveJSON(SK.prompts, prompts);
+    if (!confirm(`确认销毁【${name}】？`)) return;
+    delete prompts[name]; saveJSON(SK.prompts, prompts);
     if (editingOldPromptName === name) resetPromptEditor();
     renderModalPromptList();
 };
-
 function renderSelect() {
-    const s = dom.promptSelect;
-    if (!s) return;
-    const cur = s.value;
-    s.innerHTML = '';
+    const s = dom.promptSelect; if (!s) return;
+    const cur = s.value; s.innerHTML = '';
     Object.keys(prompts).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k; opt.textContent = k;
-        s.appendChild(opt);
+        const o = document.createElement('option'); o.value = k; o.textContent = k; s.appendChild(o);
     });
     if (cur && prompts[cur]) s.value = cur;
 }
 
-// ─────────────────────────────────────────
-//  配置 & 模型下拉
-// ─────────────────────────────────────────
+// ─── 配置 & 模型 ───
 function initConfigInputs() {
-    document.getElementById('ds_key').value      = flowConfig.ds_key      || '';
-    document.getElementById('qw_key').value      = flowConfig.qw_key      || '';
-    document.getElementById('db_key').value      = flowConfig.db_key      || '';
-    document.getElementById('db_model').value    = flowConfig.db_model    || '';
-    document.getElementById('proxy_url').value   = flowConfig.proxy_url   || '';
-    document.getElementById('proxy_key').value   = flowConfig.proxy_key   || '';
-    document.getElementById('proxy_models').value= flowConfig.proxy_models|| '';
+    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+        document.getElementById(id).value = flowConfig[id] || '';
+    });
 }
-
 function saveConfig() {
-    flowConfig = {
-        ds_key:       document.getElementById('ds_key').value.trim(),
-        qw_key:       document.getElementById('qw_key').value.trim(),
-        db_key:       document.getElementById('db_key').value.trim(),
-        db_model:     document.getElementById('db_model').value.trim(),
-        proxy_url:    document.getElementById('proxy_url').value.trim(),
-        proxy_key:    document.getElementById('proxy_key').value.trim(),
-        proxy_models: document.getElementById('proxy_models').value.trim()
-    };
+    flowConfig = {};
+    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+        flowConfig[id] = document.getElementById(id).value.trim();
+    });
     saveJSON(SK.flow, flowConfig);
     updateModelDropdowns();
     showToast('✅ 配置已保存并激活');
     document.getElementById('settingsModal').classList.add('hidden');
 }
-
 function updateModelDropdowns() {
-    // 官方模型：仅在对应 key 存在时才加入列表
     const official = [];
-    if (flowConfig.ds_key)  official.push({ value: 'deepseek-chat',  label: 'DeepSeek Chat' });
-    if (flowConfig.ds_key)  official.push({ value: 'deepseek-reasoner', label: 'DeepSeek R1' });
-    if (flowConfig.qw_key)  official.push({ value: 'qwen-plus',      label: 'Qwen Plus' });
-    if (flowConfig.qw_key)  official.push({ value: 'qwen-turbo',     label: 'Qwen Turbo' });
-    if (flowConfig.db_key && flowConfig.db_model) {
-        official.push({ value: flowConfig.db_model, label: `豆包 (${flowConfig.db_model.slice(0,12)}...)` });
-    }
-
-    // 中转自定义模型
-    const proxy = flowConfig.proxy_models
-        ? flowConfig.proxy_models.split(',').map(s => s.trim()).filter(Boolean).map(m => ({ value: m, label: m }))
-        : [];
-
+    if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek Chat'}); official.push({value:'deepseek-reasoner',label:'DeepSeek R1'}); }
+    if (flowConfig.qw_key) { official.push({value:'qwen-plus',label:'Qwen Plus'}); official.push({value:'qwen-turbo',label:'Qwen Turbo'}); }
+    if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
+    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:m})) : [];
     const all = [...official, ...proxy];
-    if (all.length === 0) all.push({ value: 'deepseek-chat', label: 'DeepSeek Chat (请先配置Key)' });
-
-    ['singleModel', 'modelA', 'modelB'].forEach(id => {
-        const el = document.getElementById(id);
-        const cur = el.value;
+    if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
+    ['singleModel','modelA','modelB'].forEach(id => {
+        const el = document.getElementById(id), cur = el.value;
         el.innerHTML = '';
-        all.forEach(({ value, label }) => {
-            const opt = document.createElement('option');
-            opt.value = value; opt.textContent = label;
-            el.appendChild(opt);
-        });
-        if (cur && all.find(m => m.value === cur)) el.value = cur;
+        all.forEach(({value,label}) => { const o=document.createElement('option'); o.value=value; o.textContent=label; el.appendChild(o); });
+        if (cur && all.find(m=>m.value===cur)) el.value = cur;
     });
 }
 
-// ─────────────────────────────────────────
-//  AI 调用核心（修复正确API地址）
-// ─────────────────────────────────────────
+// ─── AI 调用核心 ───
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
-
-    // ✅ DeepSeek 正确地址（无版本号）
     if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
         url = 'https://api.deepseek.com/chat/completions';
         key = flowConfig.ds_key;
-    }
-    // 通义千问
-    else if (model.startsWith('qwen')) {
+    } else if (model.startsWith('qwen')) {
         url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
         key = flowConfig.qw_key;
-    }
-    // ✅ 豆包 正确地址（v3路径 + 动态模型ID）
-    else if (model.startsWith('ep-') || model.startsWith('doubao')) {
+    } else if (model.startsWith('ep-') || model.startsWith('doubao')) {
         url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
         key = flowConfig.db_key;
-    }
-    // 中转/其他
-    else {
+    } else {
         if (!flowConfig.proxy_url) {
             targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
             return;
         }
-        url = flowConfig.proxy_url.replace(/\/+$/, '') + '/chat/completions';
+        url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
         key = flowConfig.proxy_key;
     }
-
-    // key 校验
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
         return;
     }
-
-    // 温度限制（部分模型不支持高温度）
-    const safeTemp = Math.min(Math.max(parseFloat(temp) || 0.7, 0), 1.5);
-
+    const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1.5);
+    // ✅ 正确构建消息数组，支持多轮对话
+    const msgArray = Array.isArray(messages)
+        ? messages
+        : [{ role: 'user', content: messages }];
     try {
         const res = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${key.trim()}`
-            },
+            headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${key.trim()}` },
             body: JSON.stringify({
                 model,
-                messages: [
-                    { role: 'system', content: sysPrompt },
-                    { role: 'user',   content: userText }
-                ],
+                messages: [ { role:'system', content:sysPrompt }, ...msgArray ],
                 stream: true,
                 temperature: safeTemp
             }),
             signal: abortController ? abortController.signal : undefined
         });
-
         if (!res.ok) {
-            const errText = await res.text();
-            targetEl.innerHTML = `<span style="color:#ef4444">❌ 请求失败 (${res.status})：${errText.slice(0, 200)}</span>`;
+            const err = await res.text();
+            targetEl.innerHTML = `<span style="color:#ef4444">❌ 请求失败 (${res.status})：${err.slice(0,200)}</span>`;
             return;
         }
-
-        const reader  = res.body.getReader();
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let   rawText = '';
-
+        let rawText = '';
         targetEl.textContent = '';
         targetEl.classList.add('streaming-cursor');
-
         while (true) {
-            const { done, value } = await reader.read();
+            const {done,value} = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-
+            const lines = decoder.decode(value,{stream:true}).split('\n');
             for (const line of lines) {
                 const l = line.trim();
                 if (!l.startsWith('data: ')) continue;
                 const s = l.slice(6);
                 if (s === '[DONE]') break;
                 try {
-                    const j = JSON.parse(s);
-                    const c = j?.choices?.[0]?.delta?.content;
-                    if (c) {
-                        rawText += c;
-                        // 流式阶段用纯文本显示（性能好）
-                        targetEl.textContent = rawText;
-                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-                    }
-                } catch { /* 忽略非JSON行 */ }
+                    const c = JSON.parse(s)?.choices?.[0]?.delta?.content;
+                    if (c) { rawText += c; targetEl.textContent = rawText; dom.displayArea.scrollTop = dom.displayArea.scrollHeight; }
+                } catch {}
             }
         }
-
-        // 流式结束后渲染 Markdown
         targetEl.classList.remove('streaming-cursor');
         targetEl.innerHTML = marked.parse(rawText);
         dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-
-    } catch (e) {
+    } catch(e) {
         targetEl.classList.remove('streaming-cursor');
-        if (e.name === 'AbortError') {
-            targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
-        } else {
-            targetEl.innerHTML = `<span style="color:#ef4444">❌ 网络错误：${e.message}</span>`;
-        }
+        if (e.name === 'AbortError') targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
+        else targetEl.innerHTML = `<span style="color:#ef4444">❌ 网络错误：${e.message}</span>`;
     }
 }
 
-// ─────────────────────────────────────────
-//  发送消息
-// ─────────────────────────────────────────
+// ─── 发送消息 ───
 async function handleSend() {
-    if (isGenerating) {
-        if (abortController) abortController.abort();
-        return;
-    }
-
+    if (isGenerating) { if (abortController) abortController.abort(); return; }
     const text = dom.userInput.value.trim();
     if (!text) { showToast('⚠️ 请先输入内容'); return; }
-
-    // 拼接例文参考
     let ref = '';
     selectedSampleIndices.forEach(idx => {
         const s = sampleLibrary[idx];
-        if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0, 1000)}\n`;
+        if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
     });
-
-    const selectedPrompt = dom.promptSelect.value;
-    const sysContent     = prompts[selectedPrompt] || '你是一个智慧的创作助手。';
-    const fullPrompt     = ref
-        ? `${ref}\n---\n### 任务指令\n${text}`
-        : text;
-
+    const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
+    const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
     const isPK = !document.getElementById('pkSelectBox').classList.contains('hidden');
-
-    isGenerating    = true;
-    abortController = new AbortController();
-    setSendButtonStop();
-
+    isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
-        if (isPK) await handlePKMode(sysContent, fullPrompt);
-        else      await handleSingleMode(text, sysContent, fullPrompt);
+        if (isPK) await handlePKMode(sys, fullPrompt);
+        else      await handleSingleMode(text, sys, fullPrompt);
     } finally {
-        isGenerating = false;
-        abortController = null;
-        resetSendButton();
-        dom.userInput.value = '';
-        dom.charCount.textContent = '0字';
-        saveHistory();
-        renderHistorySelect();
+        isGenerating = false; abortController = null; resetSendButton();
+        dom.userInput.value = ''; dom.charCount.textContent = '0字';
+        saveHistory(); renderHistorySelect(); updateStorageBar();
     }
 }
 
 async function handleSingleMode(displayText, sys, prompt) {
     appendMsg('user', displayText);
-
-    // ✅ 加入上下文历史
-    conversationHistory.push({ role: 'user', content: prompt });
-
-    const wrapper  = appendMsg('ai', '');
+    conversationHistory.push({ role:'user', content:prompt });
+    const wrapper  = appendMsg('ai','');
     const targetEl = wrapper.querySelector('.msg-body');
-    const model    = document.getElementById('singleModel').value;
-    const temp     = parseFloat(dom.tempSlider.value);
-
-    // ✅ 传入历史消息
-    await streamCallAI(model, sys, conversationHistory, targetEl, temp);
-
+    await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
     const aiReply = targetEl.innerText;
-    // ✅ AI回复也记录进上下文
-    conversationHistory.push({ role: 'assistant', content: aiReply });
-
+    conversationHistory.push({ role:'assistant', content:aiReply });
     addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
 }
 
@@ -1208,11 +814,9 @@ async function handlePKMode(sys, prompt) {
     const mB = document.getElementById('modelB').value;
     const grid = document.createElement('div');
     grid.className = 'flex gap-4 w-full mb-6';
-    const colA = makePKCol(mA);
-    const colB = makePKCol(mB);
+    const colA = makePKCol(mA), colB = makePKCol(mB);
     grid.append(colA, colB);
-    dom.displayArea.appendChild(grid);
-    checkEmptyState();
+    dom.displayArea.appendChild(grid); checkEmptyState();
     const temp = parseFloat(dom.tempSlider.value);
     await Promise.all([
         streamCallAI(mA, sys, prompt, colA.querySelector('.pk-body'), temp),
@@ -1222,25 +826,18 @@ async function handlePKMode(sys, prompt) {
     addMsgActions(colB, colB.querySelector('.pk-body').innerText);
 }
 
-// ─────────────────────────────────────────
-//  例文 & 基因提取
-// ─────────────────────────────────────────
+// ─── 例文库 ───
 function renderSampleLibrary() {
     const container = document.getElementById('sampleLibrary');
-    const fragment  = document.createDocumentFragment();
-
-    sampleLibrary.forEach((s, i) => {
+    const frag = document.createDocumentFragment();
+    sampleLibrary.forEach((s,i) => {
         const isSelected = selectedSampleIndices.includes(i);
         const div = document.createElement('div');
-        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${
-            isSelected
-                ? 'bg-blue-500/10 border-blue-400'
-                : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'
-        }`;
+        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
         div.innerHTML = `
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0">
-                    <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected ? 'checked' : ''} onchange="toggleSample(${i})">
+                    <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleSample(${i})">
                     <span class="truncate font-bold">${s.name}</span>
                 </label>
                 <div class="flex gap-1.5 ml-2 flex-shrink-0">
@@ -1248,274 +845,152 @@ function renderSampleLibrary() {
                     <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>
-            ${s.gene ? `<div class="mt-1.5 text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1 rounded-md italic line-clamp-2">✅ 已提取基因</div>` : ''}
-        `;
-        fragment.appendChild(div);
+            ${s.gene ? `<div class="mt-1.5 text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1 rounded-md italic">✅ 已提取基因</div>` : ''}`;
+        frag.appendChild(div);
     });
-
-    container.innerHTML = '';
-    container.appendChild(fragment);
+    container.innerHTML = ''; container.appendChild(frag);
 }
-
 window.toggleSample = function(idx) {
     selectedSampleIndices = selectedSampleIndices.includes(idx)
-        ? selectedSampleIndices.filter(i => i !== idx)
+        ? selectedSampleIndices.filter(i=>i!==idx)
         : [...selectedSampleIndices, idx];
     renderSampleLibrary();
 };
-
 window.extractGene = async function(idx) {
     if (isGenerating) { showToast('⚠️ 请等待当前生成完成'); return; }
-    const sample   = sampleLibrary[idx];
-    const wrapper  = appendMsg('ai', '');
-    const targetEl = wrapper.querySelector('.msg-body');
+    const sample = sampleLibrary[idx];
     appendMsg('user', `🧬 正在分析《${sample.name}》的风格基因...`);
-
-    isGenerating    = true;
-    abortController = new AbortController();
-    setSendButtonStop();
-
+    const wrapper = appendMsg('ai','');
+    const targetEl = wrapper.querySelector('.msg-body');
+    isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
-        const model = document.getElementById('singleModel').value;
-        await streamCallAI(model, '你是专业的文学分析专家。', `${GENE_PROMPT}\n\n待分析文本：\n${sample.text.slice(0, 6000)}`, targetEl, 0.3);
+        await streamCallAI(document.getElementById('singleModel').value, '你是专业的文学分析专家。',
+            `${GENE_PROMPT}\n\n待分析文本：\n${sample.text.slice(0,6000)}`, targetEl, 0.3);
         sampleLibrary[idx].gene = targetEl.innerText;
-        saveJSON(SK.samples, sampleLibrary);
-        renderSampleLibrary();
+        saveJSON(SK.samples, sampleLibrary); renderSampleLibrary();
         showToast(`✅ 《${sample.name}》基因提取完成`);
-    } finally {
-        isGenerating = false;
-        abortController = null;
-        resetSendButton();
-    }
+    } finally { isGenerating=false; abortController=null; resetSendButton(); }
 };
-
 window.deleteSample = function(idx) {
-    sampleLibrary.splice(idx, 1);
-    selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx).map(i => i > idx ? i - 1 : i);
-    saveJSON(SK.samples, sampleLibrary);
-    renderSampleLibrary();
+    sampleLibrary.splice(idx,1);
+    selectedSampleIndices = selectedSampleIndices.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
+    saveJSON(SK.samples, sampleLibrary); renderSampleLibrary();
 };
-
 async function handleFileImport(e) {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const files = e.target.files; if (!files||!files.length) return;
     let imported = 0;
     for (const f of files) {
         try {
-            let text = '';
-            if (f.name.endsWith('.docx')) {
-                text = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = ev => mammoth.extractRawText({ arrayBuffer: ev.target.result })
-                        .then(r => resolve(r.value)).catch(reject);
-                    reader.readAsArrayBuffer(f);
-                });
-            } else {
-                text = await f.text();
-            }
-            if (text.trim()) {
-                sampleLibrary.push({ name: f.name, text, gene: '' });
-                imported++;
-            }
+            let text = f.name.endsWith('.docx')
+                ? await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>mammoth.extractRawText({arrayBuffer:ev.target.result}).then(x=>res(x.value)).catch(rej); r.readAsArrayBuffer(f); })
+                : await f.text();
+            if (text.trim()) { sampleLibrary.push({name:f.name,text,gene:''}); imported++; }
         } catch { showToast(`⚠️ 导入 ${f.name} 失败`); }
     }
-    if (imported > 0) {
-        saveJSON(SK.samples, sampleLibrary);
-        renderSampleLibrary();
-        showToast(`✅ 成功导入 ${imported} 个文件`);
-    }
+    if (imported) { saveJSON(SK.samples,sampleLibrary); renderSampleLibrary(); showToast(`✅ 成功导入 ${imported} 个文件`); }
     e.target.value = '';
 }
 
-// ─────────────────────────────────────────
-//  消息渲染
-// ─────────────────────────────────────────
+// ─── 消息渲染 ───
 function appendMsg(role, content) {
-    const wrap = document.createElement('div');
-    wrap.className = 'msg-wrapper';
-
-    const msg = document.createElement('div');
-    msg.className = role === 'user' ? 'user-msg' : 'ai-msg';
-
-    const body = document.createElement('div');
-    body.className = 'msg-body';
-    if (role === 'user') {
-        body.textContent = content;
-    } else {
-        body.innerHTML = content ? marked.parse(content) : '';
-    }
-
-    msg.appendChild(body);
-    wrap.appendChild(msg);
-    dom.displayArea.appendChild(wrap);
-    checkEmptyState();
+    const wrap = document.createElement('div'); wrap.className = 'msg-wrapper';
+    const msg  = document.createElement('div'); msg.className = role==='user' ? 'user-msg' : 'ai-msg';
+    const body = document.createElement('div'); body.className = 'msg-body';
+    if (role === 'user') body.textContent = content;
+    else body.innerHTML = content ? marked.parse(content) : '';
+    msg.appendChild(body); wrap.appendChild(msg);
+    dom.displayArea.appendChild(wrap); checkEmptyState();
     dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
     return wrap;
 }
-
 function makePKCol(model) {
-    const col = document.createElement('div');
-    col.className = 'pk-col flex-1';
-    col.innerHTML = `
-        <div class="pk-col-header">${model}</div>
-        <div class="pk-body"></div>
-    `;
+    const col = document.createElement('div'); col.className = 'pk-col flex-1';
+    col.innerHTML = `<div class="pk-col-header">${model}</div><div class="pk-body"></div>`;
     return col;
 }
-
 function addMsgActions(container, rawText) {
     const footer = document.createElement('div');
-    footer.className = 'flex gap-3 mt-4 pt-3 border-t flex-wrap';
+    footer.className = 'flex gap-2 mt-4 pt-3 border-t flex-wrap';
     footer.style.borderColor = 'var(--border-color)';
-
-    // 复制
-    const btnCopy = makeActionBtn('📋 复制', 'text-green-500', () => {
-        navigator.clipboard.writeText(rawText).then(() => showToast('✅ 已复制'));
-    });
-    // 存为书稿
-    const btnBook = makeActionBtn('📖 存为书稿', 'text-blue-500', () => {
-        const name = `书稿_${new Date().toLocaleString()}`;
-        bookLibrary.push({ name, content: rawText });
-        saveJSON(SK.books, bookLibrary);
-        renderBookLibrary();
-        showToast(`✅ 已保存书稿：${name}`);
-    });
-    // 追加草稿
-    const btnAppend = makeActionBtn('✍️ 追加草稿', 'text-purple-500', () => {
-        dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + rawText;
-        debouncedSaveWorkspace(dom.workspace.value);
-        if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
-            document.getElementById('mainEditor').classList.add('editor-active');
-        }
-        showToast('📝 已追加到草稿区');
-    });
-    // ✅ 新增：续写
-    const btnContinue = makeActionBtn('➡️ 续写', 'text-teal-500', () => {
-        dom.userInput.value = '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。';
-        dom.userInput.focus();
-        dom.charCount.textContent = dom.userInput.value.length + '字';
-        showToast('💡 续写指令已填入，点击执行即可');
-    });
-    // ✅ 新增：重新生成
-    const btnRegen = makeActionBtn('🔄 重新生成', 'text-orange-500', async () => {
+    const btnCopy    = makeActionBtn('📋 复制','text-green-500', () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
+    const btnBook    = makeActionBtn('📖 存稿','text-blue-500', () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
+    const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
+    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500', () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
+    const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
         if (isGenerating) return;
-        if (conversationHistory.length < 1) { showToast('⚠️ 没有可重新生成的内容'); return; }
-
-        // 移除最后一条AI回复，保留用户消息重新发送
-        const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-1)[0];
-        if (!lastUserMsg) return;
-
-        // 回滚上下文：移除最后一组对话
-        if (conversationHistory[conversationHistory.length - 1].role === 'assistant') {
-            conversationHistory.pop();
-        }
-
-        // 移除界面上最后一条AI消息气泡
-        const allWrappers = dom.displayArea.querySelectorAll('.msg-wrapper');
-        const lastWrapper = allWrappers[allWrappers.length - 1];
-        if (lastWrapper) lastWrapper.remove();
-
-        // 重新生成
-        isGenerating    = true;
-        abortController = new AbortController();
-        setSendButtonStop();
-
+        if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
+        const lastUser = conversationHistory.filter(m=>m.role==='user').slice(-1)[0];
+        if (!lastUser) return;
+        if (conversationHistory[conversationHistory.length-1].role === 'assistant') conversationHistory.pop();
+        const allW = dom.displayArea.querySelectorAll('.msg-wrapper');
+        if (allW.length) allW[allW.length-1].remove();
+        isGenerating=true; abortController=new AbortController(); setSendButtonStop();
         try {
-            const sys      = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
-            const model    = document.getElementById('singleModel').value;
-            const temp     = parseFloat(dom.tempSlider.value);
-            const wrapper  = appendMsg('ai', '');
-            const targetEl = wrapper.querySelector('.msg-body');
-
-            conversationHistory.push({ role: 'user', content: lastUserMsg.content });
-            await streamCallAI(model, sys, conversationHistory, targetEl, temp);
-
-            const aiReply = targetEl.innerText;
-            conversationHistory.push({ role: 'assistant', content: aiReply });
+            const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
+            conversationHistory.push({role:'user',content:lastUser.content});
+            const wrapper=appendMsg('ai',''); const targetEl=wrapper.querySelector('.msg-body');
+            await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
+            const aiReply=targetEl.innerText;
+            conversationHistory.push({role:'assistant',content:aiReply});
             addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
             showToast('🔄 已重新生成');
-        } finally {
-            isGenerating = false;
-            abortController = null;
-            resetSendButton();
-        }
+        } finally { isGenerating=false; abortController=null; resetSendButton(); }
     });
-    // 导出Word
-    const btnWord = makeActionBtn('📄 导出Word', 'text-gray-400', () => {
-        const doc = new docx.Document({
-            sections: [{ properties: {}, children: [new docx.Paragraph({ text: rawText })] }]
-        });
-        docx.Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `灵犀_${new Date().toLocaleTimeString()}.docx`);
-            showToast('✅ Word 导出成功');
-        });
+    const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
+        const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
+        docx.Packer.toBlob(doc).then(blob=>{ saveAs(blob,`灵犀_${new Date().toLocaleTimeString()}.docx`); showToast('✅ Word导出成功'); });
     });
-
     footer.append(btnCopy, btnBook, btnAppend, btnContinue, btnRegen, btnWord);
     container.appendChild(footer);
 }
-
 function makeActionBtn(text, cls, onClick) {
     const btn = document.createElement('button');
-    btn.className = `text-xs font-bold ${cls} hover:opacity-70 px-3 py-1.5 rounded-lg transition`;
+    btn.className = `text-xs font-bold ${cls} hover:opacity-70 px-2.5 py-1.5 rounded-lg transition`;
     btn.style.background = 'var(--bg-main)';
-    btn.textContent = text;
-    btn.onclick     = onClick;
+    btn.textContent = text; btn.onclick = onClick;
     return btn;
 }
 
-// ─────────────────────────────────────────
-//  历史记录
-// ─────────────────────────────────────────
+// ─── 历史记录 ───
 function saveHistory() {
     const items = Array.from(dom.displayArea.querySelectorAll('.msg-body'));
-    if (items.length === 0) return;
-    // 只存前500字，防止localStorage爆满
-    const messages = items.map(el => el.innerText.slice(0, 500));
-    const title    = messages[0].slice(0, 25) + (messages[0].length > 25 ? '...' : '');
-    history = [{ title, messages, timestamp: Date.now() }, ...history.slice(0, 29)];
+    if (!items.length) return;
+    const messages = items.map(el=>el.innerText.slice(0,500));
+    const title = messages[0].slice(0,25) + (messages[0].length>25?'...':'');
+    history = [{title, messages, timestamp:Date.now()}, ...history.slice(0,29)];
     saveJSON(SK.history, history);
 }
-
 function renderHistorySelect() {
     const sel = document.getElementById('historySelect');
     sel.innerHTML = '<option value="">-- 选择历史 --</option>';
-    history.forEach((h, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
-        sel.appendChild(opt);
+    history.forEach((h,i) => {
+        const o=document.createElement('option'); o.value=i;
+        o.textContent=`${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
+        sel.appendChild(o);
     });
 }
-
+function deleteHistory(idx) {
+    if (!confirm('确认删除这条历史记录？')) return;
+    history.splice(idx, 1);
+    saveJSON(SK.history, history);
+    renderHistorySelect();
+    showToast('🗑️ 历史记录已删除');
+}
 function loadHistory() {
     const idx = document.getElementById('historySelect').value;
     if (!history[idx]) return;
     clearChat();
-    history[idx].messages.forEach((msg, i) => {
-        appendMsg(i % 2 === 0 ? 'user' : 'ai', msg);
-    });
+    history[idx].messages.forEach((msg,i) => appendMsg(i%2===0?'user':'ai', msg));
 }
 
-// ─────────────────────────────────────────
-//  数据导入导出
-// ─────────────────────────────────────────
+// ─── 数据导入导出 ───
 function exportSystemData() {
-    const data = {
-        version: '2.0',
-        exportTime: new Date().toLocaleString(),
-        flowConfig, prompts, sampleLibrary, history,
-        books: bookLibrary,
-        workspace: dom.workspace.value
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
-    saveAs(blob, `灵犀备份_${Date.now()}.json`);
+    const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, sampleLibrary, history, books:bookLibrary, workspace:dom.workspace.value};
+    saveAs(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}), `灵犀备份_${Date.now()}.json`);
     showToast('✅ 备份导出成功');
 }
-
 function importSystemData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
         try {
@@ -1527,119 +1002,68 @@ function importSystemData(e) {
             if (data.books)         bookLibrary   = data.books;
             saveAllData();
             if (data.workspace !== undefined) dom.workspace.value = data.workspace;
-            // 只刷新UI，不重新绑定事件
-            refreshUI();
-            showToast('✅ 备份导入成功');
-        } catch {
-            showToast('❌ 导入失败，文件格式不正确');
-        }
+            refreshUI(); showToast('✅ 备份导入成功');
+        } catch { showToast('❌ 导入失败，文件格式不正确'); }
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.readAsText(file); e.target.value = '';
 }
-
 function refreshUI() {
-    initConfigInputs();
-    loadWorkspace();
-    renderBookLibrary();
-    renderSampleLibrary();
-    renderSelect();
-    updateModelDropdowns();
-    renderHistorySelect();
-    updateSidebarPromptBadge();
+    initConfigInputs(); loadWorkspace(); renderBookLibrary(); renderSampleLibrary();
+    renderSelect(); updateModelDropdowns(); renderHistorySelect(); updateSidebarPromptBadge(); updateStorageBar();
 }
-
 function saveAllData() {
-    saveJSON(SK.flow,    flowConfig);
-    saveJSON(SK.prompts, prompts);
-    saveJSON(SK.samples, sampleLibrary);
-    saveJSON(SK.history, history);
-    saveJSON(SK.books,   bookLibrary);
+    ['flow','prompts','samples','history','books'].forEach(k => saveJSON(SK[k], {flow:flowConfig,prompts,samples:sampleLibrary,history,books:bookLibrary}[k]));
 }
-
 function loadWorkspace() {
     const val = localStorage.getItem(SK.workspace);
-    if (val !== null) {
-        try { dom.workspace.value = JSON.parse(val); }
-        catch { dom.workspace.value = val; }
-    }
+    if (val !== null) { try { dom.workspace.value = JSON.parse(val); } catch { dom.workspace.value = val; } }
 }
 
-// ─────────────────────────────────────────
-//  自动备份
-// ─────────────────────────────────────────
+// ─── 自动备份 ───
 function initAutoBackup() {
     if (autoBackupTimer) clearInterval(autoBackupTimer);
     autoBackupTimer = setInterval(() => {
-        saveJSON(SK.autoBackup, {
-            flowConfig, prompts, sampleLibrary,
-            history: history.slice(0, 10),
-            bookLibrary,
-            workspace: dom.workspace.value,
-            timestamp: new Date().toLocaleString()
-        });
-    }, 5 * 60 * 1000);
+        saveJSON(SK.autoBackup, {flowConfig, prompts, sampleLibrary, history:history.slice(0,10), bookLibrary, workspace:dom.workspace.value, timestamp:new Date().toLocaleString()});
+    }, 5*60*1000);
 }
 
-// ─────────────────────────────────────────
-//  界面工具
-// ─────────────────────────────────────────
+// ─── 界面工具 ───
 function checkEmptyState() {
-    const has = dom.displayArea.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
-    dom.emptyState.style.display = has ? 'none' : 'flex';
+    dom.emptyState.style.display = dom.displayArea.querySelectorAll('.msg-wrapper').length > 0 ? 'none' : 'flex';
 }
-
 function clearChat() {
     dom.displayArea.innerHTML = '';
     dom.displayArea.appendChild(dom.emptyState);
     dom.emptyState.style.display = 'flex';
 }
-
 function setSendButtonStop() {
-    dom.sendBtn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-    </svg> 停止`;
-    dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500');
-    dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400');
+    dom.sendBtn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> 停止`;
+    dom.sendBtn.classList.replace('bg-blue-600','bg-red-500');
+    dom.sendBtn.classList.replace('hover:bg-blue-500','hover:bg-red-400');
 }
-
 function resetSendButton() {
     dom.sendBtn.innerHTML = '<span>🚀</span> 执行';
-    dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600');
-    dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500');
+    dom.sendBtn.classList.replace('bg-red-500','bg-blue-600');
+    dom.sendBtn.classList.replace('hover:bg-red-400','hover:bg-blue-500');
 }
-
 function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position:fixed; top:24px; left:50%; transform:translateX(-50%);
-        background:rgba(30,41,59,0.95); color:white; padding:8px 18px;
-        border-radius:999px; z-index:9999; font-size:12px; font-weight:700;
-        box-shadow:0 4px 20px rgba(0,0,0,0.2); backdrop-filter:blur(8px);
-        transition:opacity 0.5s; pointer-events:none;
-    `;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; }, 2200);
-    setTimeout(() => toast.remove(), 2700);
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:rgba(30,41,59,0.95);color:white;padding:8px 18px;border-radius:999px;z-index:9999;font-size:12px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,0.2);backdrop-filter:blur(8px);transition:opacity 0.5s;pointer-events:none;';
+    t.textContent = msg; document.body.appendChild(t);
+    setTimeout(()=>t.style.opacity='0', 2200); setTimeout(()=>t.remove(), 2700);
 }
-
 function makeBtn(icon, cls, onClick) {
     const btn = document.createElement('button');
     btn.className = `${cls} p-1 rounded-md transition text-sm`;
-    btn.innerHTML = icon;
-    btn.onclick = e => { e.stopPropagation(); onClick(); };
+    btn.innerHTML = icon; btn.onclick = e => { e.stopPropagation(); onClick(); };
     return btn;
 }
-
 function switchToChatMode() {
     document.getElementById('modeChat').classList.add('mode-btn-active');
     document.getElementById('modePK').classList.remove('mode-btn-active');
     document.getElementById('singleSelectBox').classList.remove('hidden');
     document.getElementById('pkSelectBox').classList.add('hidden');
 }
-
 function switchToPKMode() {
     document.getElementById('modePK').classList.add('mode-btn-active');
     document.getElementById('modeChat').classList.remove('mode-btn-active');
@@ -1647,71 +1071,54 @@ function switchToPKMode() {
     document.getElementById('pkSelectBox').classList.remove('hidden');
 }
 
-// ─────────────────────────────────────────
-//  事件绑定（只执行一次）
-// ─────────────────────────────────────────
+// ─── 事件绑定 ───
 function bindEvents() {
-    // 发送
-    dom.sendBtn.onclick   = handleSend;
-    dom.userInput.onkeydown = e => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-    };
-
-    // 字数统计
-    dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length + '字'; };
-    dom.workspace.oninput  = () => {
-        dom.wsWordCount.textContent = dom.workspace.value.length + '字';
-        debouncedSaveWorkspace(dom.workspace.value);
-    };
-
-    // 温度
+    dom.sendBtn.onclick = handleSend;
+    dom.userInput.onkeydown = e => { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); handleSend(); } };
+    dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length+'字'; };
+    dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
 
-    // 顶部按钮
     document.getElementById('toggleSpace').onclick = () => document.getElementById('mainEditor').classList.toggle('editor-active');
-    document.getElementById('newChatBtn').onclick  = () => { 
-    clearChat(); 
-    dom.userInput.value = ''; 
-    conversationHistory = [];   // ✅ 新开篇时清空上下文
-    showToast('✨ 已开启新篇章，对话记忆已重置');
-};
+    document.getElementById('newChatBtn').onclick  = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
     document.getElementById('typesetBtn').onclick  = typesetContent;
     document.getElementById('clearChatBtn').onclick= clearChat;
-
-    // 模式切换
-    document.getElementById('modeChat').onclick = switchToChatMode;
-    document.getElementById('modePK').onclick   = switchToPKMode;
-
-    // 侧边栏日夜
+    document.getElementById('modeChat').onclick    = switchToChatMode;
+    document.getElementById('modePK').onclick      = switchToPKMode;
     document.getElementById('sidebarDarkToggle').onclick = toggleSidebarDarkMode;
 
-    // 设置弹窗
     document.getElementById('openSettings').onclick  = () => document.getElementById('settingsModal').classList.remove('hidden');
     document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
     document.getElementById('saveSettings').onclick  = saveConfig;
 
-    // 神兵武库弹窗
-    document.getElementById('openPromptModalBtn').onclick = () => {
-        renderModalPromptList();
-        resetPromptEditor();
-        document.getElementById('promptModal').classList.remove('hidden');
+    document.getElementById('openPromptModalBtn').onclick = () => { renderModalPromptList(); resetPromptEditor(); document.getElementById('promptModal').classList.remove('hidden'); };
+    document.getElementById('closePromptModal').onclick   = () => document.getElementById('promptModal').classList.add('hidden');
+    document.getElementById('savePromptBtn').onclick      = savePrompt;
+    document.getElementById('resetPromptBtn').onclick     = resetPromptEditor;
+    document.getElementById('addNewPromptBtn').onclick    = resetPromptEditor;
+
+  
+
+    // ✅ 草稿发给AI
+    document.getElementById('draftToAIBtn').onclick = () => {
+        const draft = dom.workspace.value.trim();
+        if (!draft) { showToast('⚠️ 草稿区为空'); return; }
+        dom.userInput.value = `请帮我分析并优化以下内容：\n\n${draft.slice(0,2000)}`;
+        dom.charCount.textContent = dom.userInput.value.length + '字';
+        dom.userInput.focus();
+        showToast('📤 草稿已填入输入框，可直接执行');
     };
-    document.getElementById('closePromptModal').onclick = () => document.getElementById('promptModal').classList.add('hidden');
-    document.getElementById('savePromptBtn').onclick    = savePrompt;
-    document.getElementById('resetPromptBtn').onclick   = resetPromptEditor;
 
-    // ✅ 新增：神兵武库内"+"新建按钮
-    document.getElementById('addNewPromptBtn').onclick = resetPromptEditor;
-
-    // 文件导入
-    document.getElementById('fileImport').onchange        = handleFileImport;      // ✅ 修复ID一致
+    document.getElementById('fileImport').onchange        = handleFileImport;
     document.getElementById('importSystemInput').onchange = importSystemData;
-
-    // 历史记录
     document.getElementById('historySelect').onchange = loadHistory;
+    document.getElementById('deleteHistoryBtn').onclick = () => {
+        const idx = document.getElementById('historySelect').value;
+        if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
+        deleteHistory(parseInt(idx));
+    };
 }
 
-// 启动
 window.onload = init;
 </script>
 </body>
