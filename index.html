@@ -3,48 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵犀 - 分屏修复版</title>
+    <title>灵犀 - 最终稳定版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        :root { --bg-main: #f8fafc; --bg-sidebar: #1e222d; --accent-blue: #3b82f6; }
-        .theme-dark { --bg-main: #0f172a; }
-        .theme-eye { --bg-main: #f0fdf4; }
-        .theme-retro { --bg-main: #fdf6e3; }
-        body { background-color: var(--bg-main); font-family: "PingFang SC", "Microsoft YaHei", sans-serif; transition: all 0.3s ease; }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.2); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.4); }
-        .sidebar { width: 280px; background: var(--bg-sidebar); color: white; z-index: 50; }
+        /* 基础样式 */
+        :root { 
+            --bg-main: #f8fafc; 
+            --bg-sidebar: #1e222d; 
+            --accent-blue: #3b82f6;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+        }
         
-        .mode-btn { flex: 1; padding-top: 0.75rem; padding-bottom: 0.75rem; font-size: 15px !important; font-weight: 900; font-style: italic; transition: all 0.3s; border-radius: 10px; }
-        .mode-btn-active { background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+        /* 主题样式 - 核心修复：为每个主题定义独立样式变量 */
+        body.theme-dark {
+            --bg-main: #0f172a;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --card-bg: #1e293b;
+        }
+        
+        body.theme-eye {
+            --bg-main: #f0f9f0;
+            --text-primary: #265e26;
+            --text-secondary: #4a7c4a;
+            --border-color: #d1e7d1;
+            --card-bg: #ffffff;
+        }
+        
+        body.theme-retro {
+            --bg-main: #fff8e6;
+            --text-primary: #8b4513;
+            --text-secondary: #a0522d;
+            --border-color: #ffdead;
+            --card-bg: #ffffff;
+        }
+        
+        /* 左侧边栏白天模式修复 */
+        .sidebar-light { 
+            --bg-sidebar: #ffffff !important; 
+            color: #1e293b !important; 
+            background-color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            border-right: 1px solid #e2e8f0;
+        }
+        .sidebar-light .text-gray-200 { color: #475569 !important; }
+        .sidebar-light .text-blue-300 { color: #3b82f6 !important; }
+        .sidebar-light .border-white\/5 { border-color: #e2e8f0 !important; }
+        .sidebar-light .bg-black\/20 { background-color: #f1f5f9 !important; }
+        .sidebar-light .bg-white\/5 { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
+        .sidebar-light .mode-btn { color: #475569 !important; }
+        .sidebar-light .mode-btn-active { color: white !important; }
+        
+        /* 全局样式 */
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-primary);
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif; 
+            transition: all 0.3s ease; 
+        }
+        
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 240, 0.2); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 240, 0.4); }
+        
+        .sidebar { 
+            width: 280px; 
+            background: var(--bg-sidebar); 
+            color: white; 
+            z-index: 50; 
+            transition: all 0.3s; 
+            height: 100vh;
+        }
+        
+        .mode-btn { 
+            flex: 1; 
+            padding-top: 0.75rem; 
+            padding-bottom: 0.75rem; 
+            font-size: 15px !important; 
+            font-weight: 900; 
+            font-style: italic; 
+            transition: all 0.3s; 
+            border-radius: 10px; 
+        }
+        
+        .mode-btn-active { 
+            background: #3b82f6; 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(59,130,240,0.4); 
+        }
         
         .msg-wrapper { margin-bottom: 2rem; display: flex; flex-direction: column; }
-        .user-msg { background: var(--accent-blue); color: white; padding: 1.2rem 1.5rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.15); }
-        .ai-msg { background: white; color: #334155; padding: 1.5rem 2rem; border-radius: 20px 20px 20px 4px; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 90%; line-height: 1.8; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-        .theme-dark .ai-msg { background: #1e293b; color: #e2e8f0; border-color: #334155; }
         
-        #themeMenu { display: none; position: absolute; right: 40px; top: 60px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.1); flex-direction: row; gap: 0.75rem; }
-        .theme-dot { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 1px solid #ddd; transition: transform 0.2s; }
-        .theme-dot:hover { transform: scale(1.1); }
+        .user-msg { 
+            background: var(--accent-blue); 
+            color: white; 
+            padding: 1.2rem 1.5rem; 
+            border-radius: 20px 20px 4px 20px; 
+            align-self: flex-end; 
+            max-width: 80%; 
+            line-height: 1.8; 
+            box-shadow: 0 4px 15px rgba(59,130,240,0.15); 
+        }
         
-        .editor-container { flex: 1; display: none; background: white; border-right: 1px solid #e2e8f0; }
-        .theme-dark .editor-container { background: #0f172a; border-right-color: #334155; }
+        .ai-msg { 
+            background: var(--card-bg); 
+            color: var(--text-primary); 
+            padding: 1.5rem 2rem; 
+            border-radius: 20px 20px 20px 4px; 
+            border: 1px solid var(--border-color); 
+            align-self: flex-start; 
+            max-width: 90%; 
+            line-height: 1.8; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02); 
+        }
+        
+        /* 主题菜单 - 修复样式和定位 */
+        #themeMenu { 
+            display: none; 
+            position: absolute; 
+            right: 20px; 
+            top: 70px; 
+            background: white; 
+            border-radius: 12px; 
+            padding: 12px; 
+            z-index: 9999; 
+            border: 1px solid #eee; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            flex-direction: row; 
+            gap: 10px;
+        }
+        
+        .theme-dot { 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            border: 2px solid #ddd; 
+            transition: all 0.2s; 
+        }
+        
+        .theme-dot:hover { 
+            transform: scale(1.1); 
+            border-color: #3b82f6;
+        }
+        
+        /* 主题色块样式 */
+        .theme-dot.classic { background: #f8fafc; }
+        .theme-dot.dark { background: #0f172a; }
+        .theme-dot.eye { background: #f0f9f0; }
+        .theme-dot.retro { background: #fff8e6; }
+        
+        .editor-container { 
+            flex: 1; 
+            display: none; 
+            background: var(--card-bg); 
+            border-right: 1px solid var(--border-color); 
+        }
+        
         .editor-active { display: flex !important; }
-        .writing-area { width: 100%; height: 100%; padding: 40px; font-size: 16px; line-height: 2; outline: none; border: none; background: transparent; color: inherit; }
         
-        #tempValueDisplay { font-family: monospace; font-weight: 900; color: #3b82f6; font-size: 14px; min-width: 25px; }
+        .writing-area { 
+            width: 100%; 
+            height: 100%; 
+            padding: 40px; 
+            font-size: 16px; 
+            line-height: 2; 
+            outline: none; 
+            border: none; 
+            background: transparent; 
+            color: var(--text-primary); 
+        }
+        
+        #tempValueDisplay { 
+            font-family: monospace; 
+            font-weight: 900; 
+            color: #3b82f6; 
+            font-size: 14px; 
+            min-width: 25px; 
+        }
+        
+        .pill-btn {
+            @apply px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white hover:shadow-lg hover:-translate-y-05;
+        }
+        
+        /* 适配主题的pill按钮 */
+        body.theme-dark .pill-btn { @apply bg-gray-800 text-gray-200; }
+        body.theme-eye .pill-btn { @apply bg-green-50 text-green-700; }
+        body.theme-retro .pill-btn { @apply bg-orange-50 text-orange-700; }
+        
+        /* 头部样式适配主题 */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* 输入框样式适配主题 */
+        textarea, input, select {
+            background-color: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
+<!-- 左侧边栏 -->
 <div class="sidebar flex flex-col shadow-2xl">
-    <div class="p-8 border-b border-white/5">
-        <h1 class="text-3xl font-black text-blue-400 italic tracking-wider">灵犀</h1>
-        <p id="slogan" class="text-[12px] text-blue-300/60 italic mt-2 tracking-widest">妙笔千般意 灵犀一点通</p>
+    <div class="p-8 border-b border-white/5 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-black text-blue-400 italic tracking-wider">灵犀</h1>
+            <p class="text-[12px] text-blue-300/60 italic mt-2 tracking-widest">妙笔千般意 灵犀一点通</p>
+        </div>
+        <!-- 左侧独立日夜模式 -->
+        <button id="sidebarDarkToggle" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="左侧边栏日夜模式">🌞</button>
     </div>
     
     <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-8">
@@ -76,61 +254,45 @@
                 <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📖 例文克隆中心</span>
                 <button onclick="document.getElementById('fileInput').click()" class="text-blue-400 text-[11px] font-bold hover:text-blue-300 transition px-2 py-1 bg-blue-500/10 rounded hover:bg-blue-500/20">+ 导入</button>
             </div>
-            <input type="file" id="fileInput" class="hidden" multiple accept=".txt,.docx">
+            <input type="file" id="file" class="hidden" multiple accept=".txt,.docx">
             <div id="sampleLibrary" class="space-y-2"></div>
         </section>
     </div>
 </div>
 
 <div class="flex-1 flex flex-col overflow-hidden bg-transparent">
-    <header class="h-[72px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center px-8 justify-between z-10 transition-colors theme-dark:bg-[#1e293b]/80 theme-dark:border-[#334155]">
+    <header class="h-[72px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center px-8 justify-between z-10 transition-colors">
         <div class="flex items-center gap-3">
-            <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
-            <h2 id="workTitle" class="text-base font-bold text-gray-700 italic mr-4 theme-dark:text-gray-200">灵犀创作</h2>
-            
-            <button id="toggleSpace" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
-                <span>✍️</span> 分屏创作
-            </button>
-            <button id="newChatBtn" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
-                <span>✨</span> 新开篇
-            </button>
-            <button id="typesetBtn" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
-                <span>📝</span> 一键排版
-            </button>
-            
-            <div class="w-px h-4 bg-gray-200 mx-2 theme-dark:bg-gray-700"></div>
-            
-            <button onclick="document.getElementById('importSystemInput').click()" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 font-bold text-sm px-4 py-2 rounded-lg transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800" title="导入神兵档案 JSON">
-                <span>📂</span> 导入
-            </button>
-            <button id="exportSystemBtn" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 font-bold text-sm px-4 py-2 rounded-lg transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800" title="导出全量备份 JSON">
-                <span>💾</span> 导出
-            </button>
-            <input type="file" id="importSystemInput" class="hidden" accept=".json">
+            <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
+            <button id="newChatBtn" class="pill-btn">✨ 新开篇</button>
+            <button id="typesetBtn" class="pill-btn">📝 一键排版</button>
         </div>
         
         <div class="flex items-center gap-6 relative">
-            <div class="flex items-center gap-3 bg-gray-50/80 px-4 py-1.5 rounded-full border border-gray-200 theme-dark:bg-gray-800 theme-dark:border-gray-700">
+            <div class="flex items-center gap-3 bg-gray-50/80 px-4 py-1.5 rounded-full border border-gray-200">
                 <span class="text-[11px] font-black text-gray-400">灵感</span>
                 <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="w-16 h-1 accent-blue-500 cursor-pointer">
                 <span id="tempValueDisplay" class="text-[12px]">0.7</span>
             </div>
             
-            <div id="singleSelectBox"><select id="singleModel" class="bg-gray-50 border border-gray-200 py-1.5 px-4 rounded-full text-xs font-bold outline-none cursor-pointer theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-gray-200"></select></div>
+            <div id="singleSelectBox"><select id="singleModel" class="bg-gray-50 border border-gray-200 py-1.5 px-4 rounded-full text-xs font-bold outline-none cursor-pointer"></select></div>
             <div id="pkSelectBox" class="hidden flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">
                 A: <select id="modelA" class="bg-transparent outline-none cursor-pointer"></select> | B: <select id="modelB" class="bg-transparent outline-none cursor-pointer"></select>
             </div>
             
-            <div class="flex items-center gap-4 border-l border-gray-200 pl-4 theme-dark:border-gray-700">
+            <div class="flex items-center gap-4 border-l border-gray-200 pl-4">
+                <!-- 仅保留调色盘按钮，已删除小太阳 -->
                 <button id="themeToggle" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="更换主题">🎨</button>
                 <button id="openSettings" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="大脑配置">⚙️</button>
                 <button id="clearChatBtn" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="清空屏幕">🧹</button>
             </div>
+            
+            <!-- 主题菜单 - 重构 -->
             <div id="themeMenu">
-                <div onclick="setTheme('')" class="theme-dot bg-[#f8fafc]" title="经典"></div>
-                <div onclick="setTheme('theme-dark')" class="theme-dot bg-gray-900" title="深空"></div>
-                <div onclick="setTheme('theme-eye')" class="theme-dot bg-green-50" title="护眼"></div>
-                <div onclick="setTheme('theme-retro')" class="theme-dot bg-orange-50" title="复古"></div>
+                <div class="theme-dot classic" onclick="setTheme('')" title="经典"></div>
+                <div class="theme-dot dark" onclick="setTheme('theme-dark')" title="深空"></div>
+                <div class="theme-dot eye" onclick="setTheme('theme-eye')" title="护眼"></div>
+                <div class="theme-dot retro" onclick="setTheme('theme-retro')" title="复古"></div>
             </div>
         </div>
     </header>
@@ -142,30 +304,30 @@
         
         <div class="flex-1 flex flex-col relative">
             <main id="displayArea" class="flex-1 overflow-y-auto p-10 custom-scroll relative">
-                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none theme-dark:text-gray-700">
+                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none">
                     <div class="text-6xl mb-6 opacity-30 grayscale">✨</div>
                     <h2 class="text-2xl font-black tracking-widest opacity-40 italic">灵犀一点通</h2>
                     <p class="text-sm mt-3 opacity-40">在下方输入指令，或唤醒神兵武库开始创作</p>
                 </div>
             </main>
             
-            <footer class="p-6 pb-8 bg-gradient-to-t from-white via-white to-transparent theme-dark:from-[#0f172a] theme-dark:via-[#0f172a] z-10">
+            <footer class="p-6 pb-8 bg-gradient-to-t from-white via-white to-transparent z-10">
                 <div class="max-w-4xl mx-auto">
                     <div class="flex items-center gap-3 mb-3 pl-2">
-                        <div class="flex items-center gap-2 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/50 theme-dark:bg-blue-900/20 theme-dark:border-blue-800/50">
+                        <div class="flex items-center gap-2 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/50">
                             <span class="text-[11px] font-black text-blue-500">⚔️ 选用兵器:</span>
-                            <select id="promptSelect" class="bg-transparent text-blue-700 text-xs font-black outline-none min-w-[120px] max-w-[200px] truncate cursor-pointer theme-dark:text-blue-300"></select>
+                            <select id="promptSelect" class="bg-transparent text-blue-700 text-xs font-black outline-none min-w-[120px] max-w-[200px] truncate cursor-pointer"></select>
                         </div>
-                        <div class="flex items-center gap-2 bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200/50 theme-dark:bg-gray-800 theme-dark:border-gray-700">
-                            <span class="text-[11px] font-black text-gray-500 theme-dark:text-gray-400">📜 历史回溯:</span>
-                            <select id="historySelect" class="bg-transparent text-gray-600 text-xs font-bold outline-none min-w-[150px] cursor-pointer theme-dark:text-gray-300">
+                        <div class="flex items-center gap-2 bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200/50">
+                            <span class="text-[11px] font-black text-gray-500">📜 历史回溯:</span>
+                            <select id="historySelect" class="bg-transparent text-gray-600 text-xs font-bold outline-none min-w-[150px] cursor-pointer">
                                 <option value="">-- 点击选择 --</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="relative bg-white border border-gray-300 rounded-[24px] focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-sm theme-dark:bg-[#1e293b] theme-dark:border-gray-600">
-                        <textarea id="userInput" class="w-full bg-transparent border-none pl-6 pr-6 pt-5 pb-16 text-[15px] outline-none min-h-[130px] custom-scroll resize-none theme-dark:text-gray-200" placeholder="在此输入情节需求... (按 Shift+Enter 换行，Enter 键发送)"></textarea>
+                    <div class="relative bg-white border border-gray-300 rounded-[24px] focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-sm">
+                        <textarea id="userInput" class="w-full bg-transparent border-none pl-6 pr-6 pt-5 pb-16 text-[15px] outline-none min-h-[130px] custom-scroll resize-none" placeholder="在此输入情节需求... (按 Shift+Enter 换行，Enter 键发送)"></textarea>
                         
                         <div class="absolute bottom-3 right-3">
                             <button id="sendBtn" class="bg-blue-600 text-white px-6 py-2.5 rounded-[14px] font-black shadow-md hover:bg-blue-500 hover:shadow-lg transition-all flex items-center gap-2 active:scale-95">
@@ -180,31 +342,31 @@
 </div>
 
 <div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[24px] p-6 w-full max-w-4xl shadow-2xl flex flex-col h-[80vh] theme-dark:bg-[#1e293b] border border-white/10">
-        <div class="flex justify-between items-center mb-4 border-b pb-3 theme-dark:border-gray-700">
+    <div class="bg-white rounded-[24px] p-6 w-full max-w-4xl shadow-2xl flex flex-col h-[80vh] border border-white/10">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
             <h3 class="text-xl font-black text-blue-600 italic flex items-center gap-2">📖 书稿编辑</h3>
             <button onclick="closeBookModal()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition-all">&times;</button>
         </div>
         <div class="flex flex-col h-full">
             <div class="mb-3 flex gap-3">
-                <input id="bookNameInput" type="text" placeholder="书稿名称" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm font-bold focus:border-blue-400 focus:bg-white transition-all theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-white">
-                <div class="text-sm text-gray-500 flex items-center theme-dark:text-gray-400">
+                <input id="bookNameInput" type="text" placeholder="书稿名称" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm font-bold focus:border-blue-400 focus:bg-white transition-all">
+                <div class="text-sm text-gray-500 flex items-center">
                     字数：<span id="bookWordCount" class="ml-1 text-blue-500 font-bold">0</span>
                 </div>
             </div>
-            <textarea id="bookContent" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-gray-300"></textarea>
+            <textarea id="bookContent" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed"></textarea>
             <div class="flex gap-3 mt-4">
                 <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-md transition-all text-sm tracking-widest">保存书稿</button>
-                <button onclick="appendBookToDraft()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-all text-sm theme-dark:bg-gray-700 theme-dark:text-gray-300">追加到草稿</button>
+                <button onclick="appendBookToDraft()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-all text-sm">追加到草稿</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[32px] p-8 w-full max-w-xl shadow-2xl transform transition-all theme-dark:bg-[#1e293b]">
-        <h3 class="text-xl font-black mb-6 text-center border-b pb-4 theme-dark:text-white theme-dark:border-gray-700">⚙️ 配置大脑</h3>
-        <div class="grid grid-cols-2 gap-8">
+    <div class="bg-white rounded-[32px] p-8 w-full max-w-2xl shadow-2xl transform transition-all">
+        <h3 class="text-xl font-black mb-6 text-center border-b pb-4">⚙️ 配置中心</h3>
+        <div class="grid grid-cols-2 gap-8 mb-6">
             <div class="space-y-3 text-sm">
                 <h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
                 <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
@@ -218,23 +380,30 @@
                 <textarea id="proxy_models" placeholder="模型名 (逗号分隔)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs h-[88px] outline-none resize-none custom-scroll focus:border-blue-400"></textarea>
             </div>
         </div>
-        <div class="flex gap-4 mt-8">
-            <button id="saveSettings" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-lg transition-all">激活</button>
+
+        <div class="flex gap-3 mb-6">
+            <button onclick="document.getElementById('importSystemInput').click()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm">📂 导入备份</button>
+            <button onclick="exportSystemData()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm">💾 导出备份</button>
+            <input type="file" id="importSystemInput" class="hidden" accept=".json">
+        </div>
+        
+        <div class="flex gap-4">
+            <button id="saveSettings" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-lg transition-all">保存并激活</button>
             <button id="closeSettings" class="flex-1 bg-gray-100 hover:bg-gray-200 font-bold py-3 rounded-xl text-gray-600 transition-all">关闭</button>
         </div>
     </div>
 </div>
 
 <div id="promptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col h-[80vh] theme-dark:bg-[#1e293b] border border-white/10">
-        <div class="flex justify-between items-center mb-4 border-b pb-3 theme-dark:border-gray-700">
+    <div class="bg-white rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col h-[80vh] border border-white/10">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
             <h3 class="text-xl font-black text-blue-600 italic flex items-center gap-2">🗡️ 神兵武库管理</h3>
             <button id="closePromptModal" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition-all">&times;</button>
         </div>
         
         <div class="flex-1 flex gap-6 overflow-hidden mt-2">
-            <div class="w-[35%] flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden theme-dark:bg-gray-800/50 theme-dark:border-gray-700">
-                <div class="p-3 bg-gray-100/80 border-b border-gray-200 text-xs font-black text-gray-600 flex justify-between items-center theme-dark:bg-gray-800 theme-dark:text-gray-300 theme-dark:border-gray-700">
+            <div class="w-[35%] flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden">
+                <div class="p-3 bg-gray-100/80 border-b border-gray-200 text-xs font-black text-gray-600 flex justify-between items-center">
                     <span>📜 库中存根</span>
                     <span id="modalListCount" class="text-blue-600 bg-blue-100/50 px-2 py-0.5 rounded-full text-[10px]">0</span>
                 </div>
@@ -244,16 +413,16 @@
             <div class="w-[65%] flex flex-col relative">
                 <div class="flex items-center gap-2 mb-4">
                     <div id="promptEditorIcon" class="text-blue-500 text-lg">✨</div>
-                    <h4 id="promptEditorTitle" class="text-sm font-black text-gray-700 theme-dark:text-gray-200">锻造新兵器</h4>
+                    <h4 id="promptEditorTitle" class="text-sm font-black text-gray-700">锻造新兵器</h4>
                 </div>
                 
-                <input id="modalPromptName" type="text" placeholder="给兵器起个响亮的名字..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none mb-4 text-sm font-bold focus:border-blue-400 focus:bg-white transition-all theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-white theme-dark:focus:bg-gray-900">
+                <input id="modalPromptName" type="text" placeholder="给兵器起个响亮的名字..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none mb-4 text-sm font-bold focus:border-blue-400 focus:bg-white transition-all">
                 
-                <textarea id="modalPromptContent" placeholder="在此注入您的核心系统指令，支持长篇复杂逻辑..." class="w-full flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-gray-300 theme-dark:focus:bg-gray-900"></textarea>
+                <textarea id="modalPromptContent" placeholder="在此注入您的核心系统指令，支持长篇复杂逻辑..." class="w-full flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed"></textarea>
                 
                 <div class="flex gap-3 mt-4">
                     <button id="savePromptBtn" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-md transition-all text-sm tracking-widest">保存入库</button>
-                    <button id="resetPromptBtn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-3 rounded-xl transition-all text-sm theme-dark:bg-gray-700 theme-dark:text-gray-300 theme-dark:hover:bg-gray-600">清空重写</button>
+                    <button id="resetPromptBtn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-3 rounded-xl transition-all text-sm">清空重写</button>
                 </div>
             </div>
         </div>
@@ -261,346 +430,446 @@
 </div>
 
 <script>
+// 全局常量定义
 const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成基因报告：1.叙事结构与情节逻辑；2.人物塑造；3.情感张力与写作技法；4.情绪链路与冲突密度；5.语言风格。`;
 const STORAGE_KEYS = {
-    flow: 'lingxi_flow',
-    prompts: 'lingxi_prompts',
-    samples: 'lingxi_samples',
-    history: 'lingxi_history',
-    workspace: 'lingxi_workspace',
-    theme: 'lingxi_theme',
-    autoBackup: 'lingxi_auto_backup_snapshot',
-    books: 'lingxi_books'
+    flow: 'lingxi_flow', prompts: 'lingxi_prompts', samples: 'lingxi_samples', history: 'lingxi_history',
+    workspace: 'lingxi_workspace', theme: 'lingxi_theme', darkMode: 'lingxi_dark', 
+    sidebarDark: 'lingxi_sidebar_dark', autoBackup: 'lingxi_auto_backup_snapshot', books: 'lingxi_books'
 };
 
+// 全局变量
 let flowConfig = JSON.parse(localStorage.getItem(STORAGE_KEYS.flow)) || { ds_key:'', qw_key:'', db_key:'', proxy_url:'', proxy_key:'', proxy_models:'gpt-4o' };
 let prompts = JSON.parse(localStorage.getItem(STORAGE_KEYS.prompts)) || { "灵犀助手": "你是一个智慧创作助手。" };
 let history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history)) || [];
 let sampleLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.samples)) || [];
 let bookLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.books)) || [];
 let currentEditingBookId = null;
-
 let selectedSampleIndices = [];
-let currentChatId = null;
 let isGenerating = false;
 let abortController = null;
 let editingOldPromptName = null;
 let autoBackupTimer = null;
-
 let dom = {};
+
+// 缓存DOM元素
 function cacheDOMElements() {
-    dom = {
-        displayArea: document.getElementById('displayArea'),
-        emptyState: document.getElementById('emptyState'),
-        workspace: document.getElementById('workspace'),
-        userInput: document.getElementById('userInput'),
-        sendBtn: document.getElementById('sendBtn'),
-        tempSlider: document.getElementById('tempSlider'),
-        tempValueDisplay: document.getElementById('tempValueDisplay')
+    dom = { 
+        displayArea: document.getElementById('displayArea'), 
+        emptyState: document.getElementById('emptyState'), 
+        workspace: document.getElementById('workspace'), 
+        userInput: document.getElementById('userInput'), 
+        sendBtn: document.getElementById('sendBtn'), 
+        tempSlider: document.getElementById('tempSlider'), 
+        tempValueDisplay: document.getElementById('tempValueDisplay'),
+        themeMenu: document.getElementById('themeMenu'),
+        themeToggle: document.getElementById('themeToggle')
     };
 }
 
+// 左侧边栏独立日夜模式（修复底色问题）
+function initSidebarDarkMode() {
+    const btn = document.getElementById('sidebarDarkToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const isLight = localStorage.getItem(STORAGE_KEYS.sidebarDark) === '1';
+    
+    if (isLight) {
+        sidebar.classList.add('sidebar-light');
+        btn.textContent = '🌙';
+    } else {
+        btn.textContent = '🌞';
+    }
+}
+
+function toggleSidebarDarkMode() {
+    const btn = document.getElementById('sidebarDarkToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const isLight = sidebar.classList.toggle('sidebar-light');
+    
+    localStorage.setItem(STORAGE_KEYS.sidebarDark, isLight ? '1' : '0');
+    btn.textContent = isLight ? '🌙' : '🌞';
+}
+
+// 主题切换核心功能 - 完全重构
+function initTheme() {
+    // 从本地存储加载保存的主题
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || '';
+    // 应用主题
+    document.body.className = `h-screen flex overflow-hidden ${savedTheme}`;
+    
+    // 绑定主题切换按钮事件
+    dom.themeToggle.addEventListener('click', function(e) {
+        e.stopPropagation(); // 阻止事件冒泡
+        // 切换主题菜单显示/隐藏
+        dom.themeMenu.style.display = dom.themeMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+    
+    // 点击空白处关闭主题菜单
+    document.addEventListener('click', function() {
+        dom.themeMenu.style.display = 'none';
+    });
+    
+    // 阻止主题菜单内部点击事件冒泡
+    dom.themeMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+// 设置主题 - 核心修复
+function setTheme(themeClass) {
+    // 移除所有主题类
+    document.body.classList.remove('theme-dark', 'theme-eye', 'theme-retro');
+    // 添加选中的主题类
+    if (themeClass) {
+        document.body.classList.add(themeClass);
+    }
+    // 保存到本地存储
+    localStorage.setItem(STORAGE_KEYS.theme, themeClass);
+    // 关闭主题菜单
+    dom.themeMenu.style.display = 'none';
+    
+    // 显示提示
+    showToast(`✅ 主题已切换为：${
+        themeClass === '' ? '经典' : 
+        themeClass === 'theme-dark' ? '深空' :
+        themeClass === 'theme-eye' ? '护眼' : '复古'
+    }`);
+}
+// 暴露到全局，让HTML能调用
+window.setTheme = setTheme;
+
+// 初始化函数
 function init() {
     cacheDOMElements();
-    updateSidebarPromptBadge();
-    renderSelect();
-    updateModelDropdowns();
+    updateSidebarPromptBadge(); 
+    renderSelect(); 
+    updateModelDropdowns(); 
     renderSampleLibrary();
-    renderHistorySelect();
-    initConfigInputs();
-    loadWorkspace();
+    renderHistorySelect(); 
+    initConfigInputs(); 
+    loadWorkspace(); 
     renderBookLibrary();
-    setTheme(localStorage.getItem(STORAGE_KEYS.theme) || '');
-    checkEmptyState();
-    initAutoBackup();
+    initSidebarDarkMode();
+    initTheme(); // 初始化主题功能
+    checkEmptyState(); 
+    initAutoBackup(); 
     bindEvents();
 }
 
+// 检查空状态
 function checkEmptyState() {
     const hasMessages = dom.displayArea.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
     dom.emptyState.style.display = hasMessages ? 'none' : 'flex';
 }
 
-// ==================== 书稿修复逻辑 ====================
+// 书稿管理
 function renderBookLibrary() {
-    const container = document.getElementById('bookLibrary');
+    const container = document.getElementById('bookLibrary'); 
     container.innerHTML = '';
+    
     bookLibrary.forEach((book, index) => {
         const item = document.createElement('div');
         item.className = "group bg-white/5 p-3 rounded-xl border border-white/10 hover:border-blue-400/50 flex justify-between items-center cursor-pointer transition-all";
-        const titleSpan = document.createElement('div');
+        
+        const titleSpan = document.createElement('div'); 
         titleSpan.className = "text-xs font-bold text-gray-200 truncate flex-1";
-        const textCount = book.content ? book.content.length : 0;
+        const textCount = book.content ? book.content.length : 0; 
         titleSpan.textContent = `${book.name} (${textCount}字)`;
-        const btnContainer = document.createElement('div');
+        
+        const btnContainer = document.createElement('div'); 
         btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity";
         const editBtn = createButton('✏️', 'text-blue-400 hover:bg-blue-500/10', () => editBook(index));
         const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-500/10', () => deleteBook(index));
-        btnContainer.append(editBtn, delBtn);
-        item.append(titleSpan, btnContainer);
-        item.onclick = () => editBook(index);
+        
+        btnContainer.append(editBtn, delBtn); 
+        item.append(titleSpan, btnContainer); 
+        item.onclick = () => editBook(index); 
         container.appendChild(item);
     });
 }
 
-window.addNewBook = function() {
-    autoSaveDraftToTempBook();
-    currentEditingBookId = null;
-    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`;
-    document.getElementById('bookContent').value = '';
-    updateWordCount();
-    document.getElementById('bookModal').classList.remove('hidden');
+window.addNewBook = function() { 
+    autoSaveDraftToTempBook(); 
+    currentEditingBookId = null; 
+    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`; 
+    document.getElementById('bookContent').value = ''; 
+    updateWordCount(); 
+    document.getElementById('bookModal').classList.remove('hidden'); 
+};
+
+window.editBook = function(index) { 
+    autoSaveDraftToTempBook(); 
+    const book = bookLibrary[index]; 
+    currentEditingBookId = index; 
+    document.getElementById('bookNameInput').value = book.name; 
+    document.getElementById('bookContent').value = book.content || ''; 
+    updateWordCount(); 
+    document.getElementById('bookModal').classList.remove('hidden'); 
+};
+
+window.deleteBook = function(index) { 
+    if(confirm(`确认删除书稿【${bookLibrary[index].name}】吗？`)) { 
+        bookLibrary.splice(index, 1); 
+        saveBooks(); 
+        renderBookLibrary(); 
+    } 
+};
+
+window.saveCurrentBook = function() { 
+    const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿'; 
+    const content = document.getElementById('bookContent').value; 
+    
+    if(currentEditingBookId !== null) { 
+        bookLibrary[currentEditingBookId] = { name, content }; 
+    } else { 
+        bookLibrary.push({ name, content }); 
+    } 
+    
+    saveBooks(); 
+    renderBookLibrary(); 
+    closeBookModal(); 
+    showToast(`✅ 书稿【${name}】已保存`); 
+};
+
+window.closeBookModal = function() { 
+    document.getElementById('bookModal').classList.add('hidden'); 
+};
+
+window.appendBookToDraft = function() { 
+    const bookContent = document.getElementById('bookContent').value; 
+    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + bookContent; 
+    saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value); 
+    showToast("📝 已追加书稿内容到草稿区"); 
+};
+
+window.saveDraftToBook = function() { 
+    const draft = dom.workspace.value.trim(); 
+    if(!draft) { 
+        showToast("⚠️ 草稿区为空"); 
+        return; 
+    } 
+    bookLibrary.push({ name: `草稿_${new Date().toLocaleString()}`, content: draft }); 
+    saveBooks(); 
+    renderBookLibrary(); 
+    showToast("💾 草稿已保存为新书稿"); 
+};
+
+function autoSaveDraftToTempBook() { 
+    const draft = dom.workspace.value.trim(); 
+    if(!draft) return; 
+    const tempBook = bookLibrary.find(b => b.name === "临时草稿（自动保存）"); 
+    if(tempBook) { 
+        tempBook.content = draft; 
+    } else { 
+        bookLibrary.unshift({ name: "临时草稿（自动保存）", content: draft }); 
+    } 
+    saveBooks(); 
+    renderBookLibrary(); 
 }
 
-window.editBook = function(index) {
-    autoSaveDraftToTempBook();
-    const book = bookLibrary[index];
-    currentEditingBookId = index;
-    document.getElementById('bookNameInput').value = book.name;
-    document.getElementById('bookContent').value = book.content || '';
-    updateWordCount();
-    document.getElementById('bookModal').classList.remove('hidden');
+function updateWordCount() { 
+    const content = document.getElementById('bookContent').value; 
+    document.getElementById('bookWordCount').textContent = content.length; 
 }
 
-window.deleteBook = function(index) {
-    if(confirm(`确认删除书稿【${bookLibrary[index].name}】吗？`)) {
-        bookLibrary.splice(index, 1);
-        saveBooks();
-        renderBookLibrary();
-    }
+function saveBooks() { 
+    saveToLocal(STORAGE_KEYS.books, bookLibrary); 
 }
 
-window.saveCurrentBook = function() {
-    const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
-    const content = document.getElementById('bookContent').value;
-    if(currentEditingBookId !== null) {
-        bookLibrary[currentEditingBookId] = { name, content };
-    } else {
-        bookLibrary.push({ name, content });
-    }
-    saveBooks();
-    renderBookLibrary();
-    closeBookModal();
-    showToast(`✅ 书稿【${name}】已保存`);
-}
-
-window.closeBookModal = function() {
-    document.getElementById('bookModal').classList.add('hidden');
-}
-
-window.appendBookToDraft = function() {
-    const bookContent = document.getElementById('bookContent').value;
-    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + bookContent;
-    saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
-    showToast("📝 已追加书稿内容到草稿区");
-}
-
-window.saveDraftToBook = function() {
-    const draft = dom.workspace.value.trim();
-    if(!draft) {
-        showToast("⚠️ 草稿区为空");
-        return;
-    }
-    bookLibrary.push({
-        name: `草稿_${new Date().toLocaleString()}`,
-        content: draft
-    });
-    saveBooks();
-    renderBookLibrary();
-    showToast("💾 草稿已保存为新书稿");
-}
-
-function autoSaveDraftToTempBook() {
-    const draft = dom.workspace.value.trim();
-    if(!draft) return;
-    const tempBook = bookLibrary.find(b => b.name === "临时草稿（自动保存）");
-    if(tempBook) {
-        tempBook.content = draft;
-    } else {
-        bookLibrary.unshift({ name: "临时草稿（自动保存）", content: draft });
-    }
-    saveBooks();
-    renderBookLibrary();
-}
-
-function updateWordCount() {
-    const content = document.getElementById('bookContent').value;
-    document.getElementById('bookWordCount').textContent = content.length;
-}
-
-function saveBooks() {
-    saveToLocal(STORAGE_KEYS.books, bookLibrary);
-}
-
-// ==================== 一键排版 ====================
+// 超强一键排版
 function typesetContent() {
-    let text = dom.workspace.value;
-    if(!text) { showToast("⚠️ 编辑区为空"); return; }
-    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+/g, '\n');
+    let text = dom.workspace.value.trim();
+    if(!text) { 
+        showToast("⚠️ 编辑区为空"); 
+        return; 
+    }
+    
+    text = text.replace(/\s+/g, ' ');
+    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    text = text.replace(/([。！？；])([^”’])/g, '$1\n$2');
+    text = text.replace(/([”’」])/g, '$1\n');
+    text = text.replace(/([“‘「])/g, '\n$1');
+    text = text.replace(/\n+/g, '\n');
+    text = text.replace(/^\s+|\s+$/g, '');
+    
     dom.workspace.value = text;
     saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
-    showToast("📝 排版完成");
+    showToast("📝 智能排版完成");
 }
 
-// ==================== 神兵武库 ====================
-function updateSidebarPromptBadge() {
-    const count = Object.keys(prompts).length;
-    document.getElementById('promptCountBadge').innerText = count + '件';
-    document.getElementById('modalListCount').innerText = count;
+// 神兵武库
+function updateSidebarPromptBadge() { 
+    const count = Object.keys(prompts).length; 
+    document.getElementById('promptCountBadge').innerText = count + '件'; 
+    document.getElementById('modalListCount').innerText = count; 
 }
 
 function renderModalPromptList() {
-    const list = document.getElementById('modalPromptList');
+    const list = document.getElementById('modalPromptList'); 
     list.innerHTML = '';
+    
     Object.keys(prompts).forEach(name => {
         const item = document.createElement('div');
-        item.className = "group bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex justify-between items-center cursor-pointer hover:border-blue-400 transition-all theme-dark:bg-gray-800 theme-dark:border-gray-700";
-        const titleSpan = document.createElement('span');
-        titleSpan.className = "text-xs font-bold text-gray-700 truncate flex-1 pointer-events-none theme-dark:text-gray-300";
+        item.className = "group bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex justify-between items-center cursor-pointer hover:border-blue-400 transition-all";
+        
+        const titleSpan = document.createElement('span'); 
+        titleSpan.className = "text-xs font-bold text-gray-700 truncate flex-1 pointer-events-none"; 
         titleSpan.textContent = name;
-        const btnContainer = document.createElement('div');
+        
+        const btnContainer = document.createElement('div'); 
         btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2";
         const editBtn = createButton('✏️', 'text-blue-500 hover:bg-blue-50', () => loadPromptIntoEditor(name));
         const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-50', () => deletePrompt(name));
-        btnContainer.append(editBtn, delBtn);
-        item.append(titleSpan, btnContainer);
-        item.onclick = () => loadPromptIntoEditor(name);
+        
+        btnContainer.append(editBtn, delBtn); 
+        item.append(titleSpan, btnContainer); 
+        item.onclick = () => loadPromptIntoEditor(name); 
         list.appendChild(item);
     });
-    updateSidebarPromptBadge();
+    
+    updateSidebarPromptBadge(); 
     renderSelect();
 }
 
-function createButton(text, className, onClick) {
-    const btn = document.createElement('button');
-    btn.className = `${className} p-1.5 rounded-md transition theme-dark:hover:bg-gray-700`;
-    btn.innerHTML = text;
-    btn.onclick = e => { e.stopPropagation(); onClick(); };
-    return btn;
+function createButton(text, className, onClick) { 
+    const btn = document.createElement('button'); 
+    btn.className = `${className} p-1.5 rounded-md transition`; 
+    btn.innerHTML = text; 
+    btn.onclick = e => { 
+        e.stopPropagation(); 
+        onClick(); 
+    }; 
+    return btn; 
 }
 
-function loadPromptIntoEditor(name) {
-    editingOldPromptName = name;
-    document.getElementById('modalPromptName').value = name;
-    document.getElementById('modalPromptContent').value = prompts[name];
-    document.getElementById('promptEditorIcon').textContent = "✏️";
-    document.getElementById('promptEditorTitle').textContent = "修改兵器";
-    const saveBtn = document.getElementById('savePromptBtn');
-    saveBtn.textContent = "保存修改";
-    saveBtn.classList.replace('bg-blue-600', 'bg-amber-500');
-    saveBtn.classList.replace('hover:bg-blue-500', 'hover:bg-amber-400');
+function loadPromptIntoEditor(name) { 
+    editingOldPromptName = name; 
+    document.getElementById('modalPromptName').value = name; 
+    document.getElementById('modalPromptContent').value = prompts[name]; 
+    document.getElementById('promptEditorIcon').textContent = "✏️"; 
+    document.getElementById('promptEditorTitle').textContent = "修改兵器"; 
+    const saveBtn = document.getElementById('savePromptBtn'); 
+    saveBtn.textContent = "保存修改"; 
+    saveBtn.classList.replace('bg-blue-600', 'bg-amber-500'); 
+    saveBtn.classList.replace('hover:bg-blue-500', 'hover:bg-amber-400'); 
 }
 
-function resetPromptEditor() {
-    editingOldPromptName = null;
-    document.getElementById('modalPromptName').value = '';
-    document.getElementById('modalPromptContent').value = '';
-    document.getElementById('promptEditorIcon').textContent = "✨";
-    document.getElementById('promptEditorTitle').textContent = "锻造新兵器";
-    const saveBtn = document.getElementById('savePromptBtn');
-    saveBtn.textContent = "保存入库";
-    saveBtn.classList.replace('bg-amber-500', 'bg-blue-600');
-    saveBtn.classList.replace('hover:bg-amber-400', 'hover:bg-blue-500');
+function resetPromptEditor() { 
+    editingOldPromptName = null; 
+    document.getElementById('modalPromptName').value = ''; 
+    document.getElementById('modalPromptContent').value = ''; 
+    document.getElementById('promptEditorIcon').textContent = "✨"; 
+    document.getElementById('promptEditorTitle').textContent = "锻造新兵器"; 
+    const saveBtn = document.getElementById('savePromptBtn'); 
+    saveBtn.textContent = "保存入库"; 
+    saveBtn.classList.replace('bg-amber-500', 'bg-blue-600'); 
+    saveBtn.classList.replace('hover:bg-amber-400', 'hover:bg-blue-500'); 
 }
 
-function savePrompt() {
-    const newName = document.getElementById('modalPromptName').value.trim();
-    const newContent = document.getElementById('modalPromptContent').value.trim();
-    if(!newName || !newContent) { alert("名称和指令内容均不可为空！"); return; }
-    if(editingOldPromptName && editingOldPromptName !== newName) delete prompts[editingOldPromptName];
-    prompts[newName] = newContent;
-    saveToLocal(STORAGE_KEYS.prompts, prompts);
-    showToast(`✨ 兵器【${newName}】已就绪`);
-    resetPromptEditor();
-    renderModalPromptList();
+function savePrompt() { 
+    const newName = document.getElementById('modalPromptName').value.trim(); 
+    const newContent = document.getElementById('modalPromptContent').value.trim(); 
+    
+    if(!newName || !newContent) { 
+        alert("名称和指令内容均不可为空！"); 
+        return; 
+    } 
+    
+    if(editingOldPromptName && editingOldPromptName !== newName) delete prompts[editingOldPromptName]; 
+    prompts[newName] = newContent; 
+    saveToLocal(STORAGE_KEYS.prompts, prompts); 
+    showToast(`✨ 兵器【${newName}】已就绪`); 
+    resetPromptEditor(); 
+    renderModalPromptList(); 
 }
 
-window.deletePrompt = function(name) {
-    if(Object.keys(prompts).length <= 1) { alert("至少保留一个"); return; }
-    if(confirm(`销毁【${name}】？`)) {
-        delete prompts[name];
-        saveToLocal(STORAGE_KEYS.prompts, prompts);
-        if(editingOldPromptName === name) resetPromptEditor();
-        renderModalPromptList();
-    }
+window.deletePrompt = function(name) { 
+    if(Object.keys(prompts).length <= 1) { 
+        alert("至少保留一个"); 
+        return; 
+    } 
+    if(confirm(`销毁【${name}】？`)) { 
+        delete prompts[name]; 
+        saveToLocal(STORAGE_KEYS.prompts, prompts); 
+        if(editingOldPromptName === name) resetPromptEditor(); 
+        renderModalPromptList(); 
+    } 
 };
 
-function renderSelect() {
-    const s = document.getElementById('promptSelect');
-    s.innerHTML = '';
-    Object.keys(prompts).forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k;
-        opt.textContent = k;
-        s.appendChild(opt);
-    });
+function renderSelect() { 
+    const s = document.getElementById('promptSelect'); 
+    s.innerHTML = ''; 
+    Object.keys(prompts).forEach(k => { 
+        const opt = document.createElement('option'); 
+        opt.value = k; 
+        opt.textContent = k; 
+        s.appendChild(opt); 
+    }); 
 }
 
-// ==================== 主题 & 系统 ====================
-function toggleThemeMenu(e) {
-    e.stopPropagation();
-    const menu = document.getElementById('themeMenu');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+// 系统功能
+function exportSystemData() { 
+    const systemData = { 
+        flowConfig, prompts, sampleLibrary, history, books: bookLibrary, workspace: dom.workspace.value 
+    }; 
+    const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: "application/json;charset=utf-8" }); 
+    saveAs(blob, `灵犀_备份_${Date.now()}.json`); 
+    showToast("✅ 备份已导出"); 
 }
 
-window.setTheme = (themeClass) => {
-    document.body.className = `h-screen flex overflow-hidden ${themeClass}`;
-    localStorage.setItem(STORAGE_KEYS.theme, themeClass);
-};
-
-function exportSystemData() {
-    const systemData = { flowConfig, prompts, sampleLibrary, history, books: bookLibrary, workspace: dom.workspace.value };
-    const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: "application/json;charset=utf-8" });
-    saveAs(blob, `灵犀_备份_${Date.now()}.json`);
+function importSystemData(e) { 
+    const file = e.target.files[0]; 
+    if (!file) return; 
+    const reader = new FileReader(); 
+    reader.onload = function(event) { 
+        try { 
+            const data = JSON.parse(event.target.result); 
+            if (data.flowConfig) flowConfig = data.flowConfig; 
+            if (data.prompts) prompts = data.prompts; 
+            if (data.sampleLibrary) sampleLibrary = data.sampleLibrary; 
+            if (data.history) history = data.history; 
+            if (data.books) bookLibrary = data.books; 
+            saveAllData(); 
+            if (data.workspace !== undefined) dom.workspace.value = data.workspace; 
+            showToast("✨ 读取成功"); 
+            init(); 
+        } catch (err) { 
+            alert("导入失败，请检查文件格式"); 
+        } 
+    }; 
+    reader.readAsText(file); 
+    e.target.value = ''; 
 }
 
-function importSystemData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        try {
-            const data = JSON.parse(event.target.result);
-            if (data.flowConfig) flowConfig = data.flowConfig;
-            if (data.prompts) prompts = data.prompts;
-            if (data.sampleLibrary) sampleLibrary = data.sampleLibrary;
-            if (data.history) history = data.history;
-            if (data.books) bookLibrary = data.books;
-            saveAllData();
-            if (data.workspace !== undefined) dom.workspace.value = data.workspace;
-            showToast("✨ 读取成功");
-            init();
-        } catch (err) { alert("失败"); }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+function initAutoBackup() { 
+    if(autoBackupTimer) clearInterval(autoBackupTimer); 
+    autoBackupTimer = setInterval(() => { 
+        const snapshot = { 
+            flowConfig, prompts, sampleLibrary, history, bookLibrary, workspace: dom.workspace.value, timestamp: new Date().toLocaleString() 
+        }; 
+        localStorage.setItem(STORAGE_KEYS.autoBackup, JSON.stringify(snapshot)); 
+    }, 5*60*1000); 
 }
 
-function initAutoBackup() {
-    if(autoBackupTimer) clearInterval(autoBackupTimer);
-    autoBackupTimer = setInterval(() => {
-        const snapshot = { flowConfig, prompts, sampleLibrary, history, bookLibrary, workspace: dom.workspace.value, timestamp: new Date().toLocaleString() };
-        localStorage.setItem(STORAGE_KEYS.autoBackup, JSON.stringify(snapshot));
-    }, 5*60*1000);
+function showToast(msg) { 
+    const toast = document.createElement('div'); 
+    toast.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2 rounded-full shadow-lg z-[300] transition-opacity duration-700 text-xs font-bold backdrop-blur-md"; 
+    toast.textContent = msg; 
+    document.body.appendChild(toast); 
+    setTimeout(() => toast.style.opacity = '0', 2000); 
+    setTimeout(() => toast.remove(), 2700); 
 }
 
-function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2 rounded-full shadow-lg z-[300] transition-opacity duration-700 text-xs font-bold backdrop-blur-md";
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.style.opacity = '0', 2000);
-    setTimeout(() => toast.remove(), 2700);
-}
-
-// ==================== 例文库 ====================
+// 例文库
 function renderSampleLibrary() {
-    const container = document.getElementById('sampleLibrary');
+    const container = document.getElementById('sampleLibrary'); 
     container.innerHTML = '';
+    
     sampleLibrary.forEach((s, i) => {
         const isSelected = selectedSampleIndices.includes(i);
         const div = document.createElement('div');
         div.className = `p-3 rounded-xl border text-[11px] transition-all flex flex-col gap-2 ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        
         div.innerHTML = `
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 cursor-pointer text-gray-200">
@@ -614,393 +883,473 @@ function renderSampleLibrary() {
             </div>
             ${s.gene ? `<div class="text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1.5 rounded-md italic line-clamp-1 mt-1 font-bold">已分析基因</div>` : ''}
         `;
+        
         container.appendChild(div);
     });
 }
 
-window.toggleSample = function(idx) {
-    selectedSampleIndices = selectedSampleIndices.includes(idx)
-        ? selectedSampleIndices.filter(i => i !== idx)
-        : [...selectedSampleIndices, idx];
-    renderSampleLibrary();
+window.toggleSample = function(idx) { 
+    selectedSampleIndices = selectedSampleIndices.includes(idx) ? selectedSampleIndices.filter(i => i !== idx) : [...selectedSampleIndices, idx]; 
+    renderSampleLibrary(); 
 };
 
-async function extractGene(idx) {
-    if (isGenerating) return;
-    const sample = sampleLibrary[idx];
-    const msgWrapper = appendMsg('ai', `正在提取《${sample.name}》...`);
-    const target = msgWrapper.querySelector('.msg-body');
-    isGenerating = true;
-    abortController = new AbortController();
-    try {
-        await streamCallAI(document.getElementById('singleModel').value, "基因专家", `${GENE_PROMPT}\n\n内容：${sample.text.slice(0,5000)}`, target, 0.3);
-        sample.gene = target.textContent;
-        saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
-    } finally { isGenerating = false; abortController = null; renderSampleLibrary(); }
+async function extractGene(idx) { 
+    if (isGenerating) return; 
+    const sample = sampleLibrary[idx]; 
+    const msgWrapper = appendMsg('ai', `正在提取《${sample.name}》...`); 
+    const target = msgWrapper.querySelector('.msg-body'); 
+    isGenerating = true; 
+    abortController = new AbortController(); 
+    
+    try { 
+        await streamCallAI(document.getElementById('singleModel').value, "基因专家", `${GENE_PROMPT}\n\n内容：${sample.text.slice(0,5000)}`, target, 0.3); 
+        sample.gene = target.textContent; 
+        saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
+    } finally { 
+        isGenerating = false; 
+        abortController = null; 
+        renderSampleLibrary(); 
+    } 
 }
 
-// ==================== 发送 & AI ====================
-async function handleSend() {
-    if (isGenerating) { if(abortController) abortController.abort(); resetSendButton(); return; }
-    const text = dom.userInput.value.trim();
-    if(!text) return;
-
-    let combinedRef = "";
-    selectedSampleIndices.forEach(idx => {
-        const s = sampleLibrary[idx];
-        combinedRef += `\n【参考《${s.name}》】\n${s.gene || s.text.slice(0,800)}\n`;
-    });
-
-    const finalPrompt = `### 参考\n${combinedRef}\n### 指令\n${prompts[document.getElementById('promptSelect').value]}\n### 任务\n${text}`;
-    const isPKMode = !document.getElementById('pkSelectBox').classList.contains('hidden');
-
-    isGenerating = true;
-    setSendButtonToStop();
-    abortController = new AbortController();
-
-    try {
-        if(isPKMode) await handlePKMode(finalPrompt);
-        else await handleSingleMode(text, finalPrompt);
-    } finally {
-        isGenerating = false;
-        abortController = null;
-        resetSendButton();
-        dom.userInput.value = '';
-        saveHistory();
-        renderHistorySelect();
-    }
+// 发送 & AI
+async function handleSend() { 
+    if (isGenerating) { 
+        if(abortController) abortController.abort(); 
+        resetSendButton(); 
+        return; 
+    } 
+    
+    const text = dom.userInput.value.trim(); 
+    if(!text) return; 
+    
+    let combinedRef = ""; 
+    selectedSampleIndices.forEach(idx => { 
+        const s = sampleLibrary[idx]; 
+        combinedRef += `\n【参考《${s.name}》】\n${s.gene || s.text.slice(0,800)}\n`; 
+    }); 
+    
+    const finalPrompt = `### 参考\n${combinedRef}\n### 指令\n${prompts[document.getElementById('promptSelect').value]}\n### 任务\n${text}`; 
+    const isPKMode = !document.getElementById('pkSelectBox').classList.contains('hidden'); 
+    
+    isGenerating = true; 
+    setSendButtonToStop(); 
+    abortController = new AbortController(); 
+    
+    try { 
+        if(isPKMode) await handlePKMode(finalPrompt); 
+        else await handleSingleMode(text, finalPrompt); 
+    } finally { 
+        isGenerating = false; 
+        abortController = null; 
+        resetSendButton(); 
+        dom.userInput.value = ''; 
+        saveHistory(); 
+        renderHistorySelect(); 
+    } 
 }
 
-async function handleSingleMode(userText, prompt) {
-    appendMsg('user', userText);
-    const aiWrapper = appendMsg('ai', "...");
-    const target = aiWrapper.querySelector('.msg-body');
-    await streamCallAI(document.getElementById('singleModel').value, "写作专家", prompt, target, parseFloat(dom.tempSlider.value));
-    addActions(aiWrapper.querySelector('.ai-msg'), target.textContent);
+async function handleSingleMode(userText, prompt) { 
+    appendMsg('user', userText); 
+    const aiWrapper = appendMsg('ai', "..."); 
+    const target = aiWrapper.querySelector('.msg-body'); 
+    await streamCallAI(document.getElementById('singleModel').value, "写作专家", prompt, target, parseFloat(dom.tempSlider.value)); 
+    addActions(aiWrapper.querySelector('.ai-msg'), target.textContent); 
 }
 
-async function handlePKMode(prompt) {
-    const mA = document.getElementById('modelA').value;
-    const mB = document.getElementById('modelB').value;
-    const pkGrid = document.createElement('div');
-    pkGrid.className = "pk-grid flex gap-4 w-full mb-6 relative z-10";
-    const colA = createPKCol(mA);
-    const colB = createPKCol(mB);
-    pkGrid.append(colA, colB);
-    dom.displayArea.appendChild(pkGrid);
-    checkEmptyState();
-    const t = parseFloat(dom.tempSlider.value);
-    await Promise.all([
-        streamCallAI(mA, "专家", prompt, colA.querySelector('.pk-body'), t),
-        streamCallAI(mB, "专家", prompt, colB.querySelector('.pk-body'), t)
-    ]);
-    addActions(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').textContent);
-    addActions(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').textContent);
+async function handlePKMode(prompt) { 
+    const mA = document.getElementById('modelA').value; 
+    const mB = document.getElementById('modelB').value; 
+    const pkGrid = document.createElement('div'); 
+    pkGrid.className = "pk-grid flex gap-4 w-full mb-6 relative z-10"; 
+    const colA = createPKCol(mA); 
+    const colB = createPKCol(mB); 
+    pkGrid.append(colA, colB); 
+    dom.displayArea.appendChild(pkGrid); 
+    checkEmptyState(); 
+    const t = parseFloat(dom.tempSlider.value); 
+    await Promise.all([ 
+        streamCallAI(mA, "专家", prompt, colA.querySelector('.pk-body'), t), 
+        streamCallAI(mB, "专家", prompt, colB.querySelector('.pk-body'), t) 
+    ]); 
+    addActions(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').textContent); 
+    addActions(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').textContent); 
 }
 
 async function streamCallAI(model, sys, text, target, temp) {
     let url, key;
-    if(model.includes('doubao') || model.startsWith('ep-')) {
-        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-        key = flowConfig.db_key;
-    } else if(model === 'deepseek-chat') {
-        url = 'https://api.deepseek.com/v1/chat/completions';
-        key = flowConfig.ds_key;
-    } else if(model === 'qwen-plus') {
-        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-        key = flowConfig.qw_key;
-    } else {
-        url = flowConfig.proxy_url.replace(/\/$/, '') + '/chat/completions';
-        key = flowConfig.proxy_key;
+    
+    if(model.includes('doubao') || model.startsWith('ep-')) { 
+        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; 
+        key = flowConfig.db_key; 
     }
+    else if(model === 'deepseek-chat') { 
+        url = 'https://api.deepseek.com/v3/chat/completions'; 
+        key = flowConfig.ds_key; 
+    }
+    else if(model === 'qwen-plus') { 
+        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'; 
+        key = flowConfig.qw_key; 
+    }
+    else { 
+        url = flowConfig.proxy_url.replace(/\/$/, '') + '/chat/completions'; 
+        key = flowConfig.proxy_key; 
+    }
+    
     try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key.trim()}` },
-            body: JSON.stringify({ model, messages: [{role:'system',content:sys},{role:'user',content:text}], stream: true, temperature: temp }),
-            signal: abortController.signal
+        const res = await fetch(url, { 
+            method: 'POST', 
+            headers: { 
+                'Content-Type': 'application/json', 
+                Authorization: `Bearer ${key.trim()}` 
+            }, 
+            body: JSON.stringify({ 
+                model, 
+                messages: [{role:'system',content:sys},{role:'user',content:text}], 
+                stream: true, 
+                temperature: temp 
+            }), 
+            signal: abortController.signal 
         });
-        const reader = res.body.getReader();
-        const d = new TextDecoder();
+        
+        const reader = res.body.getReader(); 
+        const d = new TextDecoder(); 
         target.textContent = '';
-        while(true) {
-            const { done, value } = await reader.read();
-            if(done) break;
-            const chunk = d.decode(value);
-            const lines = chunk.split('\n');
-            for(const line of lines) {
-                const l = line.trim();
-                if(!l.startsWith('data: ')) continue;
-                const s = l.replace('data: ', '');
-                if(s === '[DONE]') break;
-                try {
-                    const j = JSON.parse(s);
-                    const c = j.choices[0].delta.content;
-                    if(c) {
-                        target.textContent += c;
-                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-                    }
-                } catch(e) {}
-            }
-        }
-    } catch(e) {
-        target.textContent += e.name === 'AbortError' ? '\n[已停止]' : `\n错误：${e.message}`;
+        
+        while(true) { 
+            const { done, value } = await reader.read(); 
+            if(done) break; 
+            const chunk = d.decode(value); 
+            const lines = chunk.split('\n'); 
+            
+            for(const line of lines) { 
+                const l = line.trim(); 
+                if(!l.startsWith('data: ')) continue; 
+                const s = l.replace('data: ', ''); 
+                if(s === '[DONE]') break; 
+                try { 
+                    const j = JSON.parse(s); 
+                    const c = j.choices[0].delta.content; 
+                    if(c) { 
+                        target.textContent += c; 
+                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight; 
+                    } 
+                } catch(e) {} 
+            } 
+        } 
+    } catch(e) { 
+        target.textContent += e.name === 'AbortError' ? '\n[已停止]' : `\n错误：${e.message}`; 
     }
 }
 
-// ==================== 回填修复：只追加不覆盖 ====================
+// 操作按钮
 function addActions(container, text) {
-    const footer = document.createElement('div');
-    footer.className = 'flex gap-4 mt-4 border-t border-gray-100 pt-3 theme-dark:border-gray-700';
-    const btnBack = createActionBtn('⬅️ 填入工作区', 'text-blue-500', () => {
-        dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + text;
-        saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
-        showToast("已追加到草稿");
+    const footer = document.createElement('div'); 
+    footer.className = 'flex gap-4 mt-4 border-t border-gray-100 pt-3';
+    const btnCopy = createActionBtn('📋 复制', 'text-green-500', () => { 
+        navigator.clipboard.writeText(text); 
+        showToast("✅ 已复制到剪贴板"); 
     });
-    const btnWord = createActionBtn('📄 导出Word', 'text-gray-400', () => {
-        const doc = new docx.Document({
-            sections: [{
-                properties: {},
-                children: [new docx.Paragraph(text)]
-            }]
-        });
-        docx.Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "灵犀生成内容.docx");
-            showToast("✅ Word导出成功");
-        });
+    const btnAddBook = createActionBtn('📖 添加新书稿', 'text-blue-500', () => { 
+        const name = `书稿_${new Date().toLocaleString()}`; 
+        bookLibrary.push({ name, content: text }); 
+        saveBooks(); 
+        renderBookLibrary(); 
+        showToast(`✅ 已新建书稿：${name}`); 
     });
-    footer.append(btnBack, btnWord);
+    const btnWord = createActionBtn('📄 导出Word', 'text-gray-400', () => { 
+        const doc = new docx.Document({ 
+            sections: [{ 
+                properties: {}, 
+                children: [new docx.Paragraph(text)] 
+            }] 
+        }); 
+        docx.Packer.toBlob(doc).then(blob => { 
+            saveAs(blob, "灵犀生成内容.docx"); 
+            showToast("✅ Word导出成功"); 
+        }); 
+    });
+    footer.append(btnCopy, btnAddBook, btnWord); 
     container.appendChild(footer);
 }
 
-function createActionBtn(text, cls, onClick) {
-    const btn = document.createElement('button');
-    btn.className = `text-xs font-bold ${cls} hover:bg-gray-100 px-3 py-1.5 rounded-lg transition theme-dark:hover:bg-gray-800`;
-    btn.textContent = text;
-    btn.onclick = onClick;
-    return btn;
+function createActionBtn(text, cls, onClick) { 
+    const btn = document.createElement('button'); 
+    btn.className = `text-xs font-bold ${cls} hover:bg-gray-100 px-3 py-1 rounded-lg transition`; 
+    btn.textContent = text; 
+    btn.onclick = onClick; 
+    return btn; 
 }
 
-// ==================== 消息 & 界面 ====================
+// 消息模块
 function appendMsg(role, html) {
-    const wrap = document.createElement('div');
+    const wrap = document.createElement('div'); 
     wrap.className = 'msg-wrapper';
-    const msg = document.createElement('div');
+    const msg = document.createElement('div'); 
     msg.className = role === 'user' ? 'user-msg' : 'ai-msg';
-    const body = document.createElement('div');
-    body.className = 'msg-body';
-    body.textContent = html;
+    const body = document.createElement('div'); 
+    body.className = 'msg-body'; 
+    body.textContent = html; 
     msg.appendChild(body);
-    wrap.appendChild(msg);
-    dom.displayArea.appendChild(wrap);
-    checkEmptyState();
-    dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
+    const copyBtn = document.createElement('button'); 
+    copyBtn.className = 'text-xs font-bold text-gray-400 hover:text-white mt-2 px-2 py-1 rounded-lg transition opacity-50 hover:opacity-100 self-end'; 
+    copyBtn.textContent = '📋 复制'; 
+    copyBtn.onclick = () => { 
+        navigator.clipboard.writeText(body.textContent); 
+        showToast("✅ 已复制"); 
+    }; 
+    msg.appendChild(copyBtn);
+    wrap.appendChild(msg); 
+    dom.displayArea.appendChild(wrap); 
+    checkEmptyState(); 
+    dom.displayArea.scrollTop = dom.displayArea.scrollHeight; 
     return wrap;
 }
 
 function createPKCol(model) {
-    const col = document.createElement('div');
-    col.className = 'flex-1 bg-white rounded-2xl shadow border border-gray-100 overflow-hidden theme-dark:bg-gray-800 theme-dark:border-gray-700';
+    const col = document.createElement('div'); 
+    col.className = 'flex-1 bg-white rounded-2xl shadow border border-gray-100 overflow-hidden';
     col.innerHTML = `
-        <div class="p-3 bg-gray-50 text-xs font-black text-gray-500 border-b border-gray-200 theme-dark:bg-gray-700 theme-dark:text-gray-300 theme-dark:border-gray-600">
+        <div class="p-3 bg-gray-50 text-xs font-black text-gray-500 border-b border-gray-200">
             ${model}
         </div>
-        <div class="p-4 text-sm min-h-[300px] pk-body whitespace-pre-line theme-dark:text-gray-200"></div>
+        <div class="p-4 text-sm min-h-[300px] pk-body whitespace-pre-line"></div>
     `;
     return col;
 }
 
-function setSendButtonToStop() {
-    dom.sendBtn.innerHTML = '<span>⏹️</span> 停止';
-    dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500');
-    dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400');
+function setSendButtonToStop() { 
+    dom.sendBtn.innerHTML = '<span>⏹️</span> 停止'; 
+    dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500'); 
+    dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400'); 
 }
 
-function resetSendButton() {
-    dom.sendBtn.innerHTML = '<span>🚀</span> 执行';
-    dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600');
-    dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500');
+function resetSendButton() { 
+    dom.sendBtn.innerHTML = '<span>🚀</span> 执行'; 
+    dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600'); 
+    dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500'); 
 }
 
-// ==================== 模式切换 ====================
-function switchToChatMode() {
-    document.getElementById('modeChat').classList.add('mode-btn-active');
-    document.getElementById('modePK').classList.remove('mode-btn-active');
-    document.getElementById('singleSelectBox').classList.remove('hidden');
-    document.getElementById('pkSelectBox').classList.add('hidden');
-}
-function switchToPKMode() {
-    document.getElementById('modePK').classList.add('mode-btn-active');
-    document.getElementById('modeChat').classList.remove('mode-btn-active');
-    document.getElementById('singleSelectBox').classList.add('hidden');
-    document.getElementById('pkSelectBox').classList.remove('hidden');
+// 模式切换
+function switchToChatMode() { 
+    document.getElementById('modeChat').classList.add('mode-btn-active'); 
+    document.getElementById('modePK').classList.remove('mode-btn-active'); 
+    document.getElementById('singleSelectBox').classList.remove('hidden'); 
+    document.getElementById('pkSelectBox').classList.add('hidden'); 
 }
 
-// ==================== 文件导入 ====================
-async function handleFileImport(e) {
-    const files = e.target.files;
-    if(!files) return;
-    for(const f of files) {
-        const name = f.name;
-        try {
-            let text = '';
-            if(name.endsWith('.docx')) {
-                text = await new Promise((res, rej) => {
-                    const reader = new FileReader();
-                    reader.onload = e => mammoth.extractRawText({arrayBuffer: e.target.result}).then(r => res(r.value)).catch(rej);
-                    reader.readAsArrayBuffer(f);
-                });
-            } else {
-                text = await f.text();
-            }
-            if(text) {
-                sampleLibrary.push({ name, text, gene: '' });
-                saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
-                renderSampleLibrary();
-            }
-        } catch(e) {}
-    }
-    e.target.value = '';
+function switchToPKMode() { 
+    document.getElementById('modePK').classList.add('mode-btn-active'); 
+    document.getElementById('modeChat').classList.remove('mode-btn-active'); 
+    document.getElementById('singleSelectBox').classList.add('hidden'); 
+    document.getElementById('pkSelectBox').classList.remove('hidden'); 
 }
 
-// ==================== 历史记录 ====================
-function saveHistory() {
-    const messages = Array.from(dom.displayArea.querySelectorAll('.msg-body')).map(el => el.textContent);
-    if(messages.length === 0) return;
-    const title = messages[0].slice(0, 20) + '...';
-    const item = { title, messages, timestamp: Date.now() };
-    history = [item, ...history.slice(0, 99)];
-    saveToLocal(STORAGE_KEYS.history, history);
+// 文件导入
+async function handleFileImport(e) { 
+    const files = e.target.files; 
+    if(!files) return; 
+    for(const f of files) { 
+        const name = f.name; 
+        try { 
+            let text = ''; 
+            if(name.endsWith('.docx')) { 
+                text = await new Promise((res, rej) => { 
+                    const reader = new FileReader(); 
+                    reader.onload = e => mammoth.extractRawText({arrayBuffer: e.target.result}).then(r => res(r.value)).catch(rej); 
+                    reader.readAsArrayBuffer(f); 
+                }); 
+            } else { 
+                text = await f.text(); 
+            } 
+            if(text) { 
+                sampleLibrary.push({ name, text, gene: '' }); 
+                saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
+                renderSampleLibrary(); 
+            } 
+        } catch(e) {} 
+    } 
+    e.target.value = ''; 
 }
 
-function renderHistorySelect() {
-    const sel = document.getElementById('historySelect');
-    sel.innerHTML = '<option value="">-- 点击选择 --</option>';
-    history.forEach((h, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = h.title;
-        sel.appendChild(opt);
-    });
+// 历史记录
+function saveHistory() { 
+    const messages = Array.from(dom.displayArea.querySelectorAll('.msg-body')).map(el => el.textContent); 
+    if(messages.length === 0) return; 
+    const title = messages[0].slice(0, 20) + '...'; 
+    const item = { title, messages, timestamp: Date.now() }; 
+    history = [item, ...history.slice(0, 99)]; 
+    saveToLocal(STORAGE_KEYS.history, history); 
 }
 
-function loadHistory() {
-    const idx = document.getElementById('historySelect').value;
-    if(!history[idx]) return;
-    clearChat();
-    history[idx].messages.forEach((msg, i) => {
-        appendMsg(i % 2 === 0 ? 'user' : 'ai', msg);
-    });
+function renderHistorySelect() { 
+    const sel = document.getElementById('historySelect'); 
+    sel.innerHTML = '<option value="">-- 点击选择 --</option>'; 
+    history.forEach((h, i) => { 
+        const opt = document.createElement('option'); 
+        opt.value = i; 
+        opt.textContent = h.title; 
+        sel.appendChild(opt); 
+    }); 
 }
 
-// ==================== 配置 ====================
-function initConfigInputs() {
-    document.getElementById('ds_key').value = flowConfig.ds_key;
-    document.getElementById('qw_key').value = flowConfig.qw_key;
-    document.getElementById('db_key').value = flowConfig.db_key;
-    document.getElementById('proxy_url').value = flowConfig.proxy_url;
-    document.getElementById('proxy_key').value = flowConfig.proxy_key;
-    document.getElementById('proxy_models').value = flowConfig.proxy_models;
+function loadHistory() { 
+    const idx = document.getElementById('historySelect').value; 
+    if(!history[idx]) return; 
+    clearChat(); 
+    history[idx].messages.forEach((msg, i) => { 
+        appendMsg(i % 2 === 0 ? 'user' : 'ai', msg); 
+    }); 
 }
 
-function saveConfig() {
-    flowConfig = {
-        ds_key: document.getElementById('ds_key').value.trim(),
-        qw_key: document.getElementById('qw_key').value.trim(),
-        db_key: document.getElementById('db_key').value.trim(),
-        proxy_url: document.getElementById('proxy_url').value.trim(),
-        proxy_key: document.getElementById('proxy_key').value.trim(),
-        proxy_models: document.getElementById('proxy_models').value.trim()
-    };
-    saveToLocal(STORAGE_KEYS.flow, flowConfig);
-    updateModelDropdowns();
-    showToast("✅ 配置已保存");
-    closeSettings();
+// 配置
+function initConfigInputs() { 
+    document.getElementById('ds_key').value = flowConfig.ds_key; 
+    document.getElementById('qw_key').value = flowConfig.qw_key; 
+    document.getElementById('db_key').value = flowConfig.db_key; 
+    document.getElementById('proxy_url').value = flowConfig.proxy_url; 
+    document.getElementById('proxy_key').value = flowConfig.proxy_key; 
+    document.getElementById('proxy_models').value = flowConfig.proxy_models; 
 }
 
-function updateModelDropdowns() {
-    const official = ['deepseek-chat', 'qwen-plus', 'doubao-4'];
-    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s => s.trim()).filter(Boolean) : [];
-    const all = [...official, ...proxy];
-    ['singleModel', 'modelA', 'modelB'].forEach(id => {
-        const el = document.getElementById(id);
-        el.innerHTML = '';
-        all.forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            el.appendChild(opt);
-        });
-    });
+function saveConfig() { 
+    flowConfig = { 
+        ds_key: document.getElementById('ds_key').value.trim(), 
+        qw_key: document.getElementById('qw_key').value.trim(), 
+        db_key: document.getElementById('db_key').value.trim(), 
+        proxy_url: document.getElementById('proxy_url').value.trim(), 
+        proxy_key: document.getElementById('proxy_key').value.trim(), 
+        proxy_models: document.getElementById('proxy_models').value.trim() 
+    }; 
+    saveToLocal(STORAGE_KEYS.flow, flowConfig); 
+    updateModelDropdowns(); 
+    showToast("✅ 配置已保存"); 
+    closeSettings(); 
 }
 
-// ==================== 本地存储 ====================
-function saveToLocal(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-}
-function saveAllData() {
-    saveToLocal(STORAGE_KEYS.flow, flowConfig);
-    saveToLocal(STORAGE_KEYS.prompts, prompts);
-    saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
-    saveToLocal(STORAGE_KEYS.history, history);
-    saveToLocal(STORAGE_KEYS.books, bookLibrary);
-}
-function loadWorkspace() {
-    const val = localStorage.getItem(STORAGE_KEYS.workspace);
-    if(val) dom.workspace.value = val;
-}
-
-// ==================== 界面操作 ====================
-function clearChat() {
-    dom.displayArea.innerHTML = '';
-    dom.displayArea.appendChild(dom.emptyState);
-    checkEmptyState();
-}
-function newChat() {
-    clearChat();
-    dom.userInput.value = '';
-}
-function toggleSpace() {
-    const ed = document.getElementById('mainEditor');
-    ed.classList.toggle('editor-active');
-}
-function deleteSample(idx) {
-    sampleLibrary.splice(idx, 1);
-    selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx);
-    saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
-    renderSampleLibrary();
+function updateModelDropdowns() { 
+    const official = ['deepseek-chat', 'qwen-plus', 'doubao-4']; 
+    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s => s.trim()).filter(Boolean) : []; 
+    const all = [...official, ...proxy]; 
+    ['singleModel', 'modelA', 'modelB'].forEach(id => { 
+        const el = document.getElementById(id); 
+        el.innerHTML = ''; 
+        all.forEach(m => { 
+            const opt = document.createElement('option'); 
+            opt.value = m; 
+            opt.textContent = m; 
+            el.appendChild(opt); 
+        }); 
+    }); 
 }
 
-// ==================== 事件绑定 ====================
+// 本地存储
+function saveToLocal(key, data) { 
+    localStorage.setItem(key, JSON.stringify(data)); 
+}
+
+function saveAllData() { 
+    saveToLocal(STORAGE_KEYS.flow, flowConfig); 
+    saveToLocal(STORAGE_KEYS.prompts, prompts); 
+    saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
+    saveToLocal(STORAGE_KEYS.history, history); 
+    saveToLocal(STORAGE_KEYS.books, bookLibrary); 
+}
+
+function loadWorkspace() { 
+    const val = localStorage.getItem(STORAGE_KEYS.workspace); 
+    if(val) dom.workspace.value = val; 
+}
+
+// 界面操作
+function clearChat() { 
+    dom.displayArea.innerHTML = ''; 
+    dom.displayArea.appendChild(dom.emptyState); 
+    checkEmptyState(); 
+}
+
+function newChat() { 
+    clearChat(); 
+    dom.userInput.value = ''; 
+}
+
+function toggleSpace() { 
+    const ed = document.getElementById('mainEditor'); 
+    ed.classList.toggle('editor-active'); 
+}
+
+function deleteSample(idx) { 
+    sampleLibrary.splice(idx, 1); 
+    selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx); 
+    saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
+    renderSampleLibrary(); 
+}
+
+// 事件绑定
 function bindEvents() {
+    // 发送按钮
     dom.sendBtn.onclick = handleSend;
-    dom.userInput.onkeydown = e => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
-    dom.tempSlider.oninput = () => { dom.tempValueDisplay.textContent = dom.tempSlider.value; };
+    
+    // 输入框回车发送
+    dom.userInput.onkeydown = e => { 
+        if(e.key === 'Enter' && !e.shiftKey) { 
+            e.preventDefault(); 
+            handleSend(); 
+        } 
+    };
+    
+    // 温度滑块
+    dom.tempSlider.oninput = () => { 
+        dom.tempValueDisplay.textContent = dom.tempSlider.value; 
+    };
+    
+    // 分屏创作
     document.getElementById('toggleSpace').onclick = toggleSpace;
+    
+    // 新开篇
     document.getElementById('newChatBtn').onclick = newChat;
+    
+    // 一键排版
     document.getElementById('typesetBtn').onclick = typesetContent;
+    
+    // 清空聊天
     document.getElementById('clearChatBtn').onclick = clearChat;
+    
+    // 模式切换
     document.getElementById('modeChat').onclick = switchToChatMode;
     document.getElementById('modePK').onclick = switchToPKMode;
-    document.getElementById('themeToggle').onclick = toggleThemeMenu;
-    document.getElementById('exportSystemBtn').onclick = exportSystemData;
+    
+    // 左侧边栏日夜模式
+    document.getElementById('sidebarDarkToggle').onclick = toggleSidebarDarkMode;
+    
+    // 导入备份
     document.getElementById('importSystemInput').onchange = importSystemData;
-    document.getElementById('fileInput').onchange = handleFileImport;
+    
+    // 文件导入
+    document.getElementById('file').onchange = handleFileImport;
+    
+    // 历史记录选择
     document.getElementById('historySelect').onchange = loadHistory;
+    
+    // 设置弹窗
     document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
-    document.getElementById('closeSettings').onclick = closeSettings;
+    document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
     document.getElementById('saveSettings').onclick = saveConfig;
-    document.getElementById('openPromptModalBtn').onclick = () => { renderModalPromptList(); document.getElementById('promptModal').classList.remove('hidden'); };
+    
+    // 神兵武库弹窗
+    document.getElementById('openPromptModalBtn').onclick = () => { 
+        renderModalPromptList(); 
+        document.getElementById('promptModal').classList.remove('hidden'); 
+    };
     document.getElementById('closePromptModal').onclick = () => document.getElementById('promptModal').classList.add('hidden');
     document.getElementById('savePromptBtn').onclick = savePrompt;
     document.getElementById('resetPromptBtn').onclick = resetPromptEditor;
+    
+    // 书稿内容字数统计
     document.getElementById('bookContent').oninput = updateWordCount;
-    document.addEventListener('click', (e) => { if(!document.getElementById('themeMenu').contains(e.target)) document.getElementById('themeMenu').style.display = 'none'; });
-}
-function closeSettings() {
-    document.getElementById('settingsModal').classList.add('hidden');
 }
 
+// 页面加载完成后初始化
 window.onload = init;
 </script>
 </body>
