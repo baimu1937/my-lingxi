@@ -3,334 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵犀 - 最终稳定版</title>
+    <title>灵犀 - 智能创作平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* 基础样式 */
-        :root { 
-            --bg-main: #f8fafc; 
-            --bg-sidebar: #1e222d; 
+        :root {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #1e222d;
             --accent-blue: #3b82f6;
             --text-primary: #1e293b;
             --text-secondary: #475569;
             --border-color: #e2e8f0;
             --card-bg: #ffffff;
+            --footer-bg: #ffffff;
         }
-        
-        /* 主题样式 - 核心修复：为每个主题定义独立样式变量 */
         body.theme-dark {
             --bg-main: #0f172a;
             --text-primary: #e2e8f0;
             --text-secondary: #94a3b8;
             --border-color: #334155;
             --card-bg: #1e293b;
+            --footer-bg: #1e293b;
         }
-        
         body.theme-eye {
             --bg-main: #f0f9f0;
             --text-primary: #265e26;
             --text-secondary: #4a7c4a;
             --border-color: #d1e7d1;
             --card-bg: #ffffff;
+            --footer-bg: #f0f9f0;
         }
-        
         body.theme-retro {
             --bg-main: #fff8e6;
             --text-primary: #8b4513;
             --text-secondary: #a0522d;
             --border-color: #ffdead;
             --card-bg: #ffffff;
+            --footer-bg: #fff8e6;
         }
-        
-        /* 左侧边栏白天模式修复 */
-        .sidebar-light { 
-            --bg-sidebar: #ffffff !important; 
-            color: #1e293b !important; 
+
+        /* 侧边栏日间模式 */
+        .sidebar-light {
             background-color: #ffffff !important;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
             border-right: 1px solid #e2e8f0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
-        .sidebar-light .text-gray-200 { color: #475569 !important; }
-        .sidebar-light .text-blue-300 { color: #3b82f6 !important; }
-        .sidebar-light .border-white\/5 { border-color: #e2e8f0 !important; }
-        .sidebar-light .bg-black\/20 { background-color: #f1f5f9 !important; }
-        .sidebar-light .bg-white\/5 { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
-        .sidebar-light .mode-btn { color: #475569 !important; }
-        .sidebar-light .mode-btn-active { color: white !important; }
-        
-        /* 全局样式 */
-        body { 
-            background-color: var(--bg-main); 
+        .sidebar-light .sidebar-title  { color: #3b82f6 !important; }
+        .sidebar-light .sidebar-sub    { color: rgba(59,130,246,0.5) !important; }
+        .sidebar-light .text-gray-200  { color: #475569 !important; }
+        .sidebar-light .text-gray-400  { color: #64748b !important; }
+        .sidebar-light .text-gray-500  { color: #94a3b8 !important; }
+        .sidebar-light .text-blue-300  { color: #3b82f6 !important; }
+        .sidebar-light .text-blue-400  { color: #2563eb !important; }
+        .sidebar-light .border-white\/5  { border-color: #e2e8f0 !important; }
+        .sidebar-light .bg-black\/20   { background-color: #f1f5f9 !important; }
+        .sidebar-light .bg-white\/5    { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
+        .sidebar-light .bg-blue-500\/10 { background-color: rgba(59,130,246,0.08) !important; }
+        .sidebar-light .bg-blue-500\/20 { background-color: rgba(59,130,246,0.15) !important; }
+        .sidebar-light .mode-btn       { color: #475569 !important; }
+        .sidebar-light .mode-btn-active { color: #ffffff !important; }
+        .sidebar-light .book-item      { background-color: #f8fafc !important; border-color: #e2e8f0 !important; }
+        .sidebar-light .book-item-text { color: #1e293b !important; }
+
+        body {
+            background-color: var(--bg-main);
             color: var(--text-primary);
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif; 
-            transition: all 0.3s ease; 
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59, 130, 240, 0.2); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 240, 0.4); }
-        
-        .sidebar { 
-            width: 280px; 
-            background: var(--bg-sidebar); 
-            color: white; 
-            z-index: 50; 
-            transition: all 0.3s; 
+
+        /* 滚动条 */
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.4); }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: var(--bg-sidebar);
+            color: white;
+            z-index: 50;
+            transition: all 0.3s;
             height: 100vh;
         }
-        
-        .mode-btn { 
-            flex: 1; 
-            padding-top: 0.75rem; 
-            padding-bottom: 0.75rem; 
-            font-size: 15px !important; 
-            font-weight: 900; 
-            font-style: italic; 
-            transition: all 0.3s; 
-            border-radius: 10px; 
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.6rem 0;
+            font-size: 14px;
+            font-weight: 900;
+            font-style: italic;
+            transition: all 0.3s;
+            border-radius: 8px;
+            color: #9ca3af;
         }
-        
-        .mode-btn-active { 
-            background: #3b82f6; 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(59,130,240,0.4); 
+        .mode-btn-active {
+            background: #3b82f6;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
         }
-        
-        .msg-wrapper { margin-bottom: 2rem; display: flex; flex-direction: column; }
-        
-        .user-msg { 
-            background: var(--accent-blue); 
-            color: white; 
-            padding: 1.2rem 1.5rem; 
-            border-radius: 20px 20px 4px 20px; 
-            align-self: flex-end; 
-            max-width: 80%; 
-            line-height: 1.8; 
-            box-shadow: 0 4px 15px rgba(59,130,240,0.15); 
+
+        /* 消息气泡 */
+        .msg-wrapper { margin-bottom: 1.8rem; display: flex; flex-direction: column; }
+        .user-msg {
+            background: var(--accent-blue);
+            color: white;
+            padding: 1rem 1.4rem;
+            border-radius: 20px 20px 4px 20px;
+            align-self: flex-end;
+            max-width: 80%;
+            line-height: 1.8;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.2);
         }
-        
-        .ai-msg { 
-            background: var(--card-bg); 
-            color: var(--text-primary); 
-            padding: 1.5rem 2rem; 
-            border-radius: 20px 20px 20px 4px; 
-            border: 1px solid var(--border-color); 
-            align-self: flex-start; 
-            max-width: 90%; 
-            line-height: 1.8; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02); 
+        .ai-msg {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 1.4rem 1.8rem;
+            border-radius: 20px 20px 20px 4px;
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            max-width: 92%;
+            line-height: 1.8;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
-        
-        /* 主题菜单 - 修复样式和定位 */
-        #themeMenu { 
-            display: none; 
-            position: absolute; 
-            right: 20px; 
-            top: 70px; 
-            background: white; 
-            border-radius: 12px; 
-            padding: 12px; 
-            z-index: 9999; 
-            border: 1px solid #eee; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            flex-direction: row; 
+
+        /* Markdown 渲染样式 */
+        .msg-body h1,.msg-body h2,.msg-body h3 { font-weight: 800; margin: 0.8em 0 0.4em; }
+        .msg-body h1 { font-size: 1.3em; }
+        .msg-body h2 { font-size: 1.15em; }
+        .msg-body h3 { font-size: 1.05em; }
+        .msg-body p  { margin: 0.5em 0; }
+        .msg-body ul,.msg-body ol { padding-left: 1.4em; margin: 0.4em 0; }
+        .msg-body li { margin: 0.2em 0; }
+        .msg-body code {
+            background: rgba(59,130,246,0.1);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: monospace;
+        }
+        .msg-body pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1em;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 0.6em 0;
+        }
+        .msg-body pre code { background: none; padding: 0; color: inherit; }
+        .msg-body blockquote {
+            border-left: 3px solid #3b82f6;
+            padding-left: 0.8em;
+            color: var(--text-secondary);
+            margin: 0.4em 0;
+        }
+        .msg-body strong { font-weight: 700; }
+        .msg-body hr { border: none; border-top: 1px solid var(--border-color); margin: 0.8em 0; }
+
+        /* 主题菜单 */
+        #themeMenu {
+            display: none;
+            position: absolute;
+            right: 16px;
+            top: 60px;
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 12px 14px;
+            z-index: 9999;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            flex-direction: row;
             gap: 10px;
+            align-items: center;
         }
-        
-        .theme-dot { 
-            width: 30px; 
-            height: 30px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            border: 2px solid #ddd; 
-            transition: all 0.2s; 
+        .theme-dot {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
-        
-        .theme-dot:hover { 
-            transform: scale(1.1); 
-            border-color: #3b82f6;
+        .theme-dot:hover { transform: scale(1.15); border-color: #3b82f6; }
+        .theme-dot.classic { background: linear-gradient(135deg,#f8fafc,#e2e8f0); }
+        .theme-dot.dark    { background: linear-gradient(135deg,#0f172a,#1e293b); }
+        .theme-dot.eye     { background: linear-gradient(135deg,#f0f9f0,#d1e7d1); }
+        .theme-dot.retro   { background: linear-gradient(135deg,#fff8e6,#ffdead); }
+
+        /* 编辑器分屏 */
+        .editor-container {
+            flex: 0 0 380px;
+            display: none;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            flex-direction: column;
         }
-        
-        /* 主题色块样式 */
-        .theme-dot.classic { background: #f8fafc; }
-        .theme-dot.dark { background: #0f172a; }
-        .theme-dot.eye { background: #f0f9f0; }
-        .theme-dot.retro { background: #fff8e6; }
-        
-        .editor-container { 
-            flex: 1; 
-            display: none; 
-            background: var(--card-bg); 
-            border-right: 1px solid var(--border-color); 
-        }
-        
         .editor-active { display: flex !important; }
-        
-        .writing-area { 
-            width: 100%; 
-            height: 100%; 
-            padding: 40px; 
-            font-size: 16px; 
-            line-height: 2; 
-            outline: none; 
-            border: none; 
-            background: transparent; 
-            color: var(--text-primary); 
+        .writing-area {
+            width: 100%; height: 100%;
+            padding: 32px;
+            font-size: 15px; line-height: 2;
+            outline: none; border: none;
+            background: transparent;
+            color: var(--text-primary);
+            resize: none;
         }
-        
-        #tempValueDisplay { 
-            font-family: monospace; 
-            font-weight: 900; 
-            color: #3b82f6; 
-            font-size: 14px; 
-            min-width: 25px; 
-        }
-        
-        .pill-btn {
-            @apply px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white hover:shadow-lg hover:-translate-y-05;
-        }
-        
-        /* 适配主题的pill按钮 */
-        body.theme-dark .pill-btn { @apply bg-gray-800 text-gray-200; }
-        body.theme-eye .pill-btn { @apply bg-green-50 text-green-700; }
-        body.theme-retro .pill-btn { @apply bg-orange-50 text-orange-700; }
-        
-        /* 头部样式适配主题 */
+
+        /* Header */
         header {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
         }
-        
-        /* 输入框样式适配主题 */
-        textarea, input, select {
+
+        /* Footer */
+        .chat-footer {
+            background: var(--footer-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 输入框主题适配 */
+        textarea, input[type="text"], input[type="password"], select {
             background-color: var(--card-bg) !important;
             color: var(--text-primary) !important;
             border-color: var(--border-color) !important;
         }
+        textarea::placeholder, input::placeholder { color: var(--text-secondary) !important; opacity: 0.7; }
+
+        /* pill按钮 */
+        .pill-btn {
+            padding: 0.45rem 1.1rem;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            transition: all 0.25s;
+            background-color: var(--bg-main);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .pill-btn:hover {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 温度滑块显示 */
+        #tempValueDisplay {
+            font-family: monospace;
+            font-weight: 900;
+            color: #3b82f6;
+            font-size: 13px;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* 弹窗通用 */
+        .modal-box {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .modal-input {
+            background-color: var(--bg-main) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .modal-input:focus { border-color: #3b82f6 !important; }
+
+        /* 流式输出光标 */
+        .streaming-cursor::after {
+            content: '▌';
+            animation: blink 0.8s infinite;
+            color: #3b82f6;
+            font-weight: 100;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* PK列 */
+        .pk-col {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .pk-col-header {
+            padding: 0.6rem 1rem;
+            background: var(--bg-main);
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .pk-body {
+            padding: 1rem;
+            font-size: 13px;
+            min-height: 280px;
+            white-space: pre-wrap;
+            color: var(--text-primary);
+        }
+
+        /* 神兵武库提示词卡片 */
+        .prompt-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prompt-card:hover { border-color: #3b82f6; background: rgba(59,130,246,0.04); }
+        .prompt-card.active-prompt { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
+
+        /* 书稿卡片 */
+        .book-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 0.7rem 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .book-card:hover { border-color: rgba(59,130,246,0.5); }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-<!-- 左侧边栏 -->
+<!-- ===================== 左侧边栏 ===================== -->
 <div class="sidebar flex flex-col shadow-2xl">
-    <div class="p-8 border-b border-white/5 flex justify-between items-center">
+    <!-- Logo区 -->
+    <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
-            <h1 class="text-3xl font-black text-blue-400 italic tracking-wider">灵犀</h1>
-            <p class="text-[12px] text-blue-300/60 italic mt-2 tracking-widest">妙笔千般意 灵犀一点通</p>
+            <h1 class="text-2xl font-black text-blue-400 italic tracking-wider sidebar-title">灵犀</h1>
+            <p class="text-[11px] text-blue-300/60 italic mt-1 tracking-widest sidebar-sub">妙笔千般意 灵犀一点通</p>
         </div>
-        <!-- 左侧独立日夜模式 -->
-        <button id="sidebarDarkToggle" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="左侧边栏日夜模式">🌞</button>
+        <button id="sidebarDarkToggle" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="边栏日夜模式">🌞</button>
     </div>
-    
-    <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-8">
-        <div class="flex bg-black/20 p-1.5 rounded-xl border border-white/5">
-            <button id="modeChat" class="mode-btn mode-btn-active">创作</button>
-            <button id="modePK" class="mode-btn text-gray-400 hover:text-gray-200">竞技擂台</button>
+
+    <div class="flex-1 overflow-y-auto custom-scroll p-5 space-y-6">
+        <!-- 模式切换 -->
+        <div class="flex bg-black/20 p-1 rounded-xl border border-white/5 gap-1">
+            <button id="modeChat" class="mode-btn mode-btn-active">✍️ 创作</button>
+            <button id="modePK" class="mode-btn">⚔️ 竞技擂台</button>
         </div>
 
-        <section class="mb-4">
-            <button id="openPromptModalBtn" class="w-full bg-gradient-to-r from-blue-600/10 to-blue-400/10 hover:from-blue-600 hover:to-blue-500 border border-blue-500/20 hover:border-blue-400 text-blue-300 hover:text-white py-4 rounded-xl font-black transition-all duration-300 shadow-sm flex items-center justify-center gap-3 group">
-                <span class="text-lg">🗡️ 神兵武库</span>
-                <span id="promptCountBadge" class="bg-blue-500/30 group-hover:bg-white/20 px-2.5 py-1 rounded-md text-[11px]">0件</span>
+        <!-- 神兵武库 -->
+        <section>
+            <button id="openPromptModalBtn" class="w-full bg-gradient-to-r from-blue-600/10 to-blue-400/10 hover:from-blue-600 hover:to-blue-500 border border-blue-500/20 hover:border-blue-400 text-blue-300 hover:text-white py-3.5 rounded-xl font-black transition-all duration-300 flex items-center justify-center gap-2 group">
+                <span>🗡️ 神兵武库</span>
+                <span id="promptCountBadge" class="bg-blue-500/30 group-hover:bg-white/20 px-2 py-0.5 rounded-md text-[10px]">0件</span>
             </button>
         </section>
 
-        <section class="mb-4">
-            <div class="flex justify-between items-center mb-3 px-1">
-                <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
-                <button onclick="addNewBook()" class="text-blue-400 text-[11px] font-bold hover:text-blue-300 transition px-2 py-1 bg-blue-500/10 rounded hover:bg-blue-500/20">+ 新建</button>
+        <!-- 书稿管理 -->
+        <section>
+            <div class="flex justify-between items-center mb-2 px-0.5">
+                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
+                <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
-            <div id="bookLibrary" class="space-y-2"></div>
-            <button onclick="saveDraftToBook()" class="w-full mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-bold py-2 rounded-xl transition">
-                💾 保存当前草稿到新书稿
+            <div id="bookLibrary" class="space-y-1.5 max-h-48 overflow-y-auto custom-scroll"></div>
+            <button onclick="saveDraftToBook()" class="w-full mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-[11px] font-bold py-2 rounded-xl transition">
+                💾 保存草稿为新书稿
             </button>
         </section>
 
-        <section class="pb-10">
-            <div class="flex justify-between items-center mb-3 px-1">
-                <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📖 例文克隆中心</span>
-                <button onclick="document.getElementById('fileInput').click()" class="text-blue-400 text-[11px] font-bold hover:text-blue-300 transition px-2 py-1 bg-blue-500/10 rounded hover:bg-blue-500/20">+ 导入</button>
+        <!-- 例文克隆 -->
+        <section class="pb-8">
+            <div class="flex justify-between items-center mb-2 px-0.5">
+                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🧬 例文克隆中心</span>
+                <button onclick="document.getElementById('fileImport').click()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
             </div>
-            <input type="file" id="file" class="hidden" multiple accept=".txt,.docx">
-            <div id="sampleLibrary" class="space-y-2"></div>
+            <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
+            <div id="sampleLibrary" class="space-y-1.5"></div>
         </section>
     </div>
 </div>
 
-<div class="flex-1 flex flex-col overflow-hidden bg-transparent">
-    <header class="h-[72px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center px-8 justify-between z-10 transition-colors">
-        <div class="flex items-center gap-3">
+<!-- ===================== 主内容区 ===================== -->
+<div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
+        <div class="flex items-center gap-2">
             <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
-            <button id="newChatBtn" class="pill-btn">✨ 新开篇</button>
-            <button id="typesetBtn" class="pill-btn">📝 一键排版</button>
+            <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
+            <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
         </div>
-        
-        <div class="flex items-center gap-6 relative">
-            <div class="flex items-center gap-3 bg-gray-50/80 px-4 py-1.5 rounded-full border border-gray-200">
-                <span class="text-[11px] font-black text-gray-400">灵感</span>
-                <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="w-16 h-1 accent-blue-500 cursor-pointer">
-                <span id="tempValueDisplay" class="text-[12px]">0.7</span>
+
+        <div class="flex items-center gap-4 relative">
+            <!-- 灵感温度 -->
+            <div class="flex items-center gap-2 bg-gray-50/80 px-3 py-1.5 rounded-full border border-gray-200/80" style="background:var(--bg-main);border-color:var(--border-color)">
+                <span class="text-[10px] font-black" style="color:var(--text-secondary)">灵感</span>
+                <input type="range" id="tempSlider" min="0" max="1.5" step="0.1" value="0.7" class="w-14 h-1 accent-blue-500 cursor-pointer">
+                <span id="tempValueDisplay">0.7</span>
             </div>
-            
-            <div id="singleSelectBox"><select id="singleModel" class="bg-gray-50 border border-gray-200 py-1.5 px-4 rounded-full text-xs font-bold outline-none cursor-pointer"></select></div>
+
+            <!-- 模型选择 -->
+            <div id="singleSelectBox">
+                <select id="singleModel" class="border py-1.5 px-3 rounded-full text-xs font-bold outline-none cursor-pointer" style="background:var(--bg-main);border-color:var(--border-color);color:var(--text-primary)"></select>
+            </div>
             <div id="pkSelectBox" class="hidden flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">
-                A: <select id="modelA" class="bg-transparent outline-none cursor-pointer"></select> | B: <select id="modelB" class="bg-transparent outline-none cursor-pointer"></select>
+                A: <select id="modelA" class="bg-transparent outline-none cursor-pointer"></select>
+                &nbsp;|&nbsp;
+                B: <select id="modelB" class="bg-transparent outline-none cursor-pointer"></select>
             </div>
-            
-            <div class="flex items-center gap-4 border-l border-gray-200 pl-4">
-                <!-- 仅保留调色盘按钮，已删除小太阳 -->
-                <button id="themeToggle" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="更换主题">🎨</button>
-                <button id="openSettings" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="大脑配置">⚙️</button>
-                <button id="clearChatBtn" class="text-xl opacity-70 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="清空屏幕">🧹</button>
+
+            <!-- 工具按钮 -->
+            <div class="flex items-center gap-3 border-l pl-4" style="border-color:var(--border-color)">
+                <button id="themeToggle"  class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="更换主题">🎨</button>
+                <button id="openSettings" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="配置中心">⚙️</button>
+                <button id="clearChatBtn" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="清空对话">🧹</button>
             </div>
-            
-            <!-- 主题菜单 - 重构 -->
+
+            <!-- 主题菜单 -->
             <div id="themeMenu">
-                <div class="theme-dot classic" onclick="setTheme('')" title="经典"></div>
-                <div class="theme-dot dark" onclick="setTheme('theme-dark')" title="深空"></div>
-                <div class="theme-dot eye" onclick="setTheme('theme-eye')" title="护眼"></div>
-                <div class="theme-dot retro" onclick="setTheme('theme-retro')" title="复古"></div>
+                <span class="text-[10px] font-black" style="color:var(--text-secondary)">主题</span>
+                <div class="theme-dot classic" onclick="setTheme('')"            title="经典白"></div>
+                <div class="theme-dot dark"    onclick="setTheme('theme-dark')"  title="深空黑"></div>
+                <div class="theme-dot eye"     onclick="setTheme('theme-eye')"   title="护眼绿"></div>
+                <div class="theme-dot retro"   onclick="setTheme('theme-retro')" title="复古黄"></div>
             </div>
         </div>
     </header>
 
+    <!-- 工作区 -->
     <div class="flex-1 flex overflow-hidden">
+
+        <!-- 左侧分屏编辑器 -->
         <div id="mainEditor" class="editor-container">
-            <textarea id="workspace" class="writing-area custom-scroll" placeholder="左侧是对白，右侧是属于您的创作净土...（临时草稿区，不会自动覆盖）"></textarea>
+            <div class="flex items-center justify-between px-4 py-2 border-b" style="border-color:var(--border-color);background:var(--bg-main)">
+                <span class="text-xs font-black" style="color:var(--text-secondary)">✍️ 草稿区（不自动覆盖）</span>
+                <span id="workspaceWordCount" class="text-xs font-bold text-blue-500">0字</span>
+            </div>
+            <textarea id="workspace" class="writing-area custom-scroll flex-1" placeholder="在此自由创作，左侧AI对话不会覆盖这里..."></textarea>
         </div>
-        
-        <div class="flex-1 flex flex-col relative">
-            <main id="displayArea" class="flex-1 overflow-y-auto p-10 custom-scroll relative">
-                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none">
-                    <div class="text-6xl mb-6 opacity-30 grayscale">✨</div>
-                    <h2 class="text-2xl font-black tracking-widest opacity-40 italic">灵犀一点通</h2>
-                    <p class="text-sm mt-3 opacity-40">在下方输入指令，或唤醒神兵武库开始创作</p>
+
+        <!-- 右侧对话区 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
+                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
+                    <div class="text-5xl mb-5 opacity-20">✨</div>
+                    <h2 class="text-xl font-black tracking-widest opacity-30 italic">灵犀一点通</h2>
+                    <p class="text-sm mt-2 opacity-25">在下方输入指令，或从神兵武库选择提示词开始创作</p>
                 </div>
             </main>
-            
-            <footer class="p-6 pb-8 bg-gradient-to-t from-white via-white to-transparent z-10">
+
+            <!-- Footer输入区 -->
+            <footer class="chat-footer p-5 pb-6 flex-shrink-0">
                 <div class="max-w-4xl mx-auto">
-                    <div class="flex items-center gap-3 mb-3 pl-2">
-                        <div class="flex items-center gap-2 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-100/50">
-                            <span class="text-[11px] font-black text-blue-500">⚔️ 选用兵器:</span>
-                            <select id="promptSelect" class="bg-transparent text-blue-700 text-xs font-black outline-none min-w-[120px] max-w-[200px] truncate cursor-pointer"></select>
+                    <!-- 工具栏 -->
+                    <div class="flex items-center gap-2 mb-2.5 flex-wrap">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
+                            <span class="font-black text-blue-500">⚔️</span>
+                            <span class="font-black" style="color:var(--text-secondary)">兵器:</span>
+                            <select id="promptSelect" class="bg-transparent font-black outline-none min-w-[100px] max-w-[180px] cursor-pointer text-blue-600 text-xs"></select>
                         </div>
-                        <div class="flex items-center gap-2 bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200/50">
-                            <span class="text-[11px] font-black text-gray-500">📜 历史回溯:</span>
-                            <select id="historySelect" class="bg-transparent text-gray-600 text-xs font-bold outline-none min-w-[150px] cursor-pointer">
-                                <option value="">-- 点击选择 --</option>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
+                            <span class="font-black" style="color:var(--text-secondary)">📜 历史:</span>
+                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)">
+                                <option value="">-- 选择历史 --</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="relative bg-white border border-gray-300 rounded-[24px] focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-sm">
-                        <textarea id="userInput" class="w-full bg-transparent border-none pl-6 pr-6 pt-5 pb-16 text-[15px] outline-none min-h-[130px] custom-scroll resize-none" placeholder="在此输入情节需求... (按 Shift+Enter 换行，Enter 键发送)"></textarea>
-                        
-                        <div class="absolute bottom-3 right-3">
-                            <button id="sendBtn" class="bg-blue-600 text-white px-6 py-2.5 rounded-[14px] font-black shadow-md hover:bg-blue-500 hover:shadow-lg transition-all flex items-center gap-2 active:scale-95">
+                    <!-- 输入框 -->
+                    <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
+                        <textarea id="userInput"
+                            class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
+                            placeholder="在此输入情节需求... (Enter发送，Shift+Enter换行)"></textarea>
+                        <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                            <span id="charCount" class="text-[10px] font-bold" style="color:var(--text-secondary)">0字</span>
+                            <button id="sendBtn" class="bg-blue-600 text-white px-5 py-2 rounded-[12px] font-black shadow hover:bg-blue-500 hover:shadow-lg transition-all flex items-center gap-1.5 text-sm active:scale-95">
                                 <span>🚀</span> 执行
                             </button>
                         </div>
@@ -341,1015 +500,1218 @@
     </div>
 </div>
 
+<!-- ===================== 书稿编辑弹窗 ===================== -->
 <div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[24px] p-6 w-full max-w-4xl shadow-2xl flex flex-col h-[80vh] border border-white/10">
-        <div class="flex justify-between items-center mb-4 border-b pb-3">
-            <h3 class="text-xl font-black text-blue-600 italic flex items-center gap-2">📖 书稿编辑</h3>
-            <button onclick="closeBookModal()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition-all">&times;</button>
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black text-blue-500 italic">📖 书稿编辑</h3>
+            <button onclick="closeBookModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
         </div>
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex gap-3">
-                <input id="bookNameInput" type="text" placeholder="书稿名称" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm font-bold focus:border-blue-400 focus:bg-white transition-all">
-                <div class="text-sm text-gray-500 flex items-center">
-                    字数：<span id="bookWordCount" class="ml-1 text-blue-500 font-bold">0</span>
-                </div>
+        <div class="flex flex-col flex-1 overflow-hidden gap-3">
+            <div class="flex gap-3 items-center flex-shrink-0">
+                <input id="bookNameInput" type="text" placeholder="书稿名称" class="modal-input flex-1 text-sm font-bold">
+                <span class="text-xs font-bold text-blue-500 flex-shrink-0">字数：<span id="bookWordCount">0</span></span>
             </div>
-            <textarea id="bookContent" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed"></textarea>
-            <div class="flex gap-3 mt-4">
-                <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-md transition-all text-sm tracking-widest">保存书稿</button>
-                <button onclick="appendBookToDraft()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-all text-sm">追加到草稿</button>
+            <textarea id="bookContent" class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
+            <div class="flex gap-3 flex-shrink-0">
+                <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存书稿</button>
+                <button onclick="appendBookToDraft()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm" style="background:var(--bg-main);color:var(--text-secondary)">追加到草稿</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- ===================== 配置中心弹窗 ===================== -->
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[32px] p-8 w-full max-w-2xl shadow-2xl transform transition-all">
-        <h3 class="text-xl font-black mb-6 text-center border-b pb-4">⚙️ 配置中心</h3>
-        <div class="grid grid-cols-2 gap-8 mb-6">
-            <div class="space-y-3 text-sm">
-                <h4 class="text-xs font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                <input id="ds_key" type="password" placeholder="DeepSeek Key" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
-                <input id="qw_key" type="password" placeholder="Qwen Key" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
-                <input id="db_key" type="password" placeholder="豆包 Key" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
+    <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl">
+        <h3 class="text-lg font-black mb-5 text-center pb-4 border-b" style="border-color:var(--border-color)">⚙️ 配置中心</h3>
+        <div class="grid grid-cols-2 gap-6 mb-5">
+            <div class="space-y-2.5 text-sm">
+                <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
+                <input id="ds_key"  type="password" placeholder="DeepSeek API Key" class="modal-input text-sm">
+                <input id="qw_key"  type="password" placeholder="通义千问 Qwen Key" class="modal-input text-sm">
+                <input id="db_key"  type="password" placeholder="豆包 Doubao Key" class="modal-input text-sm">
+                <input id="db_model" type="text"    placeholder="豆包模型ID (ep-xxxxx)" class="modal-input text-sm">
             </div>
-            <div class="space-y-3 text-sm">
-                <h4 class="text-xs font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转及其他</h4>
-                <input id="proxy_url" type="text" placeholder="Base URL" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
-                <input id="proxy_key" type="password" placeholder="中转 Key" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 outline-none focus:border-blue-400">
-                <textarea id="proxy_models" placeholder="模型名 (逗号分隔)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-xs h-[88px] outline-none resize-none custom-scroll focus:border-blue-400"></textarea>
+            <div class="space-y-2.5 text-sm">
+                <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
+                <input id="proxy_url" type="text"     placeholder="Base URL (含 /v1)" class="modal-input text-sm">
+                <input id="proxy_key" type="password" placeholder="中转 Key" class="modal-input text-sm">
+                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: gpt-4o,claude-3-5-sonnet" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
             </div>
         </div>
-
-        <div class="flex gap-3 mb-6">
-            <button onclick="document.getElementById('importSystemInput').click()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm">📂 导入备份</button>
-            <button onclick="exportSystemData()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all text-sm">💾 导出备份</button>
+        <div class="flex gap-2.5 mb-5">
+            <button onclick="document.getElementById('importSystemInput').click()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-80" style="background:var(--bg-main);color:var(--text-secondary)">📂 导入备份</button>
+            <button onclick="exportSystemData()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-80" style="background:var(--bg-main);color:var(--text-secondary)">💾 导出备份</button>
             <input type="file" id="importSystemInput" class="hidden" accept=".json">
         </div>
-        
-        <div class="flex gap-4">
-            <button id="saveSettings" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-lg transition-all">保存并激活</button>
-            <button id="closeSettings" class="flex-1 bg-gray-100 hover:bg-gray-200 font-bold py-3 rounded-xl text-gray-600 transition-all">关闭</button>
+        <div class="flex gap-3">
+            <button id="saveSettings"  class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow transition">保存并激活</button>
+            <button id="closeSettings" class="flex-1 font-bold py-3 rounded-xl transition" style="background:var(--bg-main);color:var(--text-secondary)">关闭</button>
         </div>
     </div>
 </div>
 
+<!-- ===================== 神兵武库弹窗 ===================== -->
 <div id="promptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col h-[80vh] border border-white/10">
-        <div class="flex justify-between items-center mb-4 border-b pb-3">
-            <h3 class="text-xl font-black text-blue-600 italic flex items-center gap-2">🗡️ 神兵武库管理</h3>
-            <button id="closePromptModal" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition-all">&times;</button>
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col" style="height:82vh">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black text-blue-500 italic flex items-center gap-2">🗡️ 神兵武库管理</h3>
+            <button id="closePromptModal" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
         </div>
-        
-        <div class="flex-1 flex gap-6 overflow-hidden mt-2">
-            <div class="w-[35%] flex flex-col bg-gray-50/50 rounded-2xl border border-gray-200 overflow-hidden">
-                <div class="p-3 bg-gray-100/80 border-b border-gray-200 text-xs font-black text-gray-600 flex justify-between items-center">
-                    <span>📜 库中存根</span>
-                    <span id="modalListCount" class="text-blue-600 bg-blue-100/50 px-2 py-0.5 rounded-full text-[10px]">0</span>
+
+        <div class="flex-1 flex gap-5 overflow-hidden">
+            <!-- 左侧列表 -->
+            <div class="w-[36%] flex flex-col rounded-2xl border overflow-hidden" style="border-color:var(--border-color)">
+                <div class="px-3 py-2 flex justify-between items-center border-b flex-shrink-0" style="background:var(--bg-main);border-color:var(--border-color)">
+                    <span class="text-[11px] font-black" style="color:var(--text-secondary)">📜 库中存根</span>
+                    <div class="flex items-center gap-2">
+                        <span id="modalListCount" class="text-blue-600 bg-blue-100/50 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
+                        <!-- ✅ 新增"添加新提示词"按钮 -->
+                        <button id="addNewPromptBtn" title="新建提示词" class="text-blue-500 hover:text-white hover:bg-blue-500 w-6 h-6 rounded-full flex items-center justify-center font-black text-sm transition">+</button>
+                    </div>
                 </div>
-                <div id="modalPromptList" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2"></div>
+                <div id="modalPromptList" class="flex-1 overflow-y-auto custom-scroll p-2.5 space-y-1.5"></div>
             </div>
-            
-            <div class="w-[65%] flex flex-col relative">
-                <div class="flex items-center gap-2 mb-4">
-                    <div id="promptEditorIcon" class="text-blue-500 text-lg">✨</div>
-                    <h4 id="promptEditorTitle" class="text-sm font-black text-gray-700">锻造新兵器</h4>
+
+            <!-- 右侧编辑器 -->
+            <div class="flex-1 flex flex-col">
+                <div class="flex items-center gap-2 mb-3 flex-shrink-0">
+                    <span id="promptEditorIcon" class="text-blue-500 text-base">✨</span>
+                    <h4 id="promptEditorTitle" class="text-sm font-black" style="color:var(--text-primary)">锻造新兵器</h4>
                 </div>
-                
-                <input id="modalPromptName" type="text" placeholder="给兵器起个响亮的名字..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none mb-4 text-sm font-bold focus:border-blue-400 focus:bg-white transition-all">
-                
-                <textarea id="modalPromptContent" placeholder="在此注入您的核心系统指令，支持长篇复杂逻辑..." class="w-full flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed"></textarea>
-                
-                <div class="flex gap-3 mt-4">
-                    <button id="savePromptBtn" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-md transition-all text-sm tracking-widest">保存入库</button>
-                    <button id="resetPromptBtn" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-3 rounded-xl transition-all text-sm">清空重写</button>
+                <input id="modalPromptName" type="text" placeholder="给这件兵器起个响亮的名字..." class="modal-input mb-3 text-sm font-bold flex-shrink-0">
+                <textarea id="modalPromptContent" placeholder="在此注入核心系统指令，支持长篇复杂逻辑...&#10;&#10;例如：你是一位专注于古风言情的顶级小说家，擅长用细腻的笔触描绘人物内心世界..." class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
+                <div class="flex gap-3 mt-3 flex-shrink-0">
+                    <button id="savePromptBtn"  class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存入库</button>
+                    <button id="resetPromptBtn" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-70" style="background:var(--bg-main);color:var(--text-secondary)">清空重写</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- ===================== JavaScript ===================== -->
 <script>
-// 全局常量定义
-const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成基因报告：1.叙事结构与情节逻辑；2.人物塑造；3.情感张力与写作技法；4.情绪链路与冲突密度；5.语言风格。`;
-const STORAGE_KEYS = {
-    flow: 'lingxi_flow', prompts: 'lingxi_prompts', samples: 'lingxi_samples', history: 'lingxi_history',
-    workspace: 'lingxi_workspace', theme: 'lingxi_theme', darkMode: 'lingxi_dark', 
-    sidebarDark: 'lingxi_sidebar_dark', autoBackup: 'lingxi_auto_backup_snapshot', books: 'lingxi_books'
+// ─────────────────────────────────────────
+//  常量
+// ─────────────────────────────────────────
+const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
+1. 叙事结构与情节逻辑
+2. 人物塑造与对话风格
+3. 情感张力与写作技法
+4. 情绪链路与冲突密度
+5. 语言风格与意象特征
+请用简洁的语言归纳，便于后续仿写参考。`;
+
+const SK = {
+    flow:        'lingxi_flow',
+    prompts:     'lingxi_prompts',
+    samples:     'lingxi_samples',
+    history:     'lingxi_history',
+    workspace:   'lingxi_workspace',
+    theme:       'lingxi_theme',
+    sidebarDark: 'lingxi_sidebar_dark',
+    autoBackup:  'lingxi_auto_backup',
+    books:       'lingxi_books'
 };
 
-// 全局变量
-let flowConfig = JSON.parse(localStorage.getItem(STORAGE_KEYS.flow)) || { ds_key:'', qw_key:'', db_key:'', proxy_url:'', proxy_key:'', proxy_models:'gpt-4o' };
-let prompts = JSON.parse(localStorage.getItem(STORAGE_KEYS.prompts)) || { "灵犀助手": "你是一个智慧创作助手。" };
-let history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history)) || [];
-let sampleLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.samples)) || [];
-let bookLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.books)) || [];
-let currentEditingBookId = null;
-let selectedSampleIndices = [];
-let isGenerating = false;
+// ─────────────────────────────────────────
+//  全局状态
+// ─────────────────────────────────────────
+let flowConfig    = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let prompts       = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
+let history       = loadJSON(SK.history) || [];
+let sampleLibrary = loadJSON(SK.samples) || [];
+let bookLibrary   = loadJSON(SK.books)   || [];
+let currentEditingBookId   = null;
+let editingOldPromptName   = null;
+let selectedSampleIndices  = [];
+let isGenerating         = false;
+let conversationHistory  = [];   // ✅ 新增：多轮对话上下文
 let abortController = null;
-let editingOldPromptName = null;
 let autoBackupTimer = null;
 let dom = {};
 
-// 缓存DOM元素
-function cacheDOMElements() {
-    dom = { 
-        displayArea: document.getElementById('displayArea'), 
-        emptyState: document.getElementById('emptyState'), 
-        workspace: document.getElementById('workspace'), 
-        userInput: document.getElementById('userInput'), 
-        sendBtn: document.getElementById('sendBtn'), 
-        tempSlider: document.getElementById('tempSlider'), 
-        tempValueDisplay: document.getElementById('tempValueDisplay'),
-        themeMenu: document.getElementById('themeMenu'),
-        themeToggle: document.getElementById('themeToggle')
-    };
+// ─────────────────────────────────────────
+//  工具函数
+// ─────────────────────────────────────────
+function loadJSON(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
 }
 
-// 左侧边栏独立日夜模式（修复底色问题）
-function initSidebarDarkMode() {
-    const btn = document.getElementById('sidebarDarkToggle');
-    const sidebar = document.querySelector('.sidebar');
-    const isLight = localStorage.getItem(STORAGE_KEYS.sidebarDark) === '1';
-    
-    if (isLight) {
-        sidebar.classList.add('sidebar-light');
-        btn.textContent = '🌙';
-    } else {
-        btn.textContent = '🌞';
+function saveJSON(key, data) {
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {
+        showToast('⚠️ 存储空间不足，请导出备份后清理历史记录');
     }
 }
 
-function toggleSidebarDarkMode() {
-    const btn = document.getElementById('sidebarDarkToggle');
-    const sidebar = document.querySelector('.sidebar');
-    const isLight = sidebar.classList.toggle('sidebar-light');
-    
-    localStorage.setItem(STORAGE_KEYS.sidebarDark, isLight ? '1' : '0');
-    btn.textContent = isLight ? '🌙' : '🌞';
+// 防抖
+function debounce(fn, delay) {
+    let t;
+    return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), delay); };
 }
 
-// 主题切换核心功能 - 完全重构
-function initTheme() {
-    // 从本地存储加载保存的主题
-    const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || '';
-    // 应用主题
-    document.body.className = `h-screen flex overflow-hidden ${savedTheme}`;
-    
-    // 绑定主题切换按钮事件
-    dom.themeToggle.addEventListener('click', function(e) {
-        e.stopPropagation(); // 阻止事件冒泡
-        // 切换主题菜单显示/隐藏
-        dom.themeMenu.style.display = dom.themeMenu.style.display === 'flex' ? 'none' : 'flex';
-    });
-    
-    // 点击空白处关闭主题菜单
-    document.addEventListener('click', function() {
-        dom.themeMenu.style.display = 'none';
-    });
-    
-    // 阻止主题菜单内部点击事件冒泡
-    dom.themeMenu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-}
+const debouncedSaveWorkspace = debounce((val) => saveJSON(SK.workspace, val), 600);
 
-// 设置主题 - 核心修复
-function setTheme(themeClass) {
-    // 移除所有主题类
-    document.body.classList.remove('theme-dark', 'theme-eye', 'theme-retro');
-    // 添加选中的主题类
-    if (themeClass) {
-        document.body.classList.add(themeClass);
-    }
-    // 保存到本地存储
-    localStorage.setItem(STORAGE_KEYS.theme, themeClass);
-    // 关闭主题菜单
-    dom.themeMenu.style.display = 'none';
-    
-    // 显示提示
-    showToast(`✅ 主题已切换为：${
-        themeClass === '' ? '经典' : 
-        themeClass === 'theme-dark' ? '深空' :
-        themeClass === 'theme-eye' ? '护眼' : '复古'
-    }`);
-}
-// 暴露到全局，让HTML能调用
-window.setTheme = setTheme;
-
-// 初始化函数
+// ─────────────────────────────────────────
+//  初始化
+// ─────────────────────────────────────────
 function init() {
-    cacheDOMElements();
-    updateSidebarPromptBadge(); 
-    renderSelect(); 
-    updateModelDropdowns(); 
-    renderSampleLibrary();
-    renderHistorySelect(); 
-    initConfigInputs(); 
-    loadWorkspace(); 
-    renderBookLibrary();
+    cacheDom();
+    initTheme();
     initSidebarDarkMode();
-    initTheme(); // 初始化主题功能
-    checkEmptyState(); 
-    initAutoBackup(); 
+    initConfigInputs();
+    loadWorkspace();
+    renderBookLibrary();
+    renderSampleLibrary();
+    renderSelect();
+    updateModelDropdowns();
+    renderHistorySelect();
+    updateSidebarPromptBadge();
+    checkEmptyState();
+    initAutoBackup();
     bindEvents();
 }
 
-// 检查空状态
-function checkEmptyState() {
-    const hasMessages = dom.displayArea.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
-    dom.emptyState.style.display = hasMessages ? 'none' : 'flex';
+function cacheDom() {
+    dom = {
+        displayArea:   document.getElementById('displayArea'),
+        emptyState:    document.getElementById('emptyState'),
+        workspace:     document.getElementById('workspace'),
+        userInput:     document.getElementById('userInput'),
+        sendBtn:       document.getElementById('sendBtn'),
+        tempSlider:    document.getElementById('tempSlider'),
+        tempVal:       document.getElementById('tempValueDisplay'),
+        themeMenu:     document.getElementById('themeMenu'),
+        themeToggle:   document.getElementById('themeToggle'),
+        charCount:     document.getElementById('charCount'),
+        wsWordCount:   document.getElementById('workspaceWordCount'),
+        promptSelect:  document.getElementById('promptSelect'),
+    };
 }
 
-// 书稿管理
+// ─────────────────────────────────────────
+//  主题
+// ─────────────────────────────────────────
+function initTheme() {
+    const saved = localStorage.getItem(SK.theme) || '';
+    applyTheme(saved);
+
+    dom.themeToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        const menu = dom.themeMenu;
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    });
+    document.addEventListener('click', () => { dom.themeMenu.style.display = 'none'; });
+    dom.themeMenu.addEventListener('click', e => e.stopPropagation());
+}
+
+function applyTheme(themeClass) {
+    document.body.className = document.body.className
+        .replace(/theme-\S+/g, '').trim();
+    document.body.classList.add('h-screen', 'flex', 'overflow-hidden');
+    if (themeClass) document.body.classList.add(themeClass);
+}
+
+window.setTheme = function(themeClass) {
+    applyTheme(themeClass);
+    localStorage.setItem(SK.theme, themeClass);
+    dom.themeMenu.style.display = 'none';
+    const names = {'':'经典白','theme-dark':'深空黑','theme-eye':'护眼绿','theme-retro':'复古黄'};
+    showToast(`🎨 已切换：${names[themeClass] || themeClass}`);
+};
+
+// ─────────────────────────────────────────
+//  侧边栏日夜模式
+// ─────────────────────────────────────────
+function initSidebarDarkMode() {
+    const isLight = localStorage.getItem(SK.sidebarDark) === '1';
+    setSidebarLight(isLight);
+}
+
+function setSidebarLight(isLight) {
+    const sidebar = document.querySelector('.sidebar');
+    const btn     = document.getElementById('sidebarDarkToggle');
+    sidebar.classList.toggle('sidebar-light', isLight);
+    btn.textContent = isLight ? '🌙' : '🌞';
+    localStorage.setItem(SK.sidebarDark, isLight ? '1' : '0');
+}
+
+function toggleSidebarDarkMode() {
+    const isLight = !document.querySelector('.sidebar').classList.contains('sidebar-light');
+    setSidebarLight(isLight);
+}
+
+// ─────────────────────────────────────────
+//  书稿管理
+// ─────────────────────────────────────────
 function renderBookLibrary() {
-    const container = document.getElementById('bookLibrary'); 
-    container.innerHTML = '';
-    
+    const container = document.getElementById('bookLibrary');
+    const fragment  = document.createDocumentFragment();
+
     bookLibrary.forEach((book, index) => {
         const item = document.createElement('div');
-        item.className = "group bg-white/5 p-3 rounded-xl border border-white/10 hover:border-blue-400/50 flex justify-between items-center cursor-pointer transition-all";
-        
-        const titleSpan = document.createElement('div'); 
-        titleSpan.className = "text-xs font-bold text-gray-200 truncate flex-1";
-        const textCount = book.content ? book.content.length : 0; 
-        titleSpan.textContent = `${book.name} (${textCount}字)`;
-        
-        const btnContainer = document.createElement('div'); 
-        btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity";
-        const editBtn = createButton('✏️', 'text-blue-400 hover:bg-blue-500/10', () => editBook(index));
-        const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-500/10', () => deleteBook(index));
-        
-        btnContainer.append(editBtn, delBtn); 
-        item.append(titleSpan, btnContainer); 
-        item.onclick = () => editBook(index); 
-        container.appendChild(item);
+        item.className = 'book-card book-item';
+
+        const left = document.createElement('div');
+        left.className = 'book-item-text text-[11px] font-bold truncate flex-1 pr-2';
+        left.textContent = `${book.name} (${(book.content || '').length}字)`;
+
+        const btns = document.createElement('div');
+        btns.className = 'flex gap-1 flex-shrink-0';
+        btns.appendChild(makeBtn('✏️', 'text-blue-400 hover:bg-blue-500/20', () => editBook(index)));
+        btns.appendChild(makeBtn('🗑️', 'text-red-400 hover:bg-red-500/20',  () => deleteBook(index)));
+
+        item.append(left, btns);
+        item.onclick = (e) => { if (!e.target.closest('button')) editBook(index); };
+        fragment.appendChild(item);
     });
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
 }
 
-window.addNewBook = function() { 
-    autoSaveDraftToTempBook(); 
-    currentEditingBookId = null; 
-    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`; 
-    document.getElementById('bookContent').value = ''; 
-    updateWordCount(); 
-    document.getElementById('bookModal').classList.remove('hidden'); 
+window.addNewBook = function() {
+    autoSaveDraftToTempBook();
+    currentEditingBookId = null;
+    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`;
+    document.getElementById('bookContent').value   = '';
+    document.getElementById('bookWordCount').textContent = '0';
+    document.getElementById('bookModal').classList.remove('hidden');
 };
 
-window.editBook = function(index) { 
-    autoSaveDraftToTempBook(); 
-    const book = bookLibrary[index]; 
-    currentEditingBookId = index; 
-    document.getElementById('bookNameInput').value = book.name; 
-    document.getElementById('bookContent').value = book.content || ''; 
-    updateWordCount(); 
-    document.getElementById('bookModal').classList.remove('hidden'); 
+window.editBook = function(index) {
+    autoSaveDraftToTempBook();
+    const book = bookLibrary[index];
+    currentEditingBookId = index;
+    document.getElementById('bookNameInput').value = book.name;
+    document.getElementById('bookContent').value   = book.content || '';
+    document.getElementById('bookWordCount').textContent = (book.content || '').length;
+    document.getElementById('bookModal').classList.remove('hidden');
 };
 
-window.deleteBook = function(index) { 
-    if(confirm(`确认删除书稿【${bookLibrary[index].name}】吗？`)) { 
-        bookLibrary.splice(index, 1); 
-        saveBooks(); 
-        renderBookLibrary(); 
-    } 
+window.deleteBook = function(index) {
+    if (!confirm(`确认删除书稿【${bookLibrary[index].name}】？`)) return;
+    bookLibrary.splice(index, 1);
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
 };
 
-window.saveCurrentBook = function() { 
-    const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿'; 
-    const content = document.getElementById('bookContent').value; 
-    
-    if(currentEditingBookId !== null) { 
-        bookLibrary[currentEditingBookId] = { name, content }; 
-    } else { 
-        bookLibrary.push({ name, content }); 
-    } 
-    
-    saveBooks(); 
-    renderBookLibrary(); 
-    closeBookModal(); 
-    showToast(`✅ 书稿【${name}】已保存`); 
+window.saveCurrentBook = function() {
+    const name    = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
+    const content = document.getElementById('bookContent').value;
+    if (currentEditingBookId !== null) {
+        bookLibrary[currentEditingBookId] = { name, content };
+    } else {
+        bookLibrary.push({ name, content });
+    }
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
+    closeBookModal();
+    showToast(`✅ 书稿【${name}】已保存`);
 };
 
-window.closeBookModal = function() { 
-    document.getElementById('bookModal').classList.add('hidden'); 
+window.closeBookModal = function() {
+    document.getElementById('bookModal').classList.add('hidden');
 };
 
-window.appendBookToDraft = function() { 
-    const bookContent = document.getElementById('bookContent').value; 
-    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + bookContent; 
-    saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value); 
-    showToast("📝 已追加书稿内容到草稿区"); 
+window.appendBookToDraft = function() {
+    const content = document.getElementById('bookContent').value;
+    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + content;
+    debouncedSaveWorkspace(dom.workspace.value);
+    showToast('📝 已追加到草稿区');
 };
 
-window.saveDraftToBook = function() { 
-    const draft = dom.workspace.value.trim(); 
-    if(!draft) { 
-        showToast("⚠️ 草稿区为空"); 
-        return; 
-    } 
-    bookLibrary.push({ name: `草稿_${new Date().toLocaleString()}`, content: draft }); 
-    saveBooks(); 
-    renderBookLibrary(); 
-    showToast("💾 草稿已保存为新书稿"); 
+window.saveDraftToBook = function() {
+    const draft = dom.workspace.value.trim();
+    if (!draft) { showToast('⚠️ 草稿区为空'); return; }
+    bookLibrary.push({ name: `草稿_${new Date().toLocaleString()}`, content: draft });
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
+    showToast('💾 草稿已保存为新书稿');
 };
 
-function autoSaveDraftToTempBook() { 
-    const draft = dom.workspace.value.trim(); 
-    if(!draft) return; 
-    const tempBook = bookLibrary.find(b => b.name === "临时草稿（自动保存）"); 
-    if(tempBook) { 
-        tempBook.content = draft; 
-    } else { 
-        bookLibrary.unshift({ name: "临时草稿（自动保存）", content: draft }); 
-    } 
-    saveBooks(); 
-    renderBookLibrary(); 
+function autoSaveDraftToTempBook() {
+    const draft = dom.workspace.value.trim();
+    if (!draft) return;
+    const tmp = bookLibrary.find(b => b.name === '临时草稿（自动保存）');
+    if (tmp) { tmp.content = draft; }
+    else     { bookLibrary.unshift({ name: '临时草稿（自动保存）', content: draft }); }
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
 }
 
-function updateWordCount() { 
-    const content = document.getElementById('bookContent').value; 
-    document.getElementById('bookWordCount').textContent = content.length; 
-}
-
-function saveBooks() { 
-    saveToLocal(STORAGE_KEYS.books, bookLibrary); 
-}
-
-// 超强一键排版
+// ─────────────────────────────────────────
+//  一键排版（修复逻辑顺序）
+// ─────────────────────────────────────────
 function typesetContent() {
     let text = dom.workspace.value.trim();
-    if(!text) { 
-        showToast("⚠️ 编辑区为空"); 
-        return; 
-    }
-    
-    text = text.replace(/\s+/g, ' ');
+    if (!text) { showToast('⚠️ 草稿区为空'); return; }
+
+    // 步骤1：统一换行符
     text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    text = text.replace(/([。！？；])([^”’])/g, '$1\n$2');
-    text = text.replace(/([”’」])/g, '$1\n');
-    text = text.replace(/([“‘「])/g, '\n$1');
-    text = text.replace(/\n+/g, '\n');
-    text = text.replace(/^\s+|\s+$/g, '');
-    
+    // 步骤2：句末自动换行（句号/感叹号/问号/省略号后接非引号则换行）
+    text = text.replace(/([。！？…]+[」"']?)\s*/g, '$1\n');
+    // 步骤3：段落间保留一个空行，去除多余空行
+    text = text.replace(/\n{3,}/g, '\n\n');
+    // 步骤4：清理行内多余空格（保留换行）
+    text = text.replace(/[ \t]+/g, ' ');
+    // 步骤5：每段首行前去除空格
+    text = text.split('\n').map(l => l.trimStart()).join('\n');
+    text = text.trim();
+
     dom.workspace.value = text;
-    saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
-    showToast("📝 智能排版完成");
+    debouncedSaveWorkspace(text);
+    showToast('📝 智能排版完成');
 }
 
-// 神兵武库
-function updateSidebarPromptBadge() { 
-    const count = Object.keys(prompts).length; 
-    document.getElementById('promptCountBadge').innerText = count + '件'; 
-    document.getElementById('modalListCount').innerText = count; 
+// ─────────────────────────────────────────
+//  神兵武库
+// ─────────────────────────────────────────
+function updateSidebarPromptBadge() {
+    const count = Object.keys(prompts).length;
+    document.getElementById('promptCountBadge').textContent = count + '件';
+    const badge = document.getElementById('modalListCount');
+    if (badge) badge.textContent = count;
 }
 
 function renderModalPromptList() {
-    const list = document.getElementById('modalPromptList'); 
-    list.innerHTML = '';
-    
+    const list     = document.getElementById('modalPromptList');
+    const fragment = document.createDocumentFragment();
+
     Object.keys(prompts).forEach(name => {
         const item = document.createElement('div');
-        item.className = "group bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex justify-between items-center cursor-pointer hover:border-blue-400 transition-all";
-        
-        const titleSpan = document.createElement('span'); 
-        titleSpan.className = "text-xs font-bold text-gray-700 truncate flex-1 pointer-events-none"; 
-        titleSpan.textContent = name;
-        
-        const btnContainer = document.createElement('div'); 
-        btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2";
-        const editBtn = createButton('✏️', 'text-blue-500 hover:bg-blue-50', () => loadPromptIntoEditor(name));
-        const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-50', () => deletePrompt(name));
-        
-        btnContainer.append(editBtn, delBtn); 
-        item.append(titleSpan, btnContainer); 
-        item.onclick = () => loadPromptIntoEditor(name); 
-        list.appendChild(item);
+        item.className = 'prompt-card';
+        if (name === editingOldPromptName) item.classList.add('active-prompt');
+
+        const title = document.createElement('span');
+        title.className = 'text-xs font-bold truncate flex-1 pointer-events-none';
+        title.style.color = 'var(--text-primary)';
+        title.textContent = name;
+
+        const btns = document.createElement('div');
+        btns.className = 'flex gap-1 ml-2 flex-shrink-0';
+        btns.appendChild(makeBtn('✏️', 'text-blue-500 hover:bg-blue-100/50', () => loadPromptInEditor(name)));
+        btns.appendChild(makeBtn('🗑️', 'text-red-400 hover:bg-red-100/50',  () => deletePrompt(name)));
+
+        item.append(title, btns);
+        item.onclick = (e) => { if (!e.target.closest('button')) loadPromptInEditor(name); };
+        fragment.appendChild(item);
     });
-    
-    updateSidebarPromptBadge(); 
+
+    list.innerHTML = '';
+    list.appendChild(fragment);
+    updateSidebarPromptBadge();
     renderSelect();
 }
 
-function createButton(text, className, onClick) { 
-    const btn = document.createElement('button'); 
-    btn.className = `${className} p-1.5 rounded-md transition`; 
-    btn.innerHTML = text; 
-    btn.onclick = e => { 
-        e.stopPropagation(); 
-        onClick(); 
-    }; 
-    return btn; 
+function loadPromptInEditor(name) {
+    editingOldPromptName = name;
+    document.getElementById('modalPromptName').value    = name;
+    document.getElementById('modalPromptContent').value = prompts[name] || '';
+    document.getElementById('promptEditorIcon').textContent  = '✏️';
+    document.getElementById('promptEditorTitle').textContent = '修改兵器';
+    const btn = document.getElementById('savePromptBtn');
+    btn.textContent = '保存修改';
+    btn.className   = btn.className.replace('bg-blue-600', 'bg-amber-500').replace('hover:bg-blue-500', 'hover:bg-amber-400');
+    renderModalPromptList();
 }
 
-function loadPromptIntoEditor(name) { 
-    editingOldPromptName = name; 
-    document.getElementById('modalPromptName').value = name; 
-    document.getElementById('modalPromptContent').value = prompts[name]; 
-    document.getElementById('promptEditorIcon').textContent = "✏️"; 
-    document.getElementById('promptEditorTitle').textContent = "修改兵器"; 
-    const saveBtn = document.getElementById('savePromptBtn'); 
-    saveBtn.textContent = "保存修改"; 
-    saveBtn.classList.replace('bg-blue-600', 'bg-amber-500'); 
-    saveBtn.classList.replace('hover:bg-blue-500', 'hover:bg-amber-400'); 
+function resetPromptEditor() {
+    editingOldPromptName = null;
+    document.getElementById('modalPromptName').value    = '';
+    document.getElementById('modalPromptContent').value = '';
+    document.getElementById('promptEditorIcon').textContent  = '✨';
+    document.getElementById('promptEditorTitle').textContent = '锻造新兵器';
+    const btn = document.getElementById('savePromptBtn');
+    btn.textContent = '保存入库';
+    btn.className   = btn.className.replace('bg-amber-500', 'bg-blue-600').replace('hover:bg-amber-400', 'hover:bg-blue-500');
+    renderModalPromptList();
 }
 
-function resetPromptEditor() { 
-    editingOldPromptName = null; 
-    document.getElementById('modalPromptName').value = ''; 
-    document.getElementById('modalPromptContent').value = ''; 
-    document.getElementById('promptEditorIcon').textContent = "✨"; 
-    document.getElementById('promptEditorTitle').textContent = "锻造新兵器"; 
-    const saveBtn = document.getElementById('savePromptBtn'); 
-    saveBtn.textContent = "保存入库"; 
-    saveBtn.classList.replace('bg-amber-500', 'bg-blue-600'); 
-    saveBtn.classList.replace('hover:bg-amber-400', 'hover:bg-blue-500'); 
+function savePrompt() {
+    const newName    = document.getElementById('modalPromptName').value.trim();
+    const newContent = document.getElementById('modalPromptContent').value.trim();
+    if (!newName || !newContent) { showToast('⚠️ 名称和内容均不能为空'); return; }
+    if (editingOldPromptName && editingOldPromptName !== newName) {
+        delete prompts[editingOldPromptName];
+    }
+    prompts[newName] = newContent;
+    saveJSON(SK.prompts, prompts);
+    showToast(`✨ 兵器【${newName}】已锻造完成`);
+    resetPromptEditor();
 }
 
-function savePrompt() { 
-    const newName = document.getElementById('modalPromptName').value.trim(); 
-    const newContent = document.getElementById('modalPromptContent').value.trim(); 
-    
-    if(!newName || !newContent) { 
-        alert("名称和指令内容均不可为空！"); 
-        return; 
-    } 
-    
-    if(editingOldPromptName && editingOldPromptName !== newName) delete prompts[editingOldPromptName]; 
-    prompts[newName] = newContent; 
-    saveToLocal(STORAGE_KEYS.prompts, prompts); 
-    showToast(`✨ 兵器【${newName}】已就绪`); 
-    resetPromptEditor(); 
-    renderModalPromptList(); 
-}
-
-window.deletePrompt = function(name) { 
-    if(Object.keys(prompts).length <= 1) { 
-        alert("至少保留一个"); 
-        return; 
-    } 
-    if(confirm(`销毁【${name}】？`)) { 
-        delete prompts[name]; 
-        saveToLocal(STORAGE_KEYS.prompts, prompts); 
-        if(editingOldPromptName === name) resetPromptEditor(); 
-        renderModalPromptList(); 
-    } 
+window.deletePrompt = function(name) {
+    if (Object.keys(prompts).length <= 1) { showToast('⚠️ 至少保留一个提示词'); return; }
+    if (!confirm(`确认销毁兵器【${name}】？`)) return;
+    delete prompts[name];
+    saveJSON(SK.prompts, prompts);
+    if (editingOldPromptName === name) resetPromptEditor();
+    renderModalPromptList();
 };
 
-function renderSelect() { 
-    const s = document.getElementById('promptSelect'); 
-    s.innerHTML = ''; 
-    Object.keys(prompts).forEach(k => { 
-        const opt = document.createElement('option'); 
-        opt.value = k; 
-        opt.textContent = k; 
-        s.appendChild(opt); 
-    }); 
+function renderSelect() {
+    const s = dom.promptSelect;
+    if (!s) return;
+    const cur = s.value;
+    s.innerHTML = '';
+    Object.keys(prompts).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k; opt.textContent = k;
+        s.appendChild(opt);
+    });
+    if (cur && prompts[cur]) s.value = cur;
 }
 
-// 系统功能
-function exportSystemData() { 
-    const systemData = { 
-        flowConfig, prompts, sampleLibrary, history, books: bookLibrary, workspace: dom.workspace.value 
-    }; 
-    const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: "application/json;charset=utf-8" }); 
-    saveAs(blob, `灵犀_备份_${Date.now()}.json`); 
-    showToast("✅ 备份已导出"); 
+// ─────────────────────────────────────────
+//  配置 & 模型下拉
+// ─────────────────────────────────────────
+function initConfigInputs() {
+    document.getElementById('ds_key').value      = flowConfig.ds_key      || '';
+    document.getElementById('qw_key').value      = flowConfig.qw_key      || '';
+    document.getElementById('db_key').value      = flowConfig.db_key      || '';
+    document.getElementById('db_model').value    = flowConfig.db_model    || '';
+    document.getElementById('proxy_url').value   = flowConfig.proxy_url   || '';
+    document.getElementById('proxy_key').value   = flowConfig.proxy_key   || '';
+    document.getElementById('proxy_models').value= flowConfig.proxy_models|| '';
 }
 
-function importSystemData(e) { 
-    const file = e.target.files[0]; 
-    if (!file) return; 
-    const reader = new FileReader(); 
-    reader.onload = function(event) { 
-        try { 
-            const data = JSON.parse(event.target.result); 
-            if (data.flowConfig) flowConfig = data.flowConfig; 
-            if (data.prompts) prompts = data.prompts; 
-            if (data.sampleLibrary) sampleLibrary = data.sampleLibrary; 
-            if (data.history) history = data.history; 
-            if (data.books) bookLibrary = data.books; 
-            saveAllData(); 
-            if (data.workspace !== undefined) dom.workspace.value = data.workspace; 
-            showToast("✨ 读取成功"); 
-            init(); 
-        } catch (err) { 
-            alert("导入失败，请检查文件格式"); 
-        } 
-    }; 
-    reader.readAsText(file); 
-    e.target.value = ''; 
+function saveConfig() {
+    flowConfig = {
+        ds_key:       document.getElementById('ds_key').value.trim(),
+        qw_key:       document.getElementById('qw_key').value.trim(),
+        db_key:       document.getElementById('db_key').value.trim(),
+        db_model:     document.getElementById('db_model').value.trim(),
+        proxy_url:    document.getElementById('proxy_url').value.trim(),
+        proxy_key:    document.getElementById('proxy_key').value.trim(),
+        proxy_models: document.getElementById('proxy_models').value.trim()
+    };
+    saveJSON(SK.flow, flowConfig);
+    updateModelDropdowns();
+    showToast('✅ 配置已保存并激活');
+    document.getElementById('settingsModal').classList.add('hidden');
 }
 
-function initAutoBackup() { 
-    if(autoBackupTimer) clearInterval(autoBackupTimer); 
-    autoBackupTimer = setInterval(() => { 
-        const snapshot = { 
-            flowConfig, prompts, sampleLibrary, history, bookLibrary, workspace: dom.workspace.value, timestamp: new Date().toLocaleString() 
-        }; 
-        localStorage.setItem(STORAGE_KEYS.autoBackup, JSON.stringify(snapshot)); 
-    }, 5*60*1000); 
+function updateModelDropdowns() {
+    // 官方模型：仅在对应 key 存在时才加入列表
+    const official = [];
+    if (flowConfig.ds_key)  official.push({ value: 'deepseek-chat',  label: 'DeepSeek Chat' });
+    if (flowConfig.ds_key)  official.push({ value: 'deepseek-reasoner', label: 'DeepSeek R1' });
+    if (flowConfig.qw_key)  official.push({ value: 'qwen-plus',      label: 'Qwen Plus' });
+    if (flowConfig.qw_key)  official.push({ value: 'qwen-turbo',     label: 'Qwen Turbo' });
+    if (flowConfig.db_key && flowConfig.db_model) {
+        official.push({ value: flowConfig.db_model, label: `豆包 (${flowConfig.db_model.slice(0,12)}...)` });
+    }
+
+    // 中转自定义模型
+    const proxy = flowConfig.proxy_models
+        ? flowConfig.proxy_models.split(',').map(s => s.trim()).filter(Boolean).map(m => ({ value: m, label: m }))
+        : [];
+
+    const all = [...official, ...proxy];
+    if (all.length === 0) all.push({ value: 'deepseek-chat', label: 'DeepSeek Chat (请先配置Key)' });
+
+    ['singleModel', 'modelA', 'modelB'].forEach(id => {
+        const el = document.getElementById(id);
+        const cur = el.value;
+        el.innerHTML = '';
+        all.forEach(({ value, label }) => {
+            const opt = document.createElement('option');
+            opt.value = value; opt.textContent = label;
+            el.appendChild(opt);
+        });
+        if (cur && all.find(m => m.value === cur)) el.value = cur;
+    });
 }
 
-function showToast(msg) { 
-    const toast = document.createElement('div'); 
-    toast.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2 rounded-full shadow-lg z-[300] transition-opacity duration-700 text-xs font-bold backdrop-blur-md"; 
-    toast.textContent = msg; 
-    document.body.appendChild(toast); 
-    setTimeout(() => toast.style.opacity = '0', 2000); 
-    setTimeout(() => toast.remove(), 2700); 
+// ─────────────────────────────────────────
+//  AI 调用核心（修复正确API地址）
+// ─────────────────────────────────────────
+async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
+    let url, key;
+
+    // ✅ DeepSeek 正确地址（无版本号）
+    if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
+        url = 'https://api.deepseek.com/chat/completions';
+        key = flowConfig.ds_key;
+    }
+    // 通义千问
+    else if (model.startsWith('qwen')) {
+        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        key = flowConfig.qw_key;
+    }
+    // ✅ 豆包 正确地址（v3路径 + 动态模型ID）
+    else if (model.startsWith('ep-') || model.startsWith('doubao')) {
+        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+        key = flowConfig.db_key;
+    }
+    // 中转/其他
+    else {
+        if (!flowConfig.proxy_url) {
+            targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
+            return;
+        }
+        url = flowConfig.proxy_url.replace(/\/+$/, '') + '/chat/completions';
+        key = flowConfig.proxy_key;
+    }
+
+    // key 校验
+    if (!key || !key.trim()) {
+        targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
+        return;
+    }
+
+    // 温度限制（部分模型不支持高温度）
+    const safeTemp = Math.min(Math.max(parseFloat(temp) || 0.7, 0), 1.5);
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key.trim()}`
+            },
+            body: JSON.stringify({
+                model,
+                messages: [
+                    { role: 'system', content: sysPrompt },
+                    { role: 'user',   content: userText }
+                ],
+                stream: true,
+                temperature: safeTemp
+            }),
+            signal: abortController ? abortController.signal : undefined
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            targetEl.innerHTML = `<span style="color:#ef4444">❌ 请求失败 (${res.status})：${errText.slice(0, 200)}</span>`;
+            return;
+        }
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   rawText = '';
+
+        targetEl.textContent = '';
+        targetEl.classList.add('streaming-cursor');
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+                const l = line.trim();
+                if (!l.startsWith('data: ')) continue;
+                const s = l.slice(6);
+                if (s === '[DONE]') break;
+                try {
+                    const j = JSON.parse(s);
+                    const c = j?.choices?.[0]?.delta?.content;
+                    if (c) {
+                        rawText += c;
+                        // 流式阶段用纯文本显示（性能好）
+                        targetEl.textContent = rawText;
+                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
+                    }
+                } catch { /* 忽略非JSON行 */ }
+            }
+        }
+
+        // 流式结束后渲染 Markdown
+        targetEl.classList.remove('streaming-cursor');
+        targetEl.innerHTML = marked.parse(rawText);
+        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
+
+    } catch (e) {
+        targetEl.classList.remove('streaming-cursor');
+        if (e.name === 'AbortError') {
+            targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
+        } else {
+            targetEl.innerHTML = `<span style="color:#ef4444">❌ 网络错误：${e.message}</span>`;
+        }
+    }
 }
 
-// 例文库
+// ─────────────────────────────────────────
+//  发送消息
+// ─────────────────────────────────────────
+async function handleSend() {
+    if (isGenerating) {
+        if (abortController) abortController.abort();
+        return;
+    }
+
+    const text = dom.userInput.value.trim();
+    if (!text) { showToast('⚠️ 请先输入内容'); return; }
+
+    // 拼接例文参考
+    let ref = '';
+    selectedSampleIndices.forEach(idx => {
+        const s = sampleLibrary[idx];
+        if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0, 1000)}\n`;
+    });
+
+    const selectedPrompt = dom.promptSelect.value;
+    const sysContent     = prompts[selectedPrompt] || '你是一个智慧的创作助手。';
+    const fullPrompt     = ref
+        ? `${ref}\n---\n### 任务指令\n${text}`
+        : text;
+
+    const isPK = !document.getElementById('pkSelectBox').classList.contains('hidden');
+
+    isGenerating    = true;
+    abortController = new AbortController();
+    setSendButtonStop();
+
+    try {
+        if (isPK) await handlePKMode(sysContent, fullPrompt);
+        else      await handleSingleMode(text, sysContent, fullPrompt);
+    } finally {
+        isGenerating = false;
+        abortController = null;
+        resetSendButton();
+        dom.userInput.value = '';
+        dom.charCount.textContent = '0字';
+        saveHistory();
+        renderHistorySelect();
+    }
+}
+
+async function handleSingleMode(displayText, sys, prompt) {
+    appendMsg('user', displayText);
+
+    // ✅ 加入上下文历史
+    conversationHistory.push({ role: 'user', content: prompt });
+
+    const wrapper  = appendMsg('ai', '');
+    const targetEl = wrapper.querySelector('.msg-body');
+    const model    = document.getElementById('singleModel').value;
+    const temp     = parseFloat(dom.tempSlider.value);
+
+    // ✅ 传入历史消息
+    await streamCallAI(model, sys, conversationHistory, targetEl, temp);
+
+    const aiReply = targetEl.innerText;
+    // ✅ AI回复也记录进上下文
+    conversationHistory.push({ role: 'assistant', content: aiReply });
+
+    addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
+}
+
+async function handlePKMode(sys, prompt) {
+    const mA = document.getElementById('modelA').value;
+    const mB = document.getElementById('modelB').value;
+    const grid = document.createElement('div');
+    grid.className = 'flex gap-4 w-full mb-6';
+    const colA = makePKCol(mA);
+    const colB = makePKCol(mB);
+    grid.append(colA, colB);
+    dom.displayArea.appendChild(grid);
+    checkEmptyState();
+    const temp = parseFloat(dom.tempSlider.value);
+    await Promise.all([
+        streamCallAI(mA, sys, prompt, colA.querySelector('.pk-body'), temp),
+        streamCallAI(mB, sys, prompt, colB.querySelector('.pk-body'), temp)
+    ]);
+    addMsgActions(colA, colA.querySelector('.pk-body').innerText);
+    addMsgActions(colB, colB.querySelector('.pk-body').innerText);
+}
+
+// ─────────────────────────────────────────
+//  例文 & 基因提取
+// ─────────────────────────────────────────
 function renderSampleLibrary() {
-    const container = document.getElementById('sampleLibrary'); 
-    container.innerHTML = '';
-    
+    const container = document.getElementById('sampleLibrary');
+    const fragment  = document.createDocumentFragment();
+
     sampleLibrary.forEach((s, i) => {
         const isSelected = selectedSampleIndices.includes(i);
         const div = document.createElement('div');
-        div.className = `p-3 rounded-xl border text-[11px] transition-all flex flex-col gap-2 ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-        
+        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${
+            isSelected
+                ? 'bg-blue-500/10 border-blue-400'
+                : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'
+        }`;
         div.innerHTML = `
             <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200">
-                    <input type="checkbox" class="accent-blue-500" ${isSelected ? 'checked' : ''} onchange="toggleSample(${i})">
-                    <span class="truncate w-32 font-bold">${s.name}</span>
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0">
+                    <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected ? 'checked' : ''} onchange="toggleSample(${i})">
+                    <span class="truncate font-bold">${s.name}</span>
                 </label>
-                <div class="flex gap-2">
-                    <button onclick="extractGene(${i})" title="提取基因" class="text-blue-400 hover:text-white transition">🧬</button>
-                    <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 text-lg leading-none transition">×</button>
+                <div class="flex gap-1.5 ml-2 flex-shrink-0">
+                    <button onclick="extractGene(${i})" title="提取风格基因" class="text-blue-400 hover:text-white transition text-sm">🧬</button>
+                    <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>
-            ${s.gene ? `<div class="text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1.5 rounded-md italic line-clamp-1 mt-1 font-bold">已分析基因</div>` : ''}
+            ${s.gene ? `<div class="mt-1.5 text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1 rounded-md italic line-clamp-2">✅ 已提取基因</div>` : ''}
         `;
-        
-        container.appendChild(div);
+        fragment.appendChild(div);
     });
+
+    container.innerHTML = '';
+    container.appendChild(fragment);
 }
 
-window.toggleSample = function(idx) { 
-    selectedSampleIndices = selectedSampleIndices.includes(idx) ? selectedSampleIndices.filter(i => i !== idx) : [...selectedSampleIndices, idx]; 
-    renderSampleLibrary(); 
+window.toggleSample = function(idx) {
+    selectedSampleIndices = selectedSampleIndices.includes(idx)
+        ? selectedSampleIndices.filter(i => i !== idx)
+        : [...selectedSampleIndices, idx];
+    renderSampleLibrary();
 };
 
-async function extractGene(idx) { 
-    if (isGenerating) return; 
-    const sample = sampleLibrary[idx]; 
-    const msgWrapper = appendMsg('ai', `正在提取《${sample.name}》...`); 
-    const target = msgWrapper.querySelector('.msg-body'); 
-    isGenerating = true; 
-    abortController = new AbortController(); 
-    
-    try { 
-        await streamCallAI(document.getElementById('singleModel').value, "基因专家", `${GENE_PROMPT}\n\n内容：${sample.text.slice(0,5000)}`, target, 0.3); 
-        sample.gene = target.textContent; 
-        saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
-    } finally { 
-        isGenerating = false; 
-        abortController = null; 
-        renderSampleLibrary(); 
-    } 
-}
+window.extractGene = async function(idx) {
+    if (isGenerating) { showToast('⚠️ 请等待当前生成完成'); return; }
+    const sample   = sampleLibrary[idx];
+    const wrapper  = appendMsg('ai', '');
+    const targetEl = wrapper.querySelector('.msg-body');
+    appendMsg('user', `🧬 正在分析《${sample.name}》的风格基因...`);
 
-// 发送 & AI
-async function handleSend() { 
-    if (isGenerating) { 
-        if(abortController) abortController.abort(); 
-        resetSendButton(); 
-        return; 
-    } 
-    
-    const text = dom.userInput.value.trim(); 
-    if(!text) return; 
-    
-    let combinedRef = ""; 
-    selectedSampleIndices.forEach(idx => { 
-        const s = sampleLibrary[idx]; 
-        combinedRef += `\n【参考《${s.name}》】\n${s.gene || s.text.slice(0,800)}\n`; 
-    }); 
-    
-    const finalPrompt = `### 参考\n${combinedRef}\n### 指令\n${prompts[document.getElementById('promptSelect').value]}\n### 任务\n${text}`; 
-    const isPKMode = !document.getElementById('pkSelectBox').classList.contains('hidden'); 
-    
-    isGenerating = true; 
-    setSendButtonToStop(); 
-    abortController = new AbortController(); 
-    
-    try { 
-        if(isPKMode) await handlePKMode(finalPrompt); 
-        else await handleSingleMode(text, finalPrompt); 
-    } finally { 
-        isGenerating = false; 
-        abortController = null; 
-        resetSendButton(); 
-        dom.userInput.value = ''; 
-        saveHistory(); 
-        renderHistorySelect(); 
-    } 
-}
+    isGenerating    = true;
+    abortController = new AbortController();
+    setSendButtonStop();
 
-async function handleSingleMode(userText, prompt) { 
-    appendMsg('user', userText); 
-    const aiWrapper = appendMsg('ai', "..."); 
-    const target = aiWrapper.querySelector('.msg-body'); 
-    await streamCallAI(document.getElementById('singleModel').value, "写作专家", prompt, target, parseFloat(dom.tempSlider.value)); 
-    addActions(aiWrapper.querySelector('.ai-msg'), target.textContent); 
-}
-
-async function handlePKMode(prompt) { 
-    const mA = document.getElementById('modelA').value; 
-    const mB = document.getElementById('modelB').value; 
-    const pkGrid = document.createElement('div'); 
-    pkGrid.className = "pk-grid flex gap-4 w-full mb-6 relative z-10"; 
-    const colA = createPKCol(mA); 
-    const colB = createPKCol(mB); 
-    pkGrid.append(colA, colB); 
-    dom.displayArea.appendChild(pkGrid); 
-    checkEmptyState(); 
-    const t = parseFloat(dom.tempSlider.value); 
-    await Promise.all([ 
-        streamCallAI(mA, "专家", prompt, colA.querySelector('.pk-body'), t), 
-        streamCallAI(mB, "专家", prompt, colB.querySelector('.pk-body'), t) 
-    ]); 
-    addActions(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').textContent); 
-    addActions(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').textContent); 
-}
-
-async function streamCallAI(model, sys, text, target, temp) {
-    let url, key;
-    
-    if(model.includes('doubao') || model.startsWith('ep-')) { 
-        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; 
-        key = flowConfig.db_key; 
-    }
-    else if(model === 'deepseek-chat') { 
-        url = 'https://api.deepseek.com/v3/chat/completions'; 
-        key = flowConfig.ds_key; 
-    }
-    else if(model === 'qwen-plus') { 
-        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'; 
-        key = flowConfig.qw_key; 
-    }
-    else { 
-        url = flowConfig.proxy_url.replace(/\/$/, '') + '/chat/completions'; 
-        key = flowConfig.proxy_key; 
-    }
-    
     try {
-        const res = await fetch(url, { 
-            method: 'POST', 
-            headers: { 
-                'Content-Type': 'application/json', 
-                Authorization: `Bearer ${key.trim()}` 
-            }, 
-            body: JSON.stringify({ 
-                model, 
-                messages: [{role:'system',content:sys},{role:'user',content:text}], 
-                stream: true, 
-                temperature: temp 
-            }), 
-            signal: abortController.signal 
-        });
-        
-        const reader = res.body.getReader(); 
-        const d = new TextDecoder(); 
-        target.textContent = '';
-        
-        while(true) { 
-            const { done, value } = await reader.read(); 
-            if(done) break; 
-            const chunk = d.decode(value); 
-            const lines = chunk.split('\n'); 
-            
-            for(const line of lines) { 
-                const l = line.trim(); 
-                if(!l.startsWith('data: ')) continue; 
-                const s = l.replace('data: ', ''); 
-                if(s === '[DONE]') break; 
-                try { 
-                    const j = JSON.parse(s); 
-                    const c = j.choices[0].delta.content; 
-                    if(c) { 
-                        target.textContent += c; 
-                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight; 
-                    } 
-                } catch(e) {} 
-            } 
-        } 
-    } catch(e) { 
-        target.textContent += e.name === 'AbortError' ? '\n[已停止]' : `\n错误：${e.message}`; 
+        const model = document.getElementById('singleModel').value;
+        await streamCallAI(model, '你是专业的文学分析专家。', `${GENE_PROMPT}\n\n待分析文本：\n${sample.text.slice(0, 6000)}`, targetEl, 0.3);
+        sampleLibrary[idx].gene = targetEl.innerText;
+        saveJSON(SK.samples, sampleLibrary);
+        renderSampleLibrary();
+        showToast(`✅ 《${sample.name}》基因提取完成`);
+    } finally {
+        isGenerating = false;
+        abortController = null;
+        resetSendButton();
     }
+};
+
+window.deleteSample = function(idx) {
+    sampleLibrary.splice(idx, 1);
+    selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx).map(i => i > idx ? i - 1 : i);
+    saveJSON(SK.samples, sampleLibrary);
+    renderSampleLibrary();
+};
+
+async function handleFileImport(e) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    let imported = 0;
+    for (const f of files) {
+        try {
+            let text = '';
+            if (f.name.endsWith('.docx')) {
+                text = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = ev => mammoth.extractRawText({ arrayBuffer: ev.target.result })
+                        .then(r => resolve(r.value)).catch(reject);
+                    reader.readAsArrayBuffer(f);
+                });
+            } else {
+                text = await f.text();
+            }
+            if (text.trim()) {
+                sampleLibrary.push({ name: f.name, text, gene: '' });
+                imported++;
+            }
+        } catch { showToast(`⚠️ 导入 ${f.name} 失败`); }
+    }
+    if (imported > 0) {
+        saveJSON(SK.samples, sampleLibrary);
+        renderSampleLibrary();
+        showToast(`✅ 成功导入 ${imported} 个文件`);
+    }
+    e.target.value = '';
 }
 
-// 操作按钮
-function addActions(container, text) {
-    const footer = document.createElement('div'); 
-    footer.className = 'flex gap-4 mt-4 border-t border-gray-100 pt-3';
-    const btnCopy = createActionBtn('📋 复制', 'text-green-500', () => { 
-        navigator.clipboard.writeText(text); 
-        showToast("✅ 已复制到剪贴板"); 
-    });
-    const btnAddBook = createActionBtn('📖 添加新书稿', 'text-blue-500', () => { 
-        const name = `书稿_${new Date().toLocaleString()}`; 
-        bookLibrary.push({ name, content: text }); 
-        saveBooks(); 
-        renderBookLibrary(); 
-        showToast(`✅ 已新建书稿：${name}`); 
-    });
-    const btnWord = createActionBtn('📄 导出Word', 'text-gray-400', () => { 
-        const doc = new docx.Document({ 
-            sections: [{ 
-                properties: {}, 
-                children: [new docx.Paragraph(text)] 
-            }] 
-        }); 
-        docx.Packer.toBlob(doc).then(blob => { 
-            saveAs(blob, "灵犀生成内容.docx"); 
-            showToast("✅ Word导出成功"); 
-        }); 
-    });
-    footer.append(btnCopy, btnAddBook, btnWord); 
-    container.appendChild(footer);
-}
-
-function createActionBtn(text, cls, onClick) { 
-    const btn = document.createElement('button'); 
-    btn.className = `text-xs font-bold ${cls} hover:bg-gray-100 px-3 py-1 rounded-lg transition`; 
-    btn.textContent = text; 
-    btn.onclick = onClick; 
-    return btn; 
-}
-
-// 消息模块
-function appendMsg(role, html) {
-    const wrap = document.createElement('div'); 
+// ─────────────────────────────────────────
+//  消息渲染
+// ─────────────────────────────────────────
+function appendMsg(role, content) {
+    const wrap = document.createElement('div');
     wrap.className = 'msg-wrapper';
-    const msg = document.createElement('div'); 
+
+    const msg = document.createElement('div');
     msg.className = role === 'user' ? 'user-msg' : 'ai-msg';
-    const body = document.createElement('div'); 
-    body.className = 'msg-body'; 
-    body.textContent = html; 
+
+    const body = document.createElement('div');
+    body.className = 'msg-body';
+    if (role === 'user') {
+        body.textContent = content;
+    } else {
+        body.innerHTML = content ? marked.parse(content) : '';
+    }
+
     msg.appendChild(body);
-    const copyBtn = document.createElement('button'); 
-    copyBtn.className = 'text-xs font-bold text-gray-400 hover:text-white mt-2 px-2 py-1 rounded-lg transition opacity-50 hover:opacity-100 self-end'; 
-    copyBtn.textContent = '📋 复制'; 
-    copyBtn.onclick = () => { 
-        navigator.clipboard.writeText(body.textContent); 
-        showToast("✅ 已复制"); 
-    }; 
-    msg.appendChild(copyBtn);
-    wrap.appendChild(msg); 
-    dom.displayArea.appendChild(wrap); 
-    checkEmptyState(); 
-    dom.displayArea.scrollTop = dom.displayArea.scrollHeight; 
+    wrap.appendChild(msg);
+    dom.displayArea.appendChild(wrap);
+    checkEmptyState();
+    dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
     return wrap;
 }
 
-function createPKCol(model) {
-    const col = document.createElement('div'); 
-    col.className = 'flex-1 bg-white rounded-2xl shadow border border-gray-100 overflow-hidden';
+function makePKCol(model) {
+    const col = document.createElement('div');
+    col.className = 'pk-col flex-1';
     col.innerHTML = `
-        <div class="p-3 bg-gray-50 text-xs font-black text-gray-500 border-b border-gray-200">
-            ${model}
-        </div>
-        <div class="p-4 text-sm min-h-[300px] pk-body whitespace-pre-line"></div>
+        <div class="pk-col-header">${model}</div>
+        <div class="pk-body"></div>
     `;
     return col;
 }
 
-function setSendButtonToStop() { 
-    dom.sendBtn.innerHTML = '<span>⏹️</span> 停止'; 
-    dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500'); 
-    dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400'); 
+function addMsgActions(container, rawText) {
+    const footer = document.createElement('div');
+    footer.className = 'flex gap-3 mt-4 pt-3 border-t flex-wrap';
+    footer.style.borderColor = 'var(--border-color)';
+
+    // 复制
+    const btnCopy = makeActionBtn('📋 复制', 'text-green-500', () => {
+        navigator.clipboard.writeText(rawText).then(() => showToast('✅ 已复制'));
+    });
+    // 存为书稿
+    const btnBook = makeActionBtn('📖 存为书稿', 'text-blue-500', () => {
+        const name = `书稿_${new Date().toLocaleString()}`;
+        bookLibrary.push({ name, content: rawText });
+        saveJSON(SK.books, bookLibrary);
+        renderBookLibrary();
+        showToast(`✅ 已保存书稿：${name}`);
+    });
+    // 追加草稿
+    const btnAppend = makeActionBtn('✍️ 追加草稿', 'text-purple-500', () => {
+        dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + rawText;
+        debouncedSaveWorkspace(dom.workspace.value);
+        if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
+            document.getElementById('mainEditor').classList.add('editor-active');
+        }
+        showToast('📝 已追加到草稿区');
+    });
+    // ✅ 新增：续写
+    const btnContinue = makeActionBtn('➡️ 续写', 'text-teal-500', () => {
+        dom.userInput.value = '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。';
+        dom.userInput.focus();
+        dom.charCount.textContent = dom.userInput.value.length + '字';
+        showToast('💡 续写指令已填入，点击执行即可');
+    });
+    // ✅ 新增：重新生成
+    const btnRegen = makeActionBtn('🔄 重新生成', 'text-orange-500', async () => {
+        if (isGenerating) return;
+        if (conversationHistory.length < 1) { showToast('⚠️ 没有可重新生成的内容'); return; }
+
+        // 移除最后一条AI回复，保留用户消息重新发送
+        const lastUserMsg = conversationHistory.filter(m => m.role === 'user').slice(-1)[0];
+        if (!lastUserMsg) return;
+
+        // 回滚上下文：移除最后一组对话
+        if (conversationHistory[conversationHistory.length - 1].role === 'assistant') {
+            conversationHistory.pop();
+        }
+
+        // 移除界面上最后一条AI消息气泡
+        const allWrappers = dom.displayArea.querySelectorAll('.msg-wrapper');
+        const lastWrapper = allWrappers[allWrappers.length - 1];
+        if (lastWrapper) lastWrapper.remove();
+
+        // 重新生成
+        isGenerating    = true;
+        abortController = new AbortController();
+        setSendButtonStop();
+
+        try {
+            const sys      = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
+            const model    = document.getElementById('singleModel').value;
+            const temp     = parseFloat(dom.tempSlider.value);
+            const wrapper  = appendMsg('ai', '');
+            const targetEl = wrapper.querySelector('.msg-body');
+
+            conversationHistory.push({ role: 'user', content: lastUserMsg.content });
+            await streamCallAI(model, sys, conversationHistory, targetEl, temp);
+
+            const aiReply = targetEl.innerText;
+            conversationHistory.push({ role: 'assistant', content: aiReply });
+            addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
+            showToast('🔄 已重新生成');
+        } finally {
+            isGenerating = false;
+            abortController = null;
+            resetSendButton();
+        }
+    });
+    // 导出Word
+    const btnWord = makeActionBtn('📄 导出Word', 'text-gray-400', () => {
+        const doc = new docx.Document({
+            sections: [{ properties: {}, children: [new docx.Paragraph({ text: rawText })] }]
+        });
+        docx.Packer.toBlob(doc).then(blob => {
+            saveAs(blob, `灵犀_${new Date().toLocaleTimeString()}.docx`);
+            showToast('✅ Word 导出成功');
+        });
+    });
+
+    footer.append(btnCopy, btnBook, btnAppend, btnContinue, btnRegen, btnWord);
+    container.appendChild(footer);
 }
 
-function resetSendButton() { 
-    dom.sendBtn.innerHTML = '<span>🚀</span> 执行'; 
-    dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600'); 
-    dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500'); 
+function makeActionBtn(text, cls, onClick) {
+    const btn = document.createElement('button');
+    btn.className = `text-xs font-bold ${cls} hover:opacity-70 px-3 py-1.5 rounded-lg transition`;
+    btn.style.background = 'var(--bg-main)';
+    btn.textContent = text;
+    btn.onclick     = onClick;
+    return btn;
 }
 
-// 模式切换
-function switchToChatMode() { 
-    document.getElementById('modeChat').classList.add('mode-btn-active'); 
-    document.getElementById('modePK').classList.remove('mode-btn-active'); 
-    document.getElementById('singleSelectBox').classList.remove('hidden'); 
-    document.getElementById('pkSelectBox').classList.add('hidden'); 
+// ─────────────────────────────────────────
+//  历史记录
+// ─────────────────────────────────────────
+function saveHistory() {
+    const items = Array.from(dom.displayArea.querySelectorAll('.msg-body'));
+    if (items.length === 0) return;
+    // 只存前500字，防止localStorage爆满
+    const messages = items.map(el => el.innerText.slice(0, 500));
+    const title    = messages[0].slice(0, 25) + (messages[0].length > 25 ? '...' : '');
+    history = [{ title, messages, timestamp: Date.now() }, ...history.slice(0, 29)];
+    saveJSON(SK.history, history);
 }
 
-function switchToPKMode() { 
-    document.getElementById('modePK').classList.add('mode-btn-active'); 
-    document.getElementById('modeChat').classList.remove('mode-btn-active'); 
-    document.getElementById('singleSelectBox').classList.add('hidden'); 
-    document.getElementById('pkSelectBox').classList.remove('hidden'); 
+function renderHistorySelect() {
+    const sel = document.getElementById('historySelect');
+    sel.innerHTML = '<option value="">-- 选择历史 --</option>';
+    history.forEach((h, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
+        sel.appendChild(opt);
+    });
 }
 
-// 文件导入
-async function handleFileImport(e) { 
-    const files = e.target.files; 
-    if(!files) return; 
-    for(const f of files) { 
-        const name = f.name; 
-        try { 
-            let text = ''; 
-            if(name.endsWith('.docx')) { 
-                text = await new Promise((res, rej) => { 
-                    const reader = new FileReader(); 
-                    reader.onload = e => mammoth.extractRawText({arrayBuffer: e.target.result}).then(r => res(r.value)).catch(rej); 
-                    reader.readAsArrayBuffer(f); 
-                }); 
-            } else { 
-                text = await f.text(); 
-            } 
-            if(text) { 
-                sampleLibrary.push({ name, text, gene: '' }); 
-                saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
-                renderSampleLibrary(); 
-            } 
-        } catch(e) {} 
-    } 
-    e.target.value = ''; 
+function loadHistory() {
+    const idx = document.getElementById('historySelect').value;
+    if (!history[idx]) return;
+    clearChat();
+    history[idx].messages.forEach((msg, i) => {
+        appendMsg(i % 2 === 0 ? 'user' : 'ai', msg);
+    });
 }
 
-// 历史记录
-function saveHistory() { 
-    const messages = Array.from(dom.displayArea.querySelectorAll('.msg-body')).map(el => el.textContent); 
-    if(messages.length === 0) return; 
-    const title = messages[0].slice(0, 20) + '...'; 
-    const item = { title, messages, timestamp: Date.now() }; 
-    history = [item, ...history.slice(0, 99)]; 
-    saveToLocal(STORAGE_KEYS.history, history); 
+// ─────────────────────────────────────────
+//  数据导入导出
+// ─────────────────────────────────────────
+function exportSystemData() {
+    const data = {
+        version: '2.0',
+        exportTime: new Date().toLocaleString(),
+        flowConfig, prompts, sampleLibrary, history,
+        books: bookLibrary,
+        workspace: dom.workspace.value
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+    saveAs(blob, `灵犀备份_${Date.now()}.json`);
+    showToast('✅ 备份导出成功');
 }
 
-function renderHistorySelect() { 
-    const sel = document.getElementById('historySelect'); 
-    sel.innerHTML = '<option value="">-- 点击选择 --</option>'; 
-    history.forEach((h, i) => { 
-        const opt = document.createElement('option'); 
-        opt.value = i; 
-        opt.textContent = h.title; 
-        sel.appendChild(opt); 
-    }); 
+function importSystemData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        try {
+            const data = JSON.parse(ev.target.result);
+            if (data.flowConfig)    flowConfig    = data.flowConfig;
+            if (data.prompts)       prompts       = data.prompts;
+            if (data.sampleLibrary) sampleLibrary = data.sampleLibrary;
+            if (data.history)       history       = data.history;
+            if (data.books)         bookLibrary   = data.books;
+            saveAllData();
+            if (data.workspace !== undefined) dom.workspace.value = data.workspace;
+            // 只刷新UI，不重新绑定事件
+            refreshUI();
+            showToast('✅ 备份导入成功');
+        } catch {
+            showToast('❌ 导入失败，文件格式不正确');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
 }
 
-function loadHistory() { 
-    const idx = document.getElementById('historySelect').value; 
-    if(!history[idx]) return; 
-    clearChat(); 
-    history[idx].messages.forEach((msg, i) => { 
-        appendMsg(i % 2 === 0 ? 'user' : 'ai', msg); 
-    }); 
+function refreshUI() {
+    initConfigInputs();
+    loadWorkspace();
+    renderBookLibrary();
+    renderSampleLibrary();
+    renderSelect();
+    updateModelDropdowns();
+    renderHistorySelect();
+    updateSidebarPromptBadge();
 }
 
-// 配置
-function initConfigInputs() { 
-    document.getElementById('ds_key').value = flowConfig.ds_key; 
-    document.getElementById('qw_key').value = flowConfig.qw_key; 
-    document.getElementById('db_key').value = flowConfig.db_key; 
-    document.getElementById('proxy_url').value = flowConfig.proxy_url; 
-    document.getElementById('proxy_key').value = flowConfig.proxy_key; 
-    document.getElementById('proxy_models').value = flowConfig.proxy_models; 
+function saveAllData() {
+    saveJSON(SK.flow,    flowConfig);
+    saveJSON(SK.prompts, prompts);
+    saveJSON(SK.samples, sampleLibrary);
+    saveJSON(SK.history, history);
+    saveJSON(SK.books,   bookLibrary);
 }
 
-function saveConfig() { 
-    flowConfig = { 
-        ds_key: document.getElementById('ds_key').value.trim(), 
-        qw_key: document.getElementById('qw_key').value.trim(), 
-        db_key: document.getElementById('db_key').value.trim(), 
-        proxy_url: document.getElementById('proxy_url').value.trim(), 
-        proxy_key: document.getElementById('proxy_key').value.trim(), 
-        proxy_models: document.getElementById('proxy_models').value.trim() 
-    }; 
-    saveToLocal(STORAGE_KEYS.flow, flowConfig); 
-    updateModelDropdowns(); 
-    showToast("✅ 配置已保存"); 
-    closeSettings(); 
+function loadWorkspace() {
+    const val = localStorage.getItem(SK.workspace);
+    if (val !== null) {
+        try { dom.workspace.value = JSON.parse(val); }
+        catch { dom.workspace.value = val; }
+    }
 }
 
-function updateModelDropdowns() { 
-    const official = ['deepseek-chat', 'qwen-plus', 'doubao-4']; 
-    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s => s.trim()).filter(Boolean) : []; 
-    const all = [...official, ...proxy]; 
-    ['singleModel', 'modelA', 'modelB'].forEach(id => { 
-        const el = document.getElementById(id); 
-        el.innerHTML = ''; 
-        all.forEach(m => { 
-            const opt = document.createElement('option'); 
-            opt.value = m; 
-            opt.textContent = m; 
-            el.appendChild(opt); 
-        }); 
-    }); 
+// ─────────────────────────────────────────
+//  自动备份
+// ─────────────────────────────────────────
+function initAutoBackup() {
+    if (autoBackupTimer) clearInterval(autoBackupTimer);
+    autoBackupTimer = setInterval(() => {
+        saveJSON(SK.autoBackup, {
+            flowConfig, prompts, sampleLibrary,
+            history: history.slice(0, 10),
+            bookLibrary,
+            workspace: dom.workspace.value,
+            timestamp: new Date().toLocaleString()
+        });
+    }, 5 * 60 * 1000);
 }
 
-// 本地存储
-function saveToLocal(key, data) { 
-    localStorage.setItem(key, JSON.stringify(data)); 
+// ─────────────────────────────────────────
+//  界面工具
+// ─────────────────────────────────────────
+function checkEmptyState() {
+    const has = dom.displayArea.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
+    dom.emptyState.style.display = has ? 'none' : 'flex';
 }
 
-function saveAllData() { 
-    saveToLocal(STORAGE_KEYS.flow, flowConfig); 
-    saveToLocal(STORAGE_KEYS.prompts, prompts); 
-    saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
-    saveToLocal(STORAGE_KEYS.history, history); 
-    saveToLocal(STORAGE_KEYS.books, bookLibrary); 
+function clearChat() {
+    dom.displayArea.innerHTML = '';
+    dom.displayArea.appendChild(dom.emptyState);
+    dom.emptyState.style.display = 'flex';
 }
 
-function loadWorkspace() { 
-    const val = localStorage.getItem(STORAGE_KEYS.workspace); 
-    if(val) dom.workspace.value = val; 
+function setSendButtonStop() {
+    dom.sendBtn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg> 停止`;
+    dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500');
+    dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400');
 }
 
-// 界面操作
-function clearChat() { 
-    dom.displayArea.innerHTML = ''; 
-    dom.displayArea.appendChild(dom.emptyState); 
-    checkEmptyState(); 
+function resetSendButton() {
+    dom.sendBtn.innerHTML = '<span>🚀</span> 执行';
+    dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600');
+    dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500');
 }
 
-function newChat() { 
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed; top:24px; left:50%; transform:translateX(-50%);
+        background:rgba(30,41,59,0.95); color:white; padding:8px 18px;
+        border-radius:999px; z-index:9999; font-size:12px; font-weight:700;
+        box-shadow:0 4px 20px rgba(0,0,0,0.2); backdrop-filter:blur(8px);
+        transition:opacity 0.5s; pointer-events:none;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+    setTimeout(() => toast.remove(), 2700);
+}
+
+function makeBtn(icon, cls, onClick) {
+    const btn = document.createElement('button');
+    btn.className = `${cls} p-1 rounded-md transition text-sm`;
+    btn.innerHTML = icon;
+    btn.onclick = e => { e.stopPropagation(); onClick(); };
+    return btn;
+}
+
+function switchToChatMode() {
+    document.getElementById('modeChat').classList.add('mode-btn-active');
+    document.getElementById('modePK').classList.remove('mode-btn-active');
+    document.getElementById('singleSelectBox').classList.remove('hidden');
+    document.getElementById('pkSelectBox').classList.add('hidden');
+}
+
+function switchToPKMode() {
+    document.getElementById('modePK').classList.add('mode-btn-active');
+    document.getElementById('modeChat').classList.remove('mode-btn-active');
+    document.getElementById('singleSelectBox').classList.add('hidden');
+    document.getElementById('pkSelectBox').classList.remove('hidden');
+}
+
+// ─────────────────────────────────────────
+//  事件绑定（只执行一次）
+// ─────────────────────────────────────────
+function bindEvents() {
+    // 发送
+    dom.sendBtn.onclick   = handleSend;
+    dom.userInput.onkeydown = e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    };
+
+    // 字数统计
+    dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length + '字'; };
+    dom.workspace.oninput  = () => {
+        dom.wsWordCount.textContent = dom.workspace.value.length + '字';
+        debouncedSaveWorkspace(dom.workspace.value);
+    };
+
+    // 温度
+    dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
+
+    // 顶部按钮
+    document.getElementById('toggleSpace').onclick = () => document.getElementById('mainEditor').classList.toggle('editor-active');
+    document.getElementById('newChatBtn').onclick  = () => { 
     clearChat(); 
     dom.userInput.value = ''; 
-}
+    conversationHistory = [];   // ✅ 新开篇时清空上下文
+    showToast('✨ 已开启新篇章，对话记忆已重置');
+};
+    document.getElementById('typesetBtn').onclick  = typesetContent;
+    document.getElementById('clearChatBtn').onclick= clearChat;
 
-function toggleSpace() { 
-    const ed = document.getElementById('mainEditor'); 
-    ed.classList.toggle('editor-active'); 
-}
-
-function deleteSample(idx) { 
-    sampleLibrary.splice(idx, 1); 
-    selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx); 
-    saveToLocal(STORAGE_KEYS.samples, sampleLibrary); 
-    renderSampleLibrary(); 
-}
-
-// 事件绑定
-function bindEvents() {
-    // 发送按钮
-    dom.sendBtn.onclick = handleSend;
-    
-    // 输入框回车发送
-    dom.userInput.onkeydown = e => { 
-        if(e.key === 'Enter' && !e.shiftKey) { 
-            e.preventDefault(); 
-            handleSend(); 
-        } 
-    };
-    
-    // 温度滑块
-    dom.tempSlider.oninput = () => { 
-        dom.tempValueDisplay.textContent = dom.tempSlider.value; 
-    };
-    
-    // 分屏创作
-    document.getElementById('toggleSpace').onclick = toggleSpace;
-    
-    // 新开篇
-    document.getElementById('newChatBtn').onclick = newChat;
-    
-    // 一键排版
-    document.getElementById('typesetBtn').onclick = typesetContent;
-    
-    // 清空聊天
-    document.getElementById('clearChatBtn').onclick = clearChat;
-    
     // 模式切换
     document.getElementById('modeChat').onclick = switchToChatMode;
-    document.getElementById('modePK').onclick = switchToPKMode;
-    
-    // 左侧边栏日夜模式
+    document.getElementById('modePK').onclick   = switchToPKMode;
+
+    // 侧边栏日夜
     document.getElementById('sidebarDarkToggle').onclick = toggleSidebarDarkMode;
-    
-    // 导入备份
-    document.getElementById('importSystemInput').onchange = importSystemData;
-    
-    // 文件导入
-    document.getElementById('file').onchange = handleFileImport;
-    
-    // 历史记录选择
-    document.getElementById('historySelect').onchange = loadHistory;
-    
+
     // 设置弹窗
-    document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
+    document.getElementById('openSettings').onclick  = () => document.getElementById('settingsModal').classList.remove('hidden');
     document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
-    document.getElementById('saveSettings').onclick = saveConfig;
-    
+    document.getElementById('saveSettings').onclick  = saveConfig;
+
     // 神兵武库弹窗
-    document.getElementById('openPromptModalBtn').onclick = () => { 
-        renderModalPromptList(); 
-        document.getElementById('promptModal').classList.remove('hidden'); 
+    document.getElementById('openPromptModalBtn').onclick = () => {
+        renderModalPromptList();
+        resetPromptEditor();
+        document.getElementById('promptModal').classList.remove('hidden');
     };
     document.getElementById('closePromptModal').onclick = () => document.getElementById('promptModal').classList.add('hidden');
-    document.getElementById('savePromptBtn').onclick = savePrompt;
-    document.getElementById('resetPromptBtn').onclick = resetPromptEditor;
-    
-    // 书稿内容字数统计
-    document.getElementById('bookContent').oninput = updateWordCount;
+    document.getElementById('savePromptBtn').onclick    = savePrompt;
+    document.getElementById('resetPromptBtn').onclick   = resetPromptEditor;
+
+    // ✅ 新增：神兵武库内"+"新建按钮
+    document.getElementById('addNewPromptBtn').onclick = resetPromptEditor;
+
+    // 文件导入
+    document.getElementById('fileImport').onchange        = handleFileImport;      // ✅ 修复ID一致
+    document.getElementById('importSystemInput').onchange = importSystemData;
+
+    // 历史记录
+    document.getElementById('historySelect').onchange = loadHistory;
 }
 
-// 页面加载完成后初始化
+// 启动
 window.onload = init;
 </script>
 </body>
