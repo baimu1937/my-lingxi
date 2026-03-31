@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>灵犀 v32.8 - 视觉焕新版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -26,7 +27,6 @@
         .ai-msg { background: white; color: #334155; padding: 1.5rem 2rem; border-radius: 20px 20px 20px 4px; border: 1px solid #e2e8f0; align-self: flex-start; max-width: 90%; line-height: 1.8; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
         .theme-dark .ai-msg { background: #1e293b; color: #e2e8f0; border-color: #334155; }
         
-        /* 调色盘菜单 */
         #themeMenu { display: none; position: absolute; right: 40px; top: 60px; background: white; border-radius: 12px; padding: 10px; z-index: 100; border: 1px solid #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.1); flex-direction: row; gap: 0.75rem; }
         .theme-dot { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 1px solid #ddd; transition: transform 0.2s; }
         .theme-dot:hover { transform: scale(1.1); }
@@ -49,7 +49,7 @@
         
         <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-8">
             <div class="flex bg-black/20 p-1.5 rounded-xl border border-white/5">
-                <button id="modeChat" class="mode-btn mode-btn-active">单人创作</button>
+                <button id="modeChat" class="mode-btn mode-btn-active">创作</button>
                 <button id="modePK" class="mode-btn text-gray-400 hover:text-gray-200">竞技擂台</button>
             </div>
 
@@ -58,6 +58,15 @@
                     <span class="text-lg">🗡️ 神兵武库</span>
                     <span id="promptCountBadge" class="bg-blue-500/30 group-hover:bg-white/20 px-2.5 py-1 rounded-md text-[11px]">0件</span>
                 </button>
+            </section>
+
+            <!-- 新增：书稿管理 -->
+            <section class="mb-4">
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <span class="text-[11px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
+                    <button onclick="addNewBook()" class="text-blue-400 text-[11px] font-bold hover:text-blue-300 transition px-2 py-1 bg-blue-500/10 rounded hover:bg-blue-500/20">+ 新建</button>
+                </div>
+                <div id="bookLibrary" class="space-y-2"></div>
             </section>
 
             <section class="pb-10">
@@ -75,13 +84,16 @@
         <header class="h-[72px] bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center px-8 justify-between z-10 transition-colors theme-dark:bg-[#1e293b]/80 theme-dark:border-[#334155]">
             <div class="flex items-center gap-3">
                 <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
-                <h2 id="workTitle" class="text-base font-bold text-gray-700 italic mr-4 theme-dark:text-gray-200">单人创作模式</h2>
+                <h2 id="workTitle" class="text-base font-bold text-gray-700 italic mr-4 theme-dark:text-gray-200">灵犀创作</h2>
                 
                 <button id="toggleSpace" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
                     <span>✍️</span> 分屏创作
                 </button>
                 <button id="newChatBtn" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
                     <span>✨</span> 新开篇
+                </button>
+                <button id="typesetBtn" class="text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800">
+                    <span>📝</span> 一键排版
                 </button>
                 
                 <div class="w-px h-4 bg-gray-200 mx-2 theme-dark:bg-gray-700"></div>
@@ -166,6 +178,28 @@
         </div>
     </div>
 
+    <!-- 书稿编辑弹窗 -->
+    <div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
+        <div class="bg-white rounded-[24px] p-6 w-full max-w-4xl shadow-2xl flex flex-col h-[80vh] theme-dark:bg-[#1e293b] border border-white/10">
+            <div class="flex justify-between items-center mb-4 border-b pb-3 theme-dark:border-gray-700">
+                <h3 class="text-xl font-black text-blue-600 italic flex items-center gap-2">📖 书稿编辑</h3>
+                <button onclick="closeBookModal()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition-all">&times;</button>
+            </div>
+            <div class="flex flex-col h-full">
+                <div class="mb-3 flex gap-3">
+                    <input id="bookNameInput" type="text" placeholder="书稿名称" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none text-sm font-bold focus:border-blue-400 focus:bg-white transition-all theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-white">
+                    <div class="text-sm text-gray-500 flex items-center theme-dark:text-gray-400">
+                        字数：<span id="bookWordCount" class="ml-1 text-blue-500 font-bold">0</span>
+                    </div>
+                </div>
+                <textarea id="bookContent" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none text-sm custom-scroll focus:border-blue-400 focus:bg-white transition-all leading-relaxed theme-dark:bg-gray-800 theme-dark:border-gray-700 theme-dark:text-gray-300"></textarea>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow-md transition-all text-sm tracking-widest">保存书稿</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
         <div class="bg-white rounded-[32px] p-8 w-full max-w-xl shadow-2xl transform transition-all theme-dark:bg-[#1e293b]">
             <h3 class="text-xl font-black mb-6 text-center border-b pb-4 theme-dark:text-white theme-dark:border-gray-700">⚙️ 配置大脑</h3>
@@ -214,42 +248,179 @@
     </div>
 
     <script>
+        // ==================== 常量配置 ====================
         const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成基因报告：1.叙事结构与情节逻辑；2.人物塑造；3.情感张力与写作技法；4.情绪链路与冲突密度；5.语言风格。`;
-        let flowConfig = JSON.parse(localStorage.getItem('lingxi_flow')) || { ds_key:'', qw_key:'', db_key:'', proxy_url:'', proxy_key:'', proxy_models:'gpt-4o' };
-        let prompts = JSON.parse(localStorage.getItem('lingxi_prompts')) || { "灵犀助手": "你是一个智慧创作助手。" };
-        let history = JSON.parse(localStorage.getItem('lingxi_history')) || [];
-        let sampleLibrary = JSON.parse(localStorage.getItem('lingxi_samples')) || [];
+        const STORAGE_KEYS = {
+            flow: 'lingxi_flow',
+            prompts: 'lingxi_prompts',
+            samples: 'lingxi_samples',
+            history: 'lingxi_history',
+            workspace: 'lingxi_workspace',
+            theme: 'lingxi_theme',
+            autoBackup: 'lingxi_auto_backup_snapshot',
+            books: 'lingxi_books'
+        };
+
+        // ==================== 全局状态 ====================
+        let flowConfig = JSON.parse(localStorage.getItem(STORAGE_KEYS.flow)) || { ds_key:'', qw_key:'', db_key:'', proxy_url:'', proxy_key:'', proxy_models:'gpt-4o' };
+        let prompts = JSON.parse(localStorage.getItem(STORAGE_KEYS.prompts)) || { "灵犀助手": "你是一个智慧创作助手。" };
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEYS.history)) || [];
+        let sampleLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.samples)) || [];
+        let bookLibrary = JSON.parse(localStorage.getItem(STORAGE_KEYS.books)) || [];
+        let currentEditingBookId = null;
         
         let selectedSampleIndices = []; 
-        let currentChatId = null; let isGenerating = false; let abortController = null;
+        let currentChatId = null;
+        let isGenerating = false;
+        let abortController = null;
         let editingOldPromptName = null;
+        let autoBackupTimer = null;
 
+        // ==================== 初始化 ====================
         function init() { 
+            cacheDOMElements();
             updateSidebarPromptBadge(); 
             renderSelect(); 
             updateModelDropdowns(); 
             renderSampleLibrary(); 
             renderHistorySelect();
-            Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = flowConfig[id]; });
-            document.getElementById('workspace').value = localStorage.getItem('lingxi_workspace') || '';
-            setTheme(localStorage.getItem('lingxi_theme') || ''); 
+            initConfigInputs();
+            loadWorkspace();
+            renderBookLibrary();
+            setTheme(localStorage.getItem(STORAGE_KEYS.theme) || ''); 
             checkEmptyState();
+            initAutoBackup();
+            bindEvents();
         }
 
-        // 检查是否显示空水印
+        // DOM元素缓存（减少重复查询）
+        let dom = {};
+        function cacheDOMElements() {
+            dom = {
+                displayArea: document.getElementById('displayArea'),
+                emptyState: document.getElementById('emptyState'),
+                workspace: document.getElementById('workspace'),
+                userInput: document.getElementById('userInput'),
+                sendBtn: document.getElementById('sendBtn'),
+                tempSlider: document.getElementById('tempSlider'),
+                tempValueDisplay: document.getElementById('tempValueDisplay')
+            };
+        }
+
+        // 检查空状态
         function checkEmptyState() {
-            const display = document.getElementById('displayArea');
-            const emptyState = document.getElementById('emptyState');
-            // 如果展示区内只有 emptyState 这个子元素，说明是空的
-            const hasMessages = display.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
-            if (emptyState) {
-                emptyState.style.display = hasMessages ? 'none' : 'flex';
+            const hasMessages = dom.displayArea.querySelectorAll('.msg-wrapper, .pk-grid').length > 0;
+            dom.emptyState.style.display = hasMessages ? 'none' : 'flex';
+        }
+
+        // ==================== 书稿管理功能 ====================
+        function renderBookLibrary() {
+            const container = document.getElementById('bookLibrary');
+            container.innerHTML = '';
+            
+            bookLibrary.forEach((book, index) => {
+                const item = document.createElement('div');
+                item.className = "group bg-white/5 p-3 rounded-xl border border-white/10 hover:border-blue-400/50 flex justify-between items-center cursor-pointer transition-all";
+                
+                const titleSpan = document.createElement('div');
+                titleSpan.className = "text-xs font-bold text-gray-200 truncate flex-1";
+                const textCount = book.content ? book.content.length : 0;
+                titleSpan.textContent = `${book.name} (${textCount}字)`;
+                
+                const btnContainer = document.createElement('div');
+                btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity";
+                
+                const editBtn = createButton('✏️', 'text-blue-400 hover:bg-blue-500/10', () => editBook(index));
+                const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-500/10', () => deleteBook(index));
+                
+                btnContainer.append(editBtn, delBtn);
+                item.append(titleSpan, btnContainer);
+                item.onclick = () => loadBookToWorkspace(index);
+                container.appendChild(item);
+            });
+        }
+
+        window.addNewBook = function() {
+            currentEditingBookId = null;
+            document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length + 1}`;
+            document.getElementById('bookContent').value = '';
+            updateWordCount();
+            document.getElementById('bookModal').classList.remove('hidden');
+        }
+
+        window.editBook = function(index) {
+            const book = bookLibrary[index];
+            currentEditingBookId = index;
+            document.getElementById('bookNameInput').value = book.name;
+            document.getElementById('bookContent').value = book.content || '';
+            updateWordCount();
+            document.getElementById('bookModal').classList.remove('hidden');
+        }
+
+        window.deleteBook = function(index) {
+            if(confirm(`确认删除书稿【${bookLibrary[index].name}】吗？`)) {
+                bookLibrary.splice(index, 1);
+                saveBooks();
+                renderBookLibrary();
             }
         }
 
-        // ==========================================
-        // 核心管理：神兵武库
-        // ==========================================
+        window.saveCurrentBook = function() {
+            const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
+            const content = document.getElementById('bookContent').value;
+            
+            if(currentEditingBookId !== null) {
+                bookLibrary[currentEditingBookId] = { name, content };
+            } else {
+                bookLibrary.push({ name, content });
+            }
+            
+            saveBooks();
+            renderBookLibrary();
+            closeBookModal();
+            showToast(`✅ 书稿【${name}】已保存`);
+        }
+
+        window.closeBookModal = function() {
+            document.getElementById('bookModal').classList.add('hidden');
+        }
+
+        function loadBookToWorkspace(index) {
+            const book = bookLibrary[index];
+            dom.workspace.value = book.content || '';
+            saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
+            showToast(`📖 已加载【${book.name}】到编辑区`);
+        }
+
+        function updateWordCount() {
+            const content = document.getElementById('bookContent').value;
+            const count = content.length;
+            document.getElementById('bookWordCount').textContent = count;
+        }
+
+        function saveBooks() {
+            saveToLocal(STORAGE_KEYS.books, bookLibrary);
+        }
+
+        // ==================== 一键排版（优化版：无空格，纯左对齐）====================
+        function typesetContent() {
+            let text = dom.workspace.value;
+            if(!text) {
+                showToast("⚠️ 编辑区为空");
+                return;
+            }
+            
+            // 纯左对齐，移除所有空格处理，只保留段落换行
+            text = text.replace(/\r\n/g, '\n');
+            text = text.replace(/\r/g, '\n');
+            text = text.replace(/\n+/g, '\n');
+            
+            dom.workspace.value = text;
+            saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
+            showToast("📝 排版完成（纯左对齐，无空格）");
+        }
+
+        // ==================== 神兵武库 ====================
         function updateSidebarPromptBadge() {
             const count = Object.keys(prompts).length;
             document.getElementById('promptCountBadge').innerText = count + '件';
@@ -262,22 +433,16 @@
             Object.keys(prompts).forEach(name => {
                 const item = document.createElement('div');
                 item.className = "group bg-white p-3 rounded-lg border border-gray-100 shadow-sm flex justify-between items-center cursor-pointer hover:border-blue-400 transition-all theme-dark:bg-gray-800 theme-dark:border-gray-700";
+                
                 const titleSpan = document.createElement('span');
                 titleSpan.className = "text-xs font-bold text-gray-700 truncate flex-1 pointer-events-none theme-dark:text-gray-300";
-                titleSpan.innerText = name;
+                titleSpan.textContent = name;
                 
                 const btnContainer = document.createElement('div');
                 btnContainer.className = "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2";
                 
-                const editBtn = document.createElement('button');
-                editBtn.className = "text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded-md transition theme-dark:hover:bg-gray-700";
-                editBtn.innerHTML = "✏️";
-                editBtn.onclick = (e) => { e.stopPropagation(); loadPromptIntoEditor(name); };
-                
-                const delBtn = document.createElement('button');
-                delBtn.className = "text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition theme-dark:hover:bg-gray-700";
-                delBtn.innerHTML = "🗑️";
-                delBtn.onclick = (e) => { e.stopPropagation(); deletePrompt(name); };
+                const editBtn = createButton('✏️', 'text-blue-500 hover:bg-blue-50', () => loadPromptIntoEditor(name));
+                const delBtn = createButton('🗑️', 'text-red-400 hover:bg-red-50', () => deletePrompt(name));
                 
                 btnContainer.append(editBtn, delBtn);
                 item.append(titleSpan, btnContainer);
@@ -288,265 +453,692 @@
             renderSelect(); 
         }
 
+        function createButton(text, className, onClick) {
+            const btn = document.createElement('button');
+            btn.className = `${className} p-1.5 rounded-md transition theme-dark:hover:bg-gray-700`;
+            btn.innerHTML = text;
+            btn.onclick = e => { e.stopPropagation(); onClick(); };
+            return btn;
+        }
+
         function loadPromptIntoEditor(name) {
             editingOldPromptName = name;
             document.getElementById('modalPromptName').value = name;
             document.getElementById('modalPromptContent').value = prompts[name];
-            document.getElementById('promptEditorIcon').innerText = "✏️";
-            document.getElementById('promptEditorTitle').innerText = "修改兵器";
-            document.getElementById('savePromptBtn').innerText = "保存修改";
-            document.getElementById('savePromptBtn').classList.replace('bg-blue-600', 'bg-amber-500'); 
-            document.getElementById('savePromptBtn').classList.replace('hover:bg-blue-500', 'hover:bg-amber-400');
+            document.getElementById('promptEditorIcon').textContent = "✏️";
+            document.getElementById('promptEditorTitle').textContent = "修改兵器";
+            
+            const saveBtn = document.getElementById('savePromptBtn');
+            saveBtn.textContent = "保存修改";
+            saveBtn.classList.replace('bg-blue-600', 'bg-amber-500'); 
+            saveBtn.classList.replace('hover:bg-blue-500', 'hover:bg-amber-400');
         }
 
         function resetPromptEditor() {
             editingOldPromptName = null;
             document.getElementById('modalPromptName').value = '';
             document.getElementById('modalPromptContent').value = '';
-            document.getElementById('promptEditorIcon').innerText = "✨";
-            document.getElementById('promptEditorTitle').innerText = "锻造新兵器";
-            document.getElementById('savePromptBtn').innerText = "保存入库";
-            document.getElementById('savePromptBtn').classList.replace('bg-amber-500', 'bg-blue-600');
-            document.getElementById('savePromptBtn').classList.replace('hover:bg-amber-400', 'hover:bg-blue-500');
+            document.getElementById('promptEditorIcon').textContent = "✨";
+            document.getElementById('promptEditorTitle').textContent = "锻造新兵器";
+            
+            const saveBtn = document.getElementById('savePromptBtn');
+            saveBtn.textContent = "保存入库";
+            saveBtn.classList.replace('bg-amber-500', 'bg-blue-600');
+            saveBtn.classList.replace('hover:bg-amber-400', 'hover:bg-blue-500');
         }
 
-        document.getElementById('savePromptBtn').onclick = () => {
+        function savePrompt() {
             const newName = document.getElementById('modalPromptName').value.trim();
             const newContent = document.getElementById('modalPromptContent').value.trim();
             if(!newName || !newContent) { alert("名称和指令内容均不可为空！"); return; }
-            if(editingOldPromptName && editingOldPromptName !== newName) { delete prompts[editingOldPromptName]; }
+            
+            if(editingOldPromptName && editingOldPromptName !== newName) {
+                delete prompts[editingOldPromptName];
+            }
             prompts[newName] = newContent;
-            localStorage.setItem('lingxi_prompts', JSON.stringify(prompts));
+            saveToLocal(STORAGE_KEYS.prompts, prompts);
+            
             showToast(`✨ 兵器【${newName}】已就绪`);
             resetPromptEditor();
             renderModalPromptList();
-        };
+        }
 
         window.deletePrompt = function(name) {
-            if(Object.keys(prompts).length <= 1) { alert("武库里至少要保留一把兵器防身哦！"); return; }
+            if(Object.keys(prompts).length <= 1) {
+                alert("武库里至少要保留一把兵器防身哦！");
+                return;
+            }
             if(confirm(`🚨 确认销毁兵器【${name}】吗？`)) {
                 delete prompts[name];
-                localStorage.setItem('lingxi_prompts', JSON.stringify(prompts));
+                saveToLocal(STORAGE_KEYS.prompts, prompts);
                 if(editingOldPromptName === name) resetPromptEditor();
                 renderModalPromptList();
             }
         };
 
-        document.getElementById('openPromptModalBtn').onclick = () => {
-            renderModalPromptList();
-            resetPromptEditor();
-            document.getElementById('promptModal').classList.remove('hidden');
-        };
-        document.getElementById('closePromptModal').onclick = () => document.getElementById('promptModal').classList.add('hidden');
-        document.getElementById('resetPromptBtn').onclick = resetPromptEditor;
-
         function renderSelect() { 
             const s = document.getElementById('promptSelect'); 
             s.innerHTML = ''; 
-            Object.keys(prompts).forEach(k => s.innerHTML += `<option value="${k}">${k}</option>`); 
+            Object.keys(prompts).forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                s.appendChild(opt);
+            }); 
         }
 
-        // ==========================================
-        // 原有功能集成与 UI 优化
-        // ==========================================
-        document.getElementById('themeToggle').onclick = (e) => { e.stopPropagation(); const m = document.getElementById('themeMenu'); m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; };
-        window.onclick = () => document.getElementById('themeMenu').style.display = 'none';
-        window.setTheme = (t) => { document.body.className = 'h-screen flex overflow-hidden ' + t; localStorage.setItem('lingxi_theme', t); };
+        // ==================== 主题 & 系统 ====================
+        function toggleThemeMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('themeMenu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-        document.getElementById('exportSystemBtn').onclick = () => {
-            const systemData = { flowConfig, prompts, sampleLibrary, history, workspace: document.getElementById('workspace').value };
+        window.setTheme = (themeClass) => {
+            document.body.className = `h-screen flex overflow-hidden ${themeClass}`;
+            localStorage.setItem(STORAGE_KEYS.theme, themeClass);
+        };
+
+        function exportSystemData() {
+            const systemData = {
+                flowConfig,
+                prompts,
+                sampleLibrary,
+                history,
+                books: bookLibrary,
+                workspace: dom.workspace.value
+            };
             const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: "application/json;charset=utf-8" });
             saveAs(blob, `灵犀_神兵档案_${Date.now()}.json`);
-        };
+        }
         
-        document.getElementById('importSystemInput').onchange = (e) => {
-            const file = e.target.files[0]; if (!file) return;
+        function importSystemData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
                     const data = JSON.parse(event.target.result);
-                    if (data.flowConfig) { flowConfig = data.flowConfig; localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); }
-                    if (data.prompts) { prompts = data.prompts; localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); }
-                    if (data.sampleLibrary) { sampleLibrary = data.sampleLibrary; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); }
-                    if (data.history) { history = data.history; localStorage.setItem('lingxi_history', JSON.stringify(history)); }
-                    if (data.workspace !== undefined) { document.getElementById('workspace').value = data.workspace; localStorage.setItem('lingxi_workspace', data.workspace); }
-                    showToast("✨ 档案读取成功！"); init();
-                } catch (err) { alert("❌ 导入失败，档案损坏"); }
+                    if (data.flowConfig) flowConfig = data.flowConfig;
+                    if (data.prompts) prompts = data.prompts;
+                    if (data.sampleLibrary) sampleLibrary = data.sampleLibrary;
+                    if (data.history) history = data.history;
+                    if (data.books) bookLibrary = data.books;
+                    
+                    saveAllData();
+                    if (data.workspace !== undefined) dom.workspace.value = data.workspace;
+                    
+                    showToast("✨ 档案读取成功！");
+                    init();
+                } catch (err) {
+                    alert("❌ 导入失败，档案损坏");
+                }
             };
-            reader.readAsText(file); e.target.value = ''; 
-        };
+            reader.readAsText(file);
+            e.target.value = ''; 
+        }
 
-        setInterval(() => {
-            localStorage.setItem('lingxi_auto_backup_snapshot', JSON.stringify({ flowConfig, prompts, sampleLibrary, history, workspace: document.getElementById('workspace').value, timestamp: new Date().toLocaleString() }));
-            showToast(`已自动备份`);
-        }, 5 * 60 * 1000);
+        // 自动备份（静默不弹窗）
+        function initAutoBackup() {
+            if(autoBackupTimer) clearInterval(autoBackupTimer);
+            autoBackupTimer = setInterval(() => {
+                const snapshot = {
+                    flowConfig, prompts, sampleLibrary, history, bookLibrary,
+                    workspace: dom.workspace.value,
+                    timestamp: new Date().toLocaleString()
+                };
+                localStorage.setItem(STORAGE_KEYS.autoBackup, JSON.stringify(snapshot));
+            }, 5 * 60 * 1000);
+        }
 
         function showToast(msg) {
             const toast = document.createElement('div');
             toast.className = "fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2 rounded-full shadow-lg z-[300] transition-opacity duration-700 text-xs font-bold backdrop-blur-md";
-            toast.innerText = msg;
+            toast.textContent = msg;
             document.body.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
-            setTimeout(() => { toast.remove(); }, 2700);
+            
+            setTimeout(() => toast.style.opacity = '0', 2000);
+            setTimeout(() => toast.remove(), 2700);
         }
 
         window.restoreAutoBackup = function() {
-            const snapshot = localStorage.getItem('lingxi_auto_backup_snapshot');
+            const snapshot = localStorage.getItem(STORAGE_KEYS.autoBackup);
             if(!snapshot) { alert("无快照"); return; }
-            if(confirm("覆盖当前数据？")) {
-                const data = JSON.parse(snapshot);
-                flowConfig=data.flowConfig; prompts=data.prompts; sampleLibrary=data.sampleLibrary; history=data.history; document.getElementById('workspace').value=data.workspace;
-                localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); localStorage.setItem('lingxi_prompts', JSON.stringify(prompts)); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); localStorage.setItem('lingxi_history', JSON.stringify(history)); localStorage.setItem('lingxi_workspace', data.workspace);
-                init();
-            }
+            if(!confirm("覆盖当前数据？")) return;
+            
+            const data = JSON.parse(snapshot);
+            flowConfig = data.flowConfig;
+            prompts = data.prompts;
+            sampleLibrary = data.sampleLibrary;
+            history = data.history;
+            bookLibrary = data.books || [];
+            dom.workspace.value = data.workspace;
+            
+            saveAllData();
+            init();
         };
 
-        document.getElementById('tempSlider').oninput = (e) => { document.getElementById('tempValueDisplay').innerText = e.target.value; };
-        
-        function renderHistorySelect() {
-            const sel = document.getElementById('historySelect'); sel.innerHTML = '<option value="">-- 点击选择回溯 --</option>';
-            history.slice().reverse().forEach(h => { sel.innerHTML += `<option value="${h.id}">${h.time} | ${h.title}</option>`; });
-            sel.onchange = (e) => { 
-                const chat = history.find(h => h.id === e.target.value); 
-                if(chat) { 
-                    currentChatId = chat.id; 
-                    const display = document.getElementById('displayArea');
-                    // 保留空水印 HTML，但把旧记录插进去
-                    display.innerHTML = `<div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none hidden"><div class="text-6xl mb-6 opacity-30 grayscale">✨</div><h2 class="text-2xl font-black tracking-widest opacity-40 italic">灵犀一点通</h2><p class="text-sm mt-3 opacity-40">在下方输入指令，或唤醒神兵武库开始创作</p></div>` + chat.content; 
-                    checkEmptyState();
-                } 
-            };
-        }
-        
+        // ==================== 例文库 ====================
         function renderSampleLibrary() {
-            const container = document.getElementById('sampleLibrary'); container.innerHTML = '';
+            const container = document.getElementById('sampleLibrary');
+            container.innerHTML = '';
+            
             sampleLibrary.forEach((s, i) => {
                 const isSelected = selectedSampleIndices.includes(i);
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-xl border text-[11px] transition-all flex flex-col gap-2 ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-                // 优化了基因标签的配色，使其更亮更清晰
-                div.innerHTML = `<div class="flex items-center justify-between"><label class="flex items-center gap-2 cursor-pointer text-gray-200"><input type="checkbox" class="accent-blue-500" ${isSelected ? 'checked' : ''} onchange="toggleSample(${i})"><span class="truncate w-32 font-bold">${s.name}</span></label><div class="flex gap-2"><button onclick="extractGene(${i})" title="提取基因" class="text-blue-400 hover:text-white transition">🧬</button><button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 text-lg leading-none transition">×</button></div></div>${s.gene ? `<div class="text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1.5 rounded-md italic line-clamp-1 mt-1 font-bold">已分析基因</div>` : ''}`;
+                div.className = `p-3 rounded-xl border text-[11px] transition-all flex flex-col gap-2 ${
+                    isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'
+                }`;
+                
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer text-gray-200">
+                            <input type="checkbox" class="accent-blue-500" ${isSelected ? 'checked' : ''} onchange="toggleSample(${i})">
+                            <span class="truncate w-32 font-bold">${s.name}</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <button onclick="extractGene(${i})" title="提取基因" class="text-blue-400 hover:text-white transition">🧬</button>
+                            <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 text-lg leading-none transition">×</button>
+                        </div>
+                    </div>
+                    ${s.gene ? `<div class="text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1.5 rounded-md italic line-clamp-1 mt-1 font-bold">已分析基因</div>` : ''}
+                `;
                 container.appendChild(div);
             });
         }
         
-        function toggleSample(idx) { if (selectedSampleIndices.includes(idx)) selectedSampleIndices = selectedSampleIndices.filter(i => i !== idx); else selectedSampleIndices.push(idx); renderSampleLibrary(); }
+        window.toggleSample = function(idx) {
+            selectedSampleIndices = selectedSampleIndices.includes(idx)
+                ? selectedSampleIndices.filter(i => i !== idx)
+                : [...selectedSampleIndices, idx];
+            renderSampleLibrary();
+        };
         
         async function extractGene(idx) {
-            if (isGenerating) return; const aW = appendMsg('ai', `正在提取《${sampleLibrary[idx].name}》的创作基因...`);
-            isGenerating = true; abortController = new AbortController();
-            await streamCallAI(document.getElementById('singleModel').value, "基因提取专家", `${GENE_PROMPT}\n\n内容：${sampleLibrary[idx].text.slice(0, 5000)}`, aW.querySelector('.msg-body'), 0.3);
-            sampleLibrary[idx].gene = aW.querySelector('.msg-body').innerText; localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary));
-            isGenerating = false; renderSampleLibrary();
+            if (isGenerating) return;
+            const sample = sampleLibrary[idx];
+            const msgWrapper = appendMsg('ai', `正在提取《${sample.name}》的创作基因...`);
+            const target = msgWrapper.querySelector('.msg-body');
+            
+            isGenerating = true;
+            abortController = new AbortController();
+            
+            try {
+                await streamCallAI(
+                    document.getElementById('singleModel').value,
+                    "基因提取专家",
+                    `${GENE_PROMPT}\n\n内容：${sample.text.slice(0, 5000)}`,
+                    target,
+                    0.3
+                );
+                sample.gene = target.textContent;
+                saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
+            } finally {
+                isGenerating = false;
+                abortController = null;
+                renderSampleLibrary();
+            }
         }
 
-        // 监听回车发送 (Shift+Enter 换行)
-        document.getElementById('userInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // 阻止默认换行
-                document.getElementById('sendBtn').click();
+        // ==================== 发送消息 & AI流式 ====================
+        async function handleSend() {
+            if (isGenerating) {
+                if(abortController) abortController.abort();
+                resetSendButton();
+                return;
             }
-        });
-        
-        document.getElementById('sendBtn').onclick = async () => {
-            if (isGenerating) { abortController.abort(); return; }
-            const input = document.getElementById('userInput'); const text = input.value.trim(); if(!text) return;
-            let combinedRef = ""; selectedSampleIndices.forEach(idx => { const s = sampleLibrary[idx]; combinedRef += `\n【参考基因/内容《${s.name}》】\n${s.gene || s.text.slice(0, 800)}\n`; });
+            
+            const text = dom.userInput.value.trim();
+            if(!text) return;
+            
+            // 拼接参考内容
+            let combinedRef = "";
+            selectedSampleIndices.forEach(idx => {
+                const s = sampleLibrary[idx];
+                combinedRef += `\n【参考基因/内容《${s.name}》】\n${s.gene || s.text.slice(0, 800)}\n`;
+            });
+            
             const finalFullPrompt = `### 参考风格 ###\n${combinedRef || "自由风格"}\n\n### 指令 ###\n${prompts[document.getElementById('promptSelect').value]}\n\n### 任务 ###\n${text}`;
             const isPKMode = !document.getElementById('pkSelectBox').classList.contains('hidden');
             
-            isGenerating = true; 
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.innerHTML = `<span>🛑</span> 停止`;
-            sendBtn.classList.replace('bg-blue-600', 'bg-red-500');
-            sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400');
-            
+            // 开始生成
+            isGenerating = true;
+            setSendButtonToStop();
             abortController = new AbortController();
-            if(isPKMode) {
-                const mA = document.getElementById('modelA').value; const mB = document.getElementById('modelB').value;
-                const pkGrid = document.createElement('div'); pkGrid.className = "pk-grid flex gap-4 w-full mb-6 relative z-10";
-                const colA = createPKCol(mA); const colB = createPKCol(mB); pkGrid.append(colA, colB); 
-                document.getElementById('displayArea').appendChild(pkGrid);
-                checkEmptyState();
-                await Promise.all([ streamCallAI(mA, "仿写专家", finalFullPrompt, colA.querySelector('.pk-body'), parseFloat(document.getElementById('tempSlider').value)), streamCallAI(mB, "仿写专家", finalFullPrompt, colB.querySelector('.pk-body'), parseFloat(document.getElementById('tempSlider').value)) ]);
-                addActions(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').innerText); addActions(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').innerText);
-            } else {
-                appendMsg('user', text); const aW = appendMsg('ai', "...");
-                await streamCallAI(document.getElementById('singleModel').value, "仿写专家", finalFullPrompt, aW.querySelector('.msg-body'), parseFloat(document.getElementById('tempSlider').value));
-                addActions(aW.querySelector('.ai-msg'), aW.querySelector('.msg-body').innerText);
+            
+            try {
+                if(isPKMode) {
+                    await handlePKMode(finalFullPrompt);
+                } else {
+                    await handleSingleMode(text, finalFullPrompt);
+                }
+            } finally {
+                isGenerating = false;
+                abortController = null;
+                resetSendButton();
+                dom.userInput.value = '';
+                saveHistory();
+                renderHistorySelect();
             }
-            isGenerating = false; 
-            sendBtn.innerHTML = `<span>🚀</span> 执行`;
-            sendBtn.classList.replace('bg-red-500', 'bg-blue-600');
-            sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500');
-            input.value = ''; saveHistory(); renderHistorySelect();
-        };
+        }
+
+        async function handleSingleMode(userText, prompt) {
+            appendMsg('user', userText);
+            const aiWrapper = appendMsg('ai', "...");
+            const target = aiWrapper.querySelector('.msg-body');
+            
+            await streamCallAI(
+                document.getElementById('singleModel').value,
+                "仿写专家",
+                prompt,
+                target,
+                parseFloat(dom.tempSlider.value)
+            );
+            
+            addActions(aiWrapper.querySelector('.ai-msg'), target.textContent);
+        }
+
+        async function handlePKMode(prompt) {
+            const mA = document.getElementById('modelA').value;
+            const mB = document.getElementById('modelB').value;
+            
+            const pkGrid = document.createElement('div');
+            pkGrid.className = "pk-grid flex gap-4 w-full mb-6 relative z-10";
+            const colA = createPKCol(mA);
+            const colB = createPKCol(mB);
+            pkGrid.append(colA, colB);
+            dom.displayArea.appendChild(pkGrid);
+            checkEmptyState();
+            
+            const temp = parseFloat(dom.tempSlider.value);
+            await Promise.all([
+                streamCallAI(mA, "仿写专家", prompt, colA.querySelector('.pk-body'), temp),
+                streamCallAI(mB, "仿写专家", prompt, colB.querySelector('.pk-body'), temp)
+            ]);
+            
+            addActions(colA.querySelector('.pk-body'), colA.querySelector('.pk-body').textContent);
+            addActions(colB.querySelector('.pk-body'), colB.querySelector('.pk-body').textContent);
+        }
 
         async function streamCallAI(modelName, sys, text, targetElement, temp) {
-            let apiUrl = ""; let apiKey = ""; 
-            if (modelName.startsWith('ep-') || modelName.includes('doubao')) { apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'; apiKey = flowConfig.db_key; }
-            else if (modelName === 'deepseek-chat') { apiUrl = "https://api.deepseek.com/v1/chat/completions"; apiKey = flowConfig.ds_key; }
-            else if (modelName === 'qwen-plus') { apiUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"; apiKey = flowConfig.qw_key; }
-            else { apiUrl = flowConfig.proxy_url.trim().replace(/\/$/, '') + '/chat/completions'; apiKey = flowConfig.proxy_key; }
+            let apiUrl, apiKey;
+            
+            if (modelName.startsWith('ep-') || modelName.includes('doubao')) {
+                apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+                apiKey = flowConfig.db_key;
+            } else if (modelName === 'deepseek-chat') {
+                apiUrl = "https://api.deepseek.com/v1/chat/completions";
+                apiKey = flowConfig.ds_key;
+            } else if (modelName === 'qwen-plus') {
+                apiUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+                apiKey = flowConfig.qw_key;
+            } else {
+                apiUrl = flowConfig.proxy_url.trim().replace(/\/$/, '') + '/chat/completions';
+                apiKey = flowConfig.proxy_key;
+            }
+
             try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey.trim()}` }, body: JSON.stringify({ model: modelName, messages: [{role:"system", content: sys}, {role:"user", content: text}], stream: true, temperature: temp }), signal: abortController.signal });
-                const reader = response.body.getReader(); const decoder = new TextDecoder(); targetElement.innerText = '';
-                const display = document.getElementById('displayArea');
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey.trim()}`
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: "system", content: sys },
+                            { role: "user", content: text }
+                        ],
+                        stream: true,
+                        temperature: temp
+                    }),
+                    signal: abortController.signal
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                targetElement.textContent = '';
+
                 while (true) {
-                    const { done, value } = await reader.read(); if (done) break;
-                    const chunk = decoder.decode(value); const lines = chunk.split('\n');
-                    for (const line of lines) { if (line.trim().startsWith('data: ')) { 
-                        const d = line.replace('data: ', '').trim(); if (d === '[DONE]') break; 
-                        try { const j = JSON.parse(d); const c = j.choices[0].delta.content; if (c) { targetElement.innerText += c; display.scrollTop = display.scrollHeight; } } catch(e) {} 
-                    } }
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        const trimmedLine = line.trim();
+                        if (!trimmedLine.startsWith('data: ')) continue;
+                        
+                        const data = trimmedLine.replace('data: ', '');
+                        if (data === '[DONE]') break;
+                        
+                        try {
+                            const json = JSON.parse(data);
+                            const content = json.choices[0].delta.content;
+                            if (content) {
+                                targetElement.textContent += content;
+                                dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
+                            }
+                        } catch (e) {}
+                    }
                 }
-            } catch (e) { targetElement.innerText += e.name === 'AbortError' ? "\n[已停止执行]" : "\n[错误]: " + e.message; }
+            } catch (e) {
+                targetElement.textContent += e.name === 'AbortError' ? "\n[已停止执行]" : `\n[错误]: ${e.message}`;
+            }
         }
 
+        // ==================== 工具函数 ====================
         function addActions(container, text) {
-            const footer = document.createElement('div'); footer.className = 'flex gap-4 mt-4 border-t border-gray-100 pt-3 theme-dark:border-gray-700';
-            const btnBack = document.createElement('button'); btnBack.className = 'text-xs font-black text-blue-500 hover:text-blue-700 transition'; btnBack.innerText = '⬅️ 填入工作区';
-            btnBack.onclick = () => { document.getElementById('workspace').value += (document.getElementById('workspace').value ? '\n\n' : '') + text; localStorage.setItem('lingxi_workspace', document.getElementById('workspace').value); showToast("已填入工作区"); };
-            const btnWord = document.createElement('button'); btnWord.className = 'text-xs font-black text-gray-400 hover:text-gray-600 transition'; btnWord.innerText = '📄 导出Word';
-            btnWord.onclick = () => { const doc = new docx.Document({ sections: [{ children: text.split('\n').map(l => new docx.Paragraph({ children: [new docx.TextRun({text:l, size:24})] })) }] }); docx.Packer.toBlob(doc).then(b => saveAs(b, `作品_${Date.now()}.docx`)); };
-            footer.append(btnBack, btnWord); container.appendChild(footer);
+            const footer = document.createElement('div');
+            footer.className = 'flex gap-4 mt-4 border-t border-gray-100 pt-3 theme-dark:border-gray-700';
+            
+            const btnBack = createActionBtn('⬅️ 填入工作区', 'text-blue-500', () => {
+                dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + text;
+                saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
+                showToast("已填入工作区");
+            });
+            
+            const btnWord = createActionBtn('📄 导出Word', 'text-gray-400', () => {
+                const doc = new docx.Document({
+                    sections: [{
+                        children: text.split('\n').map(l =>
+                            new docx.Paragraph({
+                                children: [new docx.TextRun({ text: l, size: 24 })]
+                            })
+                        )
+                    }]
+                });
+                docx.Packer.toBlob(doc).then(blob => saveAs(blob, `作品_${Date.now()}.docx`));
+            });
+            
+            footer.append(btnBack, btnWord);
+            container.appendChild(footer);
         }
 
-        document.getElementById('toggleSpace').onclick = function() { const isActive = document.getElementById('mainEditor').classList.toggle('editor-active'); this.innerHTML = isActive ? "<span>📔</span> 关闭空间" : "<span>✍️</span> 分屏创作"; this.className = isActive ? "text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-md flex items-center gap-2" : "text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800"; };
-        document.getElementById('workspace').oninput = (e) => localStorage.setItem('lingxi_workspace', e.target.value);
-        document.getElementById('modeChat').onclick = () => switchMode(false); document.getElementById('modePK').onclick = () => switchMode(true);
-        function switchMode(pk) { document.getElementById('modeChat').className = pk ? "mode-btn text-gray-400 hover:text-gray-200" : "mode-btn mode-btn-active"; document.getElementById('modePK').className = !pk ? "mode-btn text-gray-400 hover:text-gray-200" : "mode-btn mode-btn-active"; document.getElementById('singleSelectBox').classList.toggle('hidden', pk); document.getElementById('pkSelectBox').classList.toggle('hidden', !pk); }
-        function updateModelDropdowns() { const custom = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(m => m); const all = ['deepseek-chat', 'qwen-plus', ...custom]; ['singleModel', 'modelA', 'modelB'].forEach(id => { const el = document.getElementById(id); el.innerHTML = ''; all.forEach(m => el.innerHTML += `<option value="${m}">${m}</option>`); }); }
-        document.getElementById('openSettings').onclick = () => document.getElementById('settingsModal').classList.remove('hidden');
-        document.getElementById('saveSettings').onclick = () => { Object.keys(flowConfig).forEach(id => { if(document.getElementById(id)) flowConfig[id] = document.getElementById(id).value.trim(); }); localStorage.setItem('lingxi_flow', JSON.stringify(flowConfig)); updateModelDropdowns(); document.getElementById('settingsModal').classList.add('hidden'); showToast("配置已激活"); };
-        document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
-        
-        // 优化清屏逻辑：重置为空状态水印
-        document.getElementById('newChatBtn').onclick = () => resetChat();
-        document.getElementById('clearChatBtn').onclick = () => { if(confirm("确定清空当前屏幕内容吗？")) { resetChat(); } };
+        function createActionBtn(text, colorClass, onClick) {
+            const btn = document.createElement('button');
+            btn.className = `text-xs font-black ${colorClass} hover:text-blue-700 transition`;
+            btn.textContent = text;
+            btn.onclick = onClick;
+            return btn;
+        }
+
+        function setSendButtonToStop() {
+            dom.sendBtn.innerHTML = `<span>🛑</span> 停止`;
+            dom.sendBtn.classList.replace('bg-blue-600', 'bg-red-500');
+            dom.sendBtn.classList.replace('hover:bg-blue-500', 'hover:bg-red-400');
+        }
+
+        function resetSendButton() {
+            dom.sendBtn.innerHTML = `<span>🚀</span> 执行`;
+            dom.sendBtn.classList.replace('bg-red-500', 'bg-blue-600');
+            dom.sendBtn.classList.replace('hover:bg-red-400', 'hover:bg-blue-500');
+        }
+
+        function toggleEditor() {
+            const editor = document.getElementById('mainEditor');
+            const isActive = editor.classList.toggle('editor-active');
+            const btn = document.getElementById('toggleSpace');
+            
+            btn.innerHTML = isActive ? "<span>📔</span> 关闭空间" : "<span>✍️</span> 分屏创作";
+            btn.className = isActive
+                ? "text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-md flex items-center gap-2"
+                : "text-gray-500 hover:text-blue-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 theme-dark:hover:bg-gray-800";
+        }
+
+        function switchMode(isPK) {
+            document.getElementById('modeChat').className = isPK
+                ? "mode-btn text-gray-400 hover:text-gray-200"
+                : "mode-btn mode-btn-active";
+            
+            document.getElementById('modePK').className = !isPK
+                ? "mode-btn text-gray-400 hover:text-gray-200"
+                : "mode-btn mode-btn-active";
+            
+            document.getElementById('singleSelectBox').classList.toggle('hidden', isPK);
+            document.getElementById('pkSelectBox').classList.toggle('hidden', !isPK);
+        }
+
+        function updateModelDropdowns() {
+            const customModels = flowConfig.proxy_models.split(/[,，]/).map(m => m.trim()).filter(Boolean);
+            const allModels = ['deepseek-chat', 'qwen-plus', ...customModels];
+            
+            ['singleModel', 'modelA', 'modelB'].forEach(id => {
+                const el = document.getElementById(id);
+                el.innerHTML = '';
+                allModels.forEach(model => {
+                    const opt = document.createElement('option');
+                    opt.value = model;
+                    opt.textContent = model;
+                    el.appendChild(opt);
+                });
+            });
+        }
+
+        function saveSettings() {
+            Object.keys(flowConfig).forEach(id => {
+                const el = document.getElementById(id);
+                if(el) flowConfig[id] = el.value.trim();
+            });
+            saveToLocal(STORAGE_KEYS.flow, flowConfig);
+            updateModelDropdowns();
+            document.getElementById('settingsModal').classList.add('hidden');
+            showToast("配置已激活");
+        }
+
         function resetChat() {
-            currentChatId = null; 
-            const display = document.getElementById('displayArea');
-            display.innerHTML = `<div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none"><div class="text-6xl mb-6 opacity-30 grayscale">✨</div><h2 class="text-2xl font-black tracking-widest opacity-40 italic">灵犀一点通</h2><p class="text-sm mt-3 opacity-40">在下方输入指令，或唤醒神兵武库开始创作</p></div>`;
+            currentChatId = null;
+            dom.displayArea.innerHTML = `
+                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none theme-dark:text-gray-700">
+                    <div class="text-6xl mb-6 opacity-30 grayscale">✨</div>
+                    <h2 class="text-2xl font-black tracking-widest opacity-40 italic">灵犀一点通</h2>
+                    <p class="text-sm mt-3 opacity-40">在下方输入指令，或唤醒神兵武库开始创作</p>
+                </div>
+            `;
+            dom.emptyState = document.getElementById('emptyState');
         }
 
-        function deleteSample(i) { sampleLibrary.splice(i,1); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); renderSampleLibrary(); }
-        document.getElementById('fileInput').onchange = async (e) => { for (let file of e.target.files) { if (file.name.endsWith('.docx')) { let content = (await mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()})).value; sampleLibrary.push({ name: file.name, text: content }); } else { const reader = new FileReader(); reader.onload = function() { sampleLibrary.push({ name: file.name, text: reader.result }); localStorage.setItem('lingxi_samples', JSON.stringify(sampleLibrary)); renderSampleLibrary(); }; reader.readAsText(file); } } };
-        
-        function appendMsg(s, t) { 
-            const c = document.getElementById('displayArea'); 
-            const w = document.createElement('div'); 
-            w.className = 'msg-wrapper relative z-10 ' + (s==='user'?'items-end':'items-start'); 
-            w.innerHTML = `<div class="${s}-msg"><div class="msg-body">${t}</div></div>`; 
-            c.appendChild(w); 
-            c.scrollTop = c.scrollHeight; 
+        window.deleteSample = function(index) {
+            sampleLibrary.splice(index, 1);
+            saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
+            renderSampleLibrary();
+        };
+
+        function handleFileImport(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(processFile);
+        }
+
+        function processFile(file) {
+            if (file.name.endsWith('.docx')) {
+                file.arrayBuffer().then(buffer => {
+                    mammoth.extractRawText({ arrayBuffer: buffer }).then(result => {
+                        sampleLibrary.push({ name: file.name, text: result.value });
+                        saveAndRenderSamples();
+                    });
+                });
+            } else {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    sampleLibrary.push({ name: file.name, text: reader.result });
+                    saveAndRenderSamples();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function saveAndRenderSamples() {
+            saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
+            renderSampleLibrary();
+        }
+
+        function appendMsg(role, text) { 
+            const wrapper = document.createElement('div'); 
+            wrapper.className = `msg-wrapper relative z-10 ${role === 'user' ? 'items-end' : 'items-start'}`; 
+            wrapper.innerHTML = `<div class="${role}-msg"><div class="msg-body">${text}</div></div>`; 
+            dom.displayArea.appendChild(wrapper); 
+            dom.displayArea.scrollTop = dom.displayArea.scrollHeight; 
             checkEmptyState();
-            return w; 
+            return wrapper; 
         }
         
-        function createPKCol(mName) { const col = document.createElement('div'); col.className = "pk-column shadow-xl flex-1 bg-white rounded-2xl overflow-hidden border border-gray-200 theme-dark:bg-[#1e293b] theme-dark:border-gray-700"; col.innerHTML = `<div class="pk-header bg-gray-50/80 font-bold p-3 border-b text-center text-sm text-gray-600 theme-dark:bg-gray-800 theme-dark:text-gray-300 theme-dark:border-gray-700">${mName}</div><div class="pk-body custom-scroll p-6 text-[15px] leading-relaxed theme-dark:text-gray-200"></div>`; return col; }
-        function saveHistory() { const displayAreaClone = document.getElementById('displayArea').cloneNode(true); const emptyNode = displayAreaClone.querySelector('#emptyState'); if(emptyNode) emptyNode.remove(); const content = displayAreaClone.innerHTML; if(!content.trim()) return; const now = new Date(); const timeStr = `${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`; if(!currentChatId) { currentChatId = Date.now().toString(); const title = document.querySelector('.user-msg')?.innerText.slice(0, 12) || "新创作"; history.push({ id: currentChatId, title, content, time: timeStr }); } else { const idx = history.findIndex(h => h.id === currentChatId); if(idx !== -1) { history[idx].content = content; history[idx].time = timeStr; } } localStorage.setItem('lingxi_history', JSON.stringify(history)); }
+        function createPKCol(modelName) {
+            const col = document.createElement('div');
+            col.className = "pk-column shadow-xl flex-1 bg-white rounded-2xl overflow-hidden border border-gray-200 theme-dark:bg-[#1e293b] theme-dark:border-gray-700";
+            col.innerHTML = `
+                <div class="pk-header bg-gray-50/80 font-bold p-3 border-b text-center text-sm text-gray-600 theme-dark:bg-gray-800 theme-dark:text-gray-300 theme-dark:border-gray-700">${modelName}</div>
+                <div class="pk-body custom-scroll p-6 text-[15px] leading-relaxed theme-dark:text-gray-200"></div>
+            `;
+            return col;
+        }
 
+        function saveHistory() {
+            const clone = dom.displayArea.cloneNode(true);
+            const empty = clone.querySelector('#emptyState');
+            if(empty) empty.remove();
+            
+            const content = clone.innerHTML.trim();
+            if(!content) return;
+            
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            if(!currentChatId) {
+                currentChatId = Date.now().toString();
+                const title = clone.querySelector('.user-msg')?.textContent.slice(0, 12) || "新创作";
+                history.push({ id: currentChatId, title, content, time: timeStr });
+            } else {
+                const index = history.findIndex(h => h.id === currentChatId);
+                if(index !== -1) {
+                    history[index].content = content;
+                    history[index].time = timeStr;
+                }
+            }
+            saveToLocal(STORAGE_KEYS.history, history);
+        }
+
+        function renderHistorySelect() {
+            const sel = document.getElementById('historySelect');
+            sel.innerHTML = '<option value="">-- 点击选择回溯 --</option>';
+            
+            [...history].reverse().forEach(chat => {
+                const opt = document.createElement('option');
+                opt.value = chat.id;
+                opt.textContent = `${chat.time} | ${chat.title}`;
+                sel.appendChild(opt);
+            });
+
+            sel.onchange = () => {
+                const chat = history.find(h => h.id === sel.value);
+                if(chat) {
+                    currentChatId = chat.id;
+                    dom.displayArea.innerHTML = `<div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 select-none pointer-events-none hidden"></div>${chat.content}`;
+                    dom.emptyState = document.getElementById('emptyState');
+                    checkEmptyState();
+                }
+            };
+        }
+
+        // 本地存储工具
+        function saveToLocal(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function saveAllData() {
+            saveToLocal(STORAGE_KEYS.flow, flowConfig);
+            saveToLocal(STORAGE_KEYS.prompts, prompts);
+            saveToLocal(STORAGE_KEYS.samples, sampleLibrary);
+            saveToLocal(STORAGE_KEYS.history, history);
+            saveToLocal(STORAGE_KEYS.books, bookLibrary);
+            saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
+        }
+
+        function initConfigInputs() {
+            Object.keys(flowConfig).forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = flowConfig[id];
+            });
+        }
+
+        function loadWorkspace() {
+            dom.workspace.value = localStorage.getItem(STORAGE_KEYS.workspace) || '';
+        }
+
+        // 事件绑定统一管理
+        function bindEvents() {
+            // 模态框
+            document.getElementById('openPromptModalBtn').onclick = () => {
+                renderModalPromptList();
+                resetPromptEditor();
+                document.getElementById('promptModal').classList.remove('hidden');
+            };
+            document.getElementById('closePromptModal').onclick = () => {
+                document.getElementById('promptModal').classList.add('hidden');
+            };
+            document.getElementById('resetPromptBtn').onclick = resetPromptEditor;
+            document.getElementById('savePromptBtn').onclick = savePrompt;
+
+            // 主题
+            document.getElementById('themeToggle').onclick = toggleThemeMenu;
+            window.onclick = () => document.getElementById('themeMenu').style.display = 'none';
+
+            // 系统
+            document.getElementById('exportSystemBtn').onclick = exportSystemData;
+            document.getElementById('importSystemInput').onchange = importSystemData;
+
+            // 滑块
+            dom.tempSlider.oninput = () => {
+                dom.tempValueDisplay.textContent = dom.tempSlider.value;
+            };
+
+            // 输入回车
+            dom.userInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+            dom.sendBtn.onclick = handleSend;
+
+            // 分屏
+            document.getElementById('toggleSpace').onclick = toggleEditor;
+            dom.workspace.oninput = () => {
+                saveToLocal(STORAGE_KEYS.workspace, dom.workspace.value);
+            };
+
+            // 模式切换
+            document.getElementById('modeChat').onclick = () => switchMode(false);
+            document.getElementById('modePK').onclick = () => switchMode(true);
+
+            // 设置
+            document.getElementById('openSettings').onclick = () => {
+                document.getElementById('settingsModal').classList.remove('hidden');
+            };
+            document.getElementById('saveSettings').onclick = saveSettings;
+            document.getElementById('closeSettings').onclick = () => {
+                document.getElementById('settingsModal').classList.add('hidden');
+            };
+
+            // 清空
+            document.getElementById('newChatBtn').onclick = resetChat;
+            document.getElementById('clearChatBtn').onclick = () => {
+                if(confirm("确定清空当前屏幕内容吗？")) resetChat();
+            };
+
+            // 文件导入
+            document.getElementById('fileInput').onchange = handleFileImport;
+
+            // 书稿字数实时统计
+            document.getElementById('bookContent').addEventListener('input', updateWordCount);
+
+            // 一键排版
+            document.getElementById('typesetBtn').onclick = typesetContent;
+        }
+
+        // 启动
         init();
     </script>
 </body>
