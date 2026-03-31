@@ -155,9 +155,6 @@
             </div>
            
             <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
-            <button onclick="saveDraftToBook()" class="w-full mt-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-[11px] font-bold py-2 rounded-xl transition">
-                💾 保存草稿为新书稿
-            </button>
         </section>
         <section class="pb-8">
             <div class="flex justify-between items-center mb-2 px-0.5">
@@ -224,6 +221,9 @@
                 <div class="flex items-center gap-3">
                     <span id="workspaceWordCount" class="text-xs font-bold text-blue-500">0字</span>
                     <!-- 草稿发给AI按钮 -->
+                    <button onclick="saveDraftToBook()" class="text-[11px] font-bold text-green-500 hover:text-white hover:bg-green-500 px-2 py-1 rounded-lg border border-green-300 hover:border-green-500 transition" title="将草稿保存为新书稿">
+                        💾 转为新书稿
+                    </button>
                     <button id="draftToAIBtn" class="text-[11px] font-bold text-purple-500 hover:text-white hover:bg-purple-500 px-2 py-1 rounded-lg border border-purple-300 hover:border-purple-500 transition" title="将草稿内容发给AI分析">
                         📤 发给AI
                     </button>
@@ -231,9 +231,11 @@
             </div>
             <textarea id="workspace" class="writing-area custom-scroll flex-1" placeholder="在此自由创作，左侧AI对话不会覆盖这里..."></textarea>
         </div>
+        <div id="resizer" style="width:5px;cursor:col-resize;background:var(--border-color);flex-shrink:0;transition:background 0.2s;" onmouseenter="this.style.background='#3b82f6'" onmouseleave="this.style.background='var(--border-color)'"></div>
 
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
+                <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
+            <main id="displayArea"
+ class="flex-1 overflow-y-auto p-8 custom-scroll relative">
                 <!-- 空白引导页 -->
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
                     <div class="text-6xl mb-6 opacity-20">✨</div>
@@ -269,7 +271,6 @@
                         <button class="quick-tag" onclick="fillInput('请继续往下写，保持相同风格和人物设定')">⚡ 续写</button>
                         <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
                         <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
-                        <button class="quick-tag" onclick="fillInput('请将以上内容改为第一人称视角')">🔄 换视角</button>
                         <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
                         <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
                     </div>
@@ -1117,9 +1118,71 @@ function bindEvents() {
         if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
         deleteHistory(parseInt(idx));
     };
-}
+    // ─── 拖拽分隔线 ───
+(function() {
+    const resizer    = document.getElementById('resizer');
+    const editor     = document.getElementById('mainEditor');
+    if (!resizer) return;
+    let startX, startEditorW;
+    resizer.addEventListener('mousedown', function(e) {
+        startX       = e.clientX;
+        startEditorW = editor.offsetWidth;
+        document.body.style.cursor     = 'col-resize';
+        document.body.style.userSelect = 'none';
+        function onMove(e) {
+            const dx   = e.clientX - startX;
+            const newW = Math.max(200, Math.min(startEditorW + dx, window.innerWidth - 400));
+            editor.style.flex  = 'none';
+            editor.style.width = newW + 'px';
+        }
+        function onUp() {
+            document.body.style.cursor     = '';
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onUp);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onUp);
+    });
+})();
 
 window.onload = init;
+
+}// ─── 拖拽分隔线 ───
+(function() {
+    const resizer    = document.getElementById('resizer');
+    const editor     = document.getElementById('mainEditor');
+    if (!resizer) return;
+    let startX, startEditorW;
+    resizer.addEventListener('mousedown', function(e) {
+        startX       = e.clientX;
+        startEditorW = editor.offsetWidth;
+        document.body.style.cursor     = 'col-resize';
+        document.body.style.userSelect = 'none';
+        function onMove(e) {
+            const dx   = e.clientX - startX;
+            const newW = Math.max(200, Math.min(startEditorW + dx, window.innerWidth - 400));
+            editor.style.flex  = 'none';
+            editor.style.width = newW + 'px';
+        }
+        function onUp() {
+            document.body.style.cursor     = '';
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onUp);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onUp);
+    });
+})();
+
+
+        </div>
+
+        <!-- 拖拽分隔线 -->
+        <div id="resizer" style="width:5px;cursor:col-resize;background:var(--border-color);flex-shrink:0;transition:background 0.2s;" onmouseenter="this.style.background='#3b82f6'" onmouseleave="this.style.background='var(--border-color)'"></div>
+
+        <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
 </script>
 </body>
 </html>
