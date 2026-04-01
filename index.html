@@ -119,11 +119,58 @@
         .prompt-card.active-prompt { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
         .book-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.7rem 0.9rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .book-card:hover { border-color: rgba(59,130,246,0.5); }
-        /* 快捷指令标签 */
         .quick-tag { padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
         .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
-        /* 存储监控条 */
         #storageBar { height: 3px; border-radius: 9999px; transition: width 0.5s; }
+
+        /* ⚔️ 竞技擂台动画 */
+        @keyframes swordFromLeft {
+            0%   { left: -120px; opacity: 1; transform: rotate(0deg) scaleX(1); }
+            75%  { left: calc(50% - 80px); opacity: 1; transform: rotate(0deg) scaleX(1); }
+            82%  { left: calc(50% - 20px); transform: rotate(-15deg) scaleX(0.95); }
+            88%  { left: calc(50% - 60px); transform: rotate(10deg) scaleX(1.05); }
+            100% { left: calc(50% - 80px); opacity: 0; transform: rotate(5deg) scaleX(1); }
+        }
+        @keyframes swordFromRight {
+            0%   { right: -120px; opacity: 1; transform: rotate(180deg) scaleX(1); }
+            75%  { right: calc(50% - 80px); opacity: 1; transform: rotate(180deg) scaleX(1); }
+            82%  { right: calc(50% - 20px); transform: rotate(165deg) scaleX(0.95); }
+            88%  { right: calc(50% - 60px); transform: rotate(190deg) scaleX(1.05); }
+            100% { right: calc(50% - 80px); opacity: 0; transform: rotate(185deg) scaleX(1); }
+        }
+        @keyframes flashRing {
+            0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+            60%  { transform: translate(-50%,-50%) scale(1.8); opacity: 0.8; }
+            100% { transform: translate(-50%,-50%) scale(3);   opacity: 0; }
+        }
+        @keyframes screenShake {
+            0%,100% { transform: translate(0,0); }
+            15%     { transform: translate(-8px, 4px); }
+            30%     { transform: translate(8px, -4px); }
+            45%     { transform: translate(-6px, 6px); }
+            60%     { transform: translate(6px, -2px); }
+            75%     { transform: translate(-3px, 3px); }
+        }
+        @keyframes sparkFly {
+            0%   { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+        }
+        @keyframes pkColIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .pk-col-anim { animation: pkColIn 0.5s ease forwards; }
+        @keyframes slideFromLeft  { from { transform: translateX(-120px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideFromRight { from { transform: translateX(120px);  opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes clashFlash     { 0%{opacity:0;transform:scale(0.5)} 30%{opacity:1;transform:scale(1.4)} 60%{opacity:1;transform:scale(1.1)} 100%{opacity:0;transform:scale(0.8)} }
+        @keyframes clashShake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        .pk-col-left  { animation: slideFromLeft  0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .pk-col-right { animation: slideFromRight 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
+        .pk-clash-shake { animation: clashShake 0.35s ease 0.45s both; }
+        #clashEffect  { pointer-events:none; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:48px; z-index:100; animation: clashFlash 0.7s ease 0.4s both; }
+        /* 拖拽分隔线 */
+        #resizer { width: 5px; cursor: col-resize; background: var(--border-color); flex-shrink: 0; transition: background 0.2s; }
+        #resizer:hover { background: #3b82f6; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -153,7 +200,6 @@
                 <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
                 <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
-           
             <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
         </section>
         <section class="pb-8">
@@ -165,7 +211,6 @@
             <div id="sampleLibrary" class="space-y-1.5"></div>
         </section>
     </div>
-    <!-- 存储监控 -->
     <div class="px-4 py-2 border-t border-white/5">
         <div class="flex justify-between items-center mb-1">
             <span class="text-[10px] text-gray-500">本地存储</span>
@@ -215,12 +260,12 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden">
+        <!-- 草稿区 -->
         <div id="mainEditor" class="editor-container">
             <div class="flex items-center justify-between px-4 py-2 border-b" style="border-color:var(--border-color);background:var(--bg-main)">
                 <span class="text-xs font-black" style="color:var(--text-secondary)">✍️ 草稿区</span>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <span id="workspaceWordCount" class="text-xs font-bold text-blue-500">0字</span>
-                    <!-- 草稿发给AI按钮 -->
                     <button onclick="saveDraftToBook()" class="text-[11px] font-bold text-green-500 hover:text-white hover:bg-green-500 px-2 py-1 rounded-lg border border-green-300 hover:border-green-500 transition" title="将草稿保存为新书稿">
                         💾 转为新书稿
                     </button>
@@ -231,12 +276,13 @@
             </div>
             <textarea id="workspace" class="writing-area custom-scroll flex-1" placeholder="在此自由创作，左侧AI对话不会覆盖这里..."></textarea>
         </div>
-        <div id="resizer" style="width:5px;cursor:col-resize;background:var(--border-color);flex-shrink:0;transition:background 0.2s;" onmouseenter="this.style.background='#3b82f6'" onmouseleave="this.style.background='var(--border-color)'"></div>
 
-                <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
-            <main id="displayArea"
- class="flex-1 overflow-y-auto p-8 custom-scroll relative">
-                <!-- 空白引导页 -->
+        <!-- 拖拽分隔线 -->
+        <div id="resizer"></div>
+
+        <!-- 右侧内容区 -->
+        <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
+            <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
                     <div class="text-6xl mb-6 opacity-20">✨</div>
                     <h2 class="text-2xl font-black tracking-widest opacity-30 italic mb-4">灵犀一点通</h2>
@@ -251,7 +297,6 @@
 
             <footer class="chat-footer p-5 pb-6 flex-shrink-0">
                 <div class="max-w-4xl mx-auto">
-                    <!-- 工具栏 -->
                     <div class="flex items-center gap-2 mb-2.5 flex-wrap">
                         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
                             <span class="font-black text-blue-500">⚔️</span>
@@ -266,15 +311,14 @@
                             <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
-                    <!-- 快捷指令标签 -->
+                    <!-- 快捷指令标签：默认不激活，点击填入 -->
                     <div class="flex gap-2 mb-2.5 flex-wrap">
-                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持相同风格和人物设定')">⚡ 续写</button>
+                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。')">⚡ 续写</button>
                         <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
                         <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
                         <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
                         <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
                     </div>
-                    <!-- 输入框 -->
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
                             class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
@@ -370,7 +414,6 @@
                 <input id="modalPromptName" type="text" placeholder="给这件兵器起个响亮的名字..." class="modal-input mb-3 text-sm font-bold flex-shrink-0">
                 <textarea id="modalPromptContent" placeholder="在此注入核心系统指令..." class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
                 <div class="flex gap-3 mt-3 flex-shrink-0">
-                    
                     <button id="savePromptBtn"  class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存入库</button>
                     <button id="resetPromptBtn" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-70" style="background:var(--bg-main);color:var(--text-secondary)">清空</button>
                 </div>
@@ -380,7 +423,6 @@
 </div>
 
 <script>
-// ─── 常量 ───
 const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
 1. 叙事结构与情节逻辑
 2. 人物塑造与对话风格
@@ -395,12 +437,11 @@ const SK = {
     sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
 
-// ─── 全局状态 ───
-let flowConfig       = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
-let prompts          = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
-let history          = loadJSON(SK.history) || [];
-let sampleLibrary    = loadJSON(SK.samples) || [];
-let bookLibrary      = loadJSON(SK.books)   || [];
+let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let prompts             = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
+let history             = loadJSON(SK.history) || [];
+let sampleLibrary       = loadJSON(SK.samples) || [];
+let bookLibrary         = loadJSON(SK.books)   || [];
 let conversationHistory = [];
 let currentEditingBookId  = null;
 let editingOldPromptName  = null;
@@ -410,13 +451,11 @@ let abortController = null;
 let autoBackupTimer = null;
 let dom = {};
 
-// ─── 工具函数 ───
 function loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 function saveJSON(key, data) { try { localStorage.setItem(key, JSON.stringify(data)); } catch { showToast('⚠️ 存储空间不足，请导出备份后清理'); } }
 function debounce(fn, d) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this,a), d); }; }
 const debouncedSaveWorkspace = debounce((val) => saveJSON(SK.workspace, val), 600);
 
-// ─── 初始化 ───
 function init() {
     cacheDom();
     initTheme();
@@ -433,6 +472,7 @@ function init() {
     initAutoBackup();
     updateStorageBar();
     bindEvents();
+    initResizer();
 }
 
 function cacheDom() {
@@ -452,14 +492,13 @@ function cacheDom() {
     };
 }
 
-// ─── 存储监控 ───
 function updateStorageBar() {
     let total = 0;
     for (let k in localStorage) {
         if (localStorage.hasOwnProperty(k)) total += (localStorage[k].length * 2);
     }
-    const usedMB  = (total / 1024 / 1024).toFixed(2);
-    const pct     = Math.min((usedMB / 5) * 100, 100);
+    const usedMB = (total / 1024 / 1024).toFixed(2);
+    const pct    = Math.min((usedMB / 5) * 100, 100);
     document.getElementById('storageText').textContent = `${usedMB}MB / 5MB`;
     const bar = document.getElementById('storageBar');
     bar.style.width = pct + '%';
@@ -467,7 +506,6 @@ function updateStorageBar() {
     if (pct > 80) showToast('⚠️ 本地存储已超80%，建议导出备份并清理历史');
 }
 
-// ─── 主题 ───
 function initTheme() {
     applyTheme(localStorage.getItem(SK.theme) || '');
     dom.themeToggle.addEventListener('click', e => {
@@ -489,7 +527,6 @@ window.setTheme = function(t) {
     showToast(`🎨 已切换：${{'':'经典白','theme-dark':'深空黑','theme-eye':'护眼绿','theme-retro':'复古黄'}[t]}`);
 };
 
-// ─── 侧边栏日夜 ───
 function initSidebarDarkMode() { setSidebarLight(localStorage.getItem(SK.sidebarDark) === '1'); }
 function setSidebarLight(isLight) {
     document.querySelector('.sidebar').classList.toggle('sidebar-light', isLight);
@@ -498,15 +535,10 @@ function setSidebarLight(isLight) {
 }
 function toggleSidebarDarkMode() { setSidebarLight(!document.querySelector('.sidebar').classList.contains('sidebar-light')); }
 
-// ─── 书稿管理 ───
-function renderBookLibrary(keyword = '') {
-    const list = keyword
-        ? bookLibrary.filter(b => b.name.includes(keyword) || (b.content||'').includes(keyword))
-        : bookLibrary;
+function renderBookLibrary() {
     const container = document.getElementById('bookLibrary');
     const fragment  = document.createDocumentFragment();
-    list.forEach((book, i) => {
-        const realIndex = bookLibrary.indexOf(book);
+    bookLibrary.forEach((book, i) => {
         const item = document.createElement('div');
         item.className = 'book-card book-item';
         const left = document.createElement('div');
@@ -514,17 +546,16 @@ function renderBookLibrary(keyword = '') {
         left.textContent = `${book.name} (${(book.content||'').length}字)`;
         const btns = document.createElement('div');
         btns.className = 'flex gap-1 flex-shrink-0';
-        btns.appendChild(makeBtn('✏️','text-blue-400 hover:bg-blue-500/20', () => editBook(realIndex)));
-        btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-500/20',  () => deleteBook(realIndex)));
+        btns.appendChild(makeBtn('✏️','text-blue-400 hover:bg-blue-500/20', () => editBook(i)));
+        btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-500/20',  () => deleteBook(i)));
         item.append(left, btns);
-        item.onclick = e => { if (!e.target.closest('button')) editBook(realIndex); };
+        item.onclick = e => { if (!e.target.closest('button')) editBook(i); };
         fragment.appendChild(item);
     });
     container.innerHTML = '';
     container.appendChild(fragment);
 }
 window.addNewBook = function() {
-    autoSaveDraftToTempBook();
     currentEditingBookId = null;
     document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length+1}`;
     document.getElementById('bookContent').value = '';
@@ -532,7 +563,6 @@ window.addNewBook = function() {
     document.getElementById('bookModal').classList.remove('hidden');
 };
 window.editBook = function(i) {
-    autoSaveDraftToTempBook();
     currentEditingBookId = i;
     document.getElementById('bookNameInput').value = bookLibrary[i].name;
     document.getElementById('bookContent').value   = bookLibrary[i].content || '';
@@ -544,14 +574,14 @@ window.deleteBook = function(i) {
     bookLibrary.splice(i,1); saveJSON(SK.books, bookLibrary); renderBookLibrary();
 };
 window.saveCurrentBook = function() {
-    const name = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
+    const name    = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
     const content = document.getElementById('bookContent').value;
     if (currentEditingBookId !== null) bookLibrary[currentEditingBookId] = {name,content};
     else bookLibrary.push({name,content});
     saveJSON(SK.books, bookLibrary); renderBookLibrary(); closeBookModal();
     showToast(`✅ 书稿【${name}】已保存`);
 };
-window.closeBookModal  = function() { document.getElementById('bookModal').classList.add('hidden'); };
+window.closeBookModal   = function() { document.getElementById('bookModal').classList.add('hidden'); };
 window.appendBookToDraft = function() {
     dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + document.getElementById('bookContent').value;
     debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
@@ -560,17 +590,9 @@ window.saveDraftToBook = function() {
     const draft = dom.workspace.value.trim();
     if (!draft) { showToast('⚠️ 草稿区为空'); return; }
     bookLibrary.push({name:`草稿_${new Date().toLocaleString()}`, content:draft});
-    saveJSON(SK.books, bookLibrary); renderBookLibrary(); showToast('💾 草稿已保存为新书稿');
+    saveJSON(SK.books, bookLibrary); renderBookLibrary(); showToast('💾 草稿已转为新书稿');
 };
-function autoSaveDraftToTempBook() {
-    const draft = dom.workspace.value.trim(); if (!draft) return;
-    const tmp = bookLibrary.find(b => b.name === '临时草稿（自动保存）');
-    if (tmp) tmp.content = draft;
-    else bookLibrary.unshift({name:'临时草稿（自动保存）', content:draft});
-    saveJSON(SK.books, bookLibrary); renderBookLibrary();
-}
 
-// ─── 一键排版 ───
 function typesetContent() {
     let text = dom.workspace.value.trim();
     if (!text) { showToast('⚠️ 草稿区为空'); return; }
@@ -584,14 +606,12 @@ function typesetContent() {
     showToast('📝 智能排版完成');
 }
 
-// ─── 快捷指令 ───
 function fillInput(text) {
     dom.userInput.value = text;
     dom.userInput.focus();
     dom.charCount.textContent = text.length + '字';
 }
 
-// ─── 神兵武库 ───
 function updateSidebarPromptBadge() {
     const c = Object.keys(prompts).length;
     document.getElementById('promptCountBadge').textContent = c + '件';
@@ -656,7 +676,7 @@ window.deletePrompt = function(name) {
     if (!confirm(`确认销毁【${name}】？`)) return;
     delete prompts[name]; saveJSON(SK.prompts, prompts);
     if (editingOldPromptName === name) resetPromptEditor();
-    renderModalPromptList();
+    else renderModalPromptList();
 };
 function renderSelect() {
     const s = dom.promptSelect; if (!s) return;
@@ -667,7 +687,6 @@ function renderSelect() {
     if (cur && prompts[cur]) s.value = cur;
 }
 
-// ─── 配置 & 模型 ───
 function initConfigInputs() {
     ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
@@ -699,7 +718,6 @@ function updateModelDropdowns() {
     });
 }
 
-// ─── AI 调用核心 ───
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
     if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
@@ -724,17 +742,14 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
         return;
     }
     const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1.5);
-    // ✅ 正确构建消息数组，支持多轮对话
-    const msgArray = Array.isArray(messages)
-        ? messages
-        : [{ role: 'user', content: messages }];
+    const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
     try {
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${key.trim()}` },
             body: JSON.stringify({
                 model,
-                messages: [ { role:'system', content:sysPrompt }, ...msgArray ],
+                messages: [{ role:'system', content:sysPrompt }, ...msgArray],
                 stream: true,
                 temperature: safeTemp
             }),
@@ -745,7 +760,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
             targetEl.innerHTML = `<span style="color:#ef4444">❌ 请求失败 (${res.status})：${err.slice(0,200)}</span>`;
             return;
         }
-        const reader = res.body.getReader();
+        const reader  = res.body.getReader();
         const decoder = new TextDecoder();
         let rawText = '';
         targetEl.textContent = '';
@@ -775,7 +790,6 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     }
 }
 
-// ─── 发送消息 ───
 async function handleSend() {
     if (isGenerating) { if (abortController) abortController.abort(); return; }
     const text = dom.userInput.value.trim();
@@ -785,9 +799,9 @@ async function handleSend() {
         const s = sampleLibrary[idx];
         if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
     });
-    const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
+    const sys        = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
     const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
-    const isPK = !document.getElementById('pkSelectBox').classList.contains('hidden');
+    const isPK       = !document.getElementById('pkSelectBox').classList.contains('hidden');
     isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
         if (isPK) await handlePKMode(sys, fullPrompt);
@@ -813,11 +827,20 @@ async function handleSingleMode(displayText, sys, prompt) {
 async function handlePKMode(sys, prompt) {
     const mA = document.getElementById('modelA').value;
     const mB = document.getElementById('modelB').value;
+
+    await playSwordClash();
+
     const grid = document.createElement('div');
-    grid.className = 'flex gap-4 w-full mb-6';
-    const colA = makePKCol(mA), colB = makePKCol(mB);
+    grid.className = 'flex gap-4 w-full mb-6 relative';
+    const colA = makePKCol(mA);
+    const colB = makePKCol(mB);
+    colA.classList.add('pk-col-anim');
+    colB.classList.add('pk-col-anim');
+    colB.style.animationDelay = '0.1s';
     grid.append(colA, colB);
-    dom.displayArea.appendChild(grid); checkEmptyState();
+    dom.displayArea.appendChild(grid);
+    checkEmptyState();
+
     const temp = parseFloat(dom.tempSlider.value);
     await Promise.all([
         streamCallAI(mA, sys, prompt, colA.querySelector('.pk-body'), temp),
@@ -827,7 +850,112 @@ async function handlePKMode(sys, prompt) {
     addMsgActions(colB, colB.querySelector('.pk-body').innerText);
 }
 
-// ─── 例文库 ───
+function playSwordClash() {
+    return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0);pointer-events:none;overflow:hidden;';
+        document.body.appendChild(overlay);
+
+        const swordL = document.createElement('div');
+        swordL.style.cssText = 'position:fixed;top:50%;left:-120px;transform:translateY(-50%);font-size:72px;z-index:10000;pointer-events:none;line-height:1;filter:drop-shadow(0 0 8px rgba(255,200,50,0.8));';
+        swordL.textContent = '🗡️';
+        document.body.appendChild(swordL);
+
+        const swordR = document.createElement('div');
+        swordR.style.cssText = 'position:fixed;top:50%;right:-120px;transform:translateY(-50%) scaleX(-1);font-size:72px;z-index:10000;pointer-events:none;line-height:1;filter:drop-shadow(0 0 8px rgba(255,200,50,0.8));';
+        swordR.textContent = '🗡️';
+        document.body.appendChild(swordR);
+
+        const centerX = window.innerWidth  / 2;
+        const duration = 800;
+        let start = null;
+
+        function flyIn(ts) {
+            if (!start) start = ts;
+            const p = Math.min((ts - start) / duration, 1);
+            const e = p < 0.5 ? 8*p*p*p*p : 1 - Math.pow(-2*p+2, 4)/2;
+            const targetL = centerX - 80;
+            const targetR = window.innerWidth - centerX - 80;
+            swordL.style.left  = (-120 + e * (targetL + 120)) + 'px';
+            swordR.style.right = (-120 + e * (targetR + 120)) + 'px';
+            if (p < 1) {
+                requestAnimationFrame(flyIn);
+            } else {
+                triggerClash();
+            }
+        }
+        requestAnimationFrame(flyIn);
+
+        function triggerClash() {
+            // 屏幕震动
+            document.body.style.animation = 'screenShake 0.4s ease';
+            setTimeout(() => { document.body.style.animation = ''; }, 400);
+
+            // 闪光圈
+            const ring = document.createElement('div');
+            ring.style.cssText = 'position:fixed;left:50%;top:50%;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,rgba(255,200,50,0.6) 50%,transparent 70%);z-index:10001;pointer-events:none;animation:flashRing 0.6s ease forwards;';
+            document.body.appendChild(ring);
+
+            // 碰撞符号
+            const boom = document.createElement('div');
+            boom.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;z-index:10002;pointer-events:none;animation:flashRing 0.8s ease forwards;';
+            boom.textContent = '💥';
+            document.body.appendChild(boom);
+
+            // 火花粒子
+            const colors = ['#FFD700','#FF6B00','#FF3300','#FFF700','#FFFFFF','#FF9500'];
+            for (let i = 0; i < 28; i++) {
+                const spark = document.createElement('div');
+                const angle = (Math.PI * 2 / 28) * i + (Math.random() - 0.5) * 0.4;
+                const dist  = 80 + Math.random() * 140;
+                const sx    = Math.cos(angle) * dist;
+                const sy    = Math.sin(angle) * dist;
+                const size  = 4 + Math.random() * 8;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const delay = Math.random() * 0.15;
+                const dur   = 0.5 + Math.random() * 0.6;
+                spark.style.cssText = `position:fixed;left:calc(50% + ${(Math.random()-0.5)*20}px);top:calc(50% + ${(Math.random()-0.5)*20}px);width:${size}px;height:${size}px;border-radius:50%;background:${color};box-shadow:0 0 ${size*2}px ${color};z-index:10001;pointer-events:none;--sx:${sx}px;--sy:${sy}px;animation:sparkFly ${dur}s ease ${delay}s forwards;`;
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), (dur + delay) * 1000 + 100);
+            }
+
+            // 音效
+            try {
+                const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+                const osc  = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(600, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.5);
+            } catch {}
+
+            // 剑弹开淡出
+            setTimeout(() => {
+                swordL.style.transition = 'all 0.4s ease';
+                swordR.style.transition = 'all 0.4s ease';
+                swordL.style.left    = (centerX - 180) + 'px';
+                swordR.style.right   = (window.innerWidth - centerX - 180) + 'px';
+                swordL.style.opacity = '0';
+                swordR.style.opacity = '0';
+            }, 200);
+
+            // 3秒后清理所有元素，开始生成
+            setTimeout(() => {
+                [swordL, swordR, ring, boom, overlay].forEach(el => {
+                    if (el && el.parentNode) el.remove();
+                });
+                resolve();
+            }, 3000);
+        }
+    });
+}
+
+
 function renderSampleLibrary() {
     const container = document.getElementById('sampleLibrary');
     const frag = document.createDocumentFragment();
@@ -861,7 +989,7 @@ window.extractGene = async function(idx) {
     if (isGenerating) { showToast('⚠️ 请等待当前生成完成'); return; }
     const sample = sampleLibrary[idx];
     appendMsg('user', `🧬 正在分析《${sample.name}》的风格基因...`);
-    const wrapper = appendMsg('ai','');
+    const wrapper  = appendMsg('ai','');
     const targetEl = wrapper.querySelector('.msg-body');
     isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
@@ -892,10 +1020,9 @@ async function handleFileImport(e) {
     e.target.value = '';
 }
 
-// ─── 消息渲染 ───
 function appendMsg(role, content) {
     const wrap = document.createElement('div'); wrap.className = 'msg-wrapper';
-    const msg  = document.createElement('div'); msg.className = role==='user' ? 'user-msg' : 'ai-msg';
+    const msg  = document.createElement('div'); msg.className  = role==='user' ? 'user-msg' : 'ai-msg';
     const body = document.createElement('div'); body.className = 'msg-body';
     if (role === 'user') body.textContent = content;
     else body.innerHTML = content ? marked.parse(content) : '';
@@ -913,10 +1040,10 @@ function addMsgActions(container, rawText) {
     const footer = document.createElement('div');
     footer.className = 'flex gap-2 mt-4 pt-3 border-t flex-wrap';
     footer.style.borderColor = 'var(--border-color)';
-    const btnCopy    = makeActionBtn('📋 复制','text-green-500', () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
-    const btnBook    = makeActionBtn('📖 存稿','text-blue-500', () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
+    const btnCopy    = makeActionBtn('📋 复制','text-green-500',   () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
+    const btnBook    = makeActionBtn('📖 存稿','text-blue-500',    () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
     const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
-    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500', () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
+    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500',   () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
     const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
         if (isGenerating) return;
         if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
@@ -928,11 +1055,11 @@ function addMsgActions(container, rawText) {
         isGenerating=true; abortController=new AbortController(); setSendButtonStop();
         try {
             const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
-            conversationHistory.push({role:'user',content:lastUser.content});
+            conversationHistory.push({role:'user', content:lastUser.content});
             const wrapper=appendMsg('ai',''); const targetEl=wrapper.querySelector('.msg-body');
             await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
             const aiReply=targetEl.innerText;
-            conversationHistory.push({role:'assistant',content:aiReply});
+            conversationHistory.push({role:'assistant', content:aiReply});
             addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
             showToast('🔄 已重新生成');
         } finally { isGenerating=false; abortController=null; resetSendButton(); }
@@ -952,12 +1079,11 @@ function makeActionBtn(text, cls, onClick) {
     return btn;
 }
 
-// ─── 历史记录 ───
 function saveHistory() {
     const items = Array.from(dom.displayArea.querySelectorAll('.msg-body'));
     if (!items.length) return;
     const messages = items.map(el=>el.innerText.slice(0,500));
-    const title = messages[0].slice(0,25) + (messages[0].length>25?'...':'');
+    const title    = messages[0].slice(0,25) + (messages[0].length>25?'...':'');
     history = [{title, messages, timestamp:Date.now()}, ...history.slice(0,29)];
     saveJSON(SK.history, history);
 }
@@ -965,14 +1091,14 @@ function renderHistorySelect() {
     const sel = document.getElementById('historySelect');
     sel.innerHTML = '<option value="">-- 选择历史 --</option>';
     history.forEach((h,i) => {
-        const o=document.createElement('option'); o.value=i;
-        o.textContent=`${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
+        const o = document.createElement('option'); o.value = i;
+        o.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
         sel.appendChild(o);
     });
 }
 function deleteHistory(idx) {
     if (!confirm('确认删除这条历史记录？')) return;
-    history.splice(idx, 1);
+    history.splice(idx,1);
     saveJSON(SK.history, history);
     renderHistorySelect();
     showToast('🗑️ 历史记录已删除');
@@ -984,7 +1110,6 @@ function loadHistory() {
     history[idx].messages.forEach((msg,i) => appendMsg(i%2===0?'user':'ai', msg));
 }
 
-// ─── 数据导入导出 ───
 function exportSystemData() {
     const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, sampleLibrary, history, books:bookLibrary, workspace:dom.workspace.value};
     saveAs(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}), `灵犀备份_${Date.now()}.json`);
@@ -1013,14 +1138,17 @@ function refreshUI() {
     renderSelect(); updateModelDropdowns(); renderHistorySelect(); updateSidebarPromptBadge(); updateStorageBar();
 }
 function saveAllData() {
-    ['flow','prompts','samples','history','books'].forEach(k => saveJSON(SK[k], {flow:flowConfig,prompts,samples:sampleLibrary,history,books:bookLibrary}[k]));
+    saveJSON(SK.flow,    flowConfig);
+    saveJSON(SK.prompts, prompts);
+    saveJSON(SK.samples, sampleLibrary);
+    saveJSON(SK.history, history);
+    saveJSON(SK.books,   bookLibrary);
 }
 function loadWorkspace() {
     const val = localStorage.getItem(SK.workspace);
     if (val !== null) { try { dom.workspace.value = JSON.parse(val); } catch { dom.workspace.value = val; } }
 }
 
-// ─── 自动备份 ───
 function initAutoBackup() {
     if (autoBackupTimer) clearInterval(autoBackupTimer);
     autoBackupTimer = setInterval(() => {
@@ -1028,7 +1156,6 @@ function initAutoBackup() {
     }, 5*60*1000);
 }
 
-// ─── 界面工具 ───
 function checkEmptyState() {
     dom.emptyState.style.display = dom.displayArea.querySelectorAll('.msg-wrapper').length > 0 ? 'none' : 'flex';
 }
@@ -1070,22 +1197,53 @@ function switchToPKMode() {
     document.getElementById('modeChat').classList.remove('mode-btn-active');
     document.getElementById('singleSelectBox').classList.add('hidden');
     document.getElementById('pkSelectBox').classList.remove('hidden');
+    // 按钮震动提示
+    const btn = document.getElementById('modePK');
+    btn.style.transform = 'scale(1.08)';
+    setTimeout(() => { btn.style.transform = ''; }, 200);
+}
+
+// ─── 拖拽分隔线 ───
+function initResizer() {
+    const resizer = document.getElementById('resizer');
+    const editor  = document.getElementById('mainEditor');
+    if (!resizer || !editor) return;
+    let startX, startW;
+    resizer.addEventListener('mousedown', function(e) {
+        startX = e.clientX;
+        startW = editor.offsetWidth;
+        document.body.style.cursor     = 'col-resize';
+        document.body.style.userSelect = 'none';
+        function onMove(e) {
+            const newW = Math.max(200, Math.min(startW + (e.clientX - startX), window.innerWidth - 400));
+            editor.style.flex  = 'none';
+            editor.style.width = newW + 'px';
+        }
+        function onUp() {
+            document.body.style.cursor     = '';
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup',   onUp);
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup',   onUp);
+    });
 }
 
 // ─── 事件绑定 ───
 function bindEvents() {
-    dom.sendBtn.onclick = handleSend;
+    dom.sendBtn.onclick    = handleSend;
     dom.userInput.onkeydown = e => { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); handleSend(); } };
     dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length+'字'; };
     dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
 
-    document.getElementById('toggleSpace').onclick = () => document.getElementById('mainEditor').classList.toggle('editor-active');
-    document.getElementById('newChatBtn').onclick  = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
-    document.getElementById('typesetBtn').onclick  = typesetContent;
-    document.getElementById('clearChatBtn').onclick= clearChat;
-    document.getElementById('modeChat').onclick    = switchToChatMode;
-    document.getElementById('modePK').onclick      = switchToPKMode;
+    document.getElementById('toggleSpace').onclick  = () => document.getElementById('mainEditor').classList.toggle('editor-active');
+    document.getElementById('newChatBtn').onclick   = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
+    document.getElementById('typesetBtn').onclick   = typesetContent;
+    document.getElementById('clearChatBtn').onclick = clearChat;
+    document.getElementById('modeChat').onclick     = switchToChatMode;
+    document.getElementById('modePK').onclick       = switchToPKMode;
     document.getElementById('sidebarDarkToggle').onclick = toggleSidebarDarkMode;
 
     document.getElementById('openSettings').onclick  = () => document.getElementById('settingsModal').classList.remove('hidden');
@@ -1098,9 +1256,6 @@ function bindEvents() {
     document.getElementById('resetPromptBtn').onclick     = resetPromptEditor;
     document.getElementById('addNewPromptBtn').onclick    = resetPromptEditor;
 
-  
-
-    // ✅ 草稿发给AI
     document.getElementById('draftToAIBtn').onclick = () => {
         const draft = dom.workspace.value.trim();
         if (!draft) { showToast('⚠️ 草稿区为空'); return; }
@@ -1112,77 +1267,15 @@ function bindEvents() {
 
     document.getElementById('fileImport').onchange        = handleFileImport;
     document.getElementById('importSystemInput').onchange = importSystemData;
-    document.getElementById('historySelect').onchange = loadHistory;
-    document.getElementById('deleteHistoryBtn').onclick = () => {
+    document.getElementById('historySelect').onchange     = loadHistory;
+    document.getElementById('deleteHistoryBtn').onclick   = () => {
         const idx = document.getElementById('historySelect').value;
         if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
         deleteHistory(parseInt(idx));
     };
-    // ─── 拖拽分隔线 ───
-(function() {
-    const resizer    = document.getElementById('resizer');
-    const editor     = document.getElementById('mainEditor');
-    if (!resizer) return;
-    let startX, startEditorW;
-    resizer.addEventListener('mousedown', function(e) {
-        startX       = e.clientX;
-        startEditorW = editor.offsetWidth;
-        document.body.style.cursor     = 'col-resize';
-        document.body.style.userSelect = 'none';
-        function onMove(e) {
-            const dx   = e.clientX - startX;
-            const newW = Math.max(200, Math.min(startEditorW + dx, window.innerWidth - 400));
-            editor.style.flex  = 'none';
-            editor.style.width = newW + 'px';
-        }
-        function onUp() {
-            document.body.style.cursor     = '';
-            document.body.style.userSelect = '';
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup',   onUp);
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup',   onUp);
-    });
-})();
+}
 
 window.onload = init;
-
-}// ─── 拖拽分隔线 ───
-(function() {
-    const resizer    = document.getElementById('resizer');
-    const editor     = document.getElementById('mainEditor');
-    if (!resizer) return;
-    let startX, startEditorW;
-    resizer.addEventListener('mousedown', function(e) {
-        startX       = e.clientX;
-        startEditorW = editor.offsetWidth;
-        document.body.style.cursor     = 'col-resize';
-        document.body.style.userSelect = 'none';
-        function onMove(e) {
-            const dx   = e.clientX - startX;
-            const newW = Math.max(200, Math.min(startEditorW + dx, window.innerWidth - 400));
-            editor.style.flex  = 'none';
-            editor.style.width = newW + 'px';
-        }
-        function onUp() {
-            document.body.style.cursor     = '';
-            document.body.style.userSelect = '';
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup',   onUp);
-        }
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup',   onUp);
-    });
-})();
-
-
-        </div>
-
-        <!-- 拖拽分隔线 -->
-        <div id="resizer" style="width:5px;cursor:col-resize;background:var(--border-color);flex-shrink:0;transition:background 0.2s;" onmouseenter="this.style.background='#3b82f6'" onmouseleave="this.style.background='var(--border-color)'"></div>
-
-        <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
 </script>
 </body>
 </html>
