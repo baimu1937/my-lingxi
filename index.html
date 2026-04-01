@@ -705,7 +705,7 @@ function saveConfig() {
 function updateModelDropdowns() {
     const official = [];
     if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek Chat'}); official.push({value:'deepseek-reasoner',label:'DeepSeek R1'}); }
-    if (flowConfig.qw_key) { official.push({value:'qwen3.5-plus',label:'Qwen3.5 最新'}); official.push({value:'qwen3.5-flash',label:'Qwen3.5 Flash 极速'}); }
+    if (flowConfig.qw_key) { official.push({value:'qwen3.5-plus',label:'Qwen3.5 最新'}); official.push({value:'qwen3.5-flash',label:'Qwen3.5 Flash 极速'}); official.push({value:'qwen3-max-preview',label:'Qwen3-Max 旗舰推理'}); }
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
     const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:m})) : [];
     const all = [...official, ...proxy];
