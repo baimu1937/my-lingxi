@@ -731,12 +731,11 @@ function isClaudeModel(model) {
 
 function normalizeClaudeMessages(messages) {
     const arr = Array.isArray(messages) ? messages : [{ role:'user', content: messages }];
-    return arr
-        .filter(m => m.role !== 'system')
-        .map(m => ({
-            role: m.role === 'assistant' ? 'assistant' : 'user',
-            content: typeof m.content === 'string' ? m.content : String(m.content || '')
-        }));
+    // 不再过滤 system，确保指令能传达
+    return arr.map(m => ({
+        role: (m.role === 'assistant' ? 'assistant' : (m.role === 'system' ? 'system' : 'user')),
+        content: typeof m.content === 'string' ? m.content : String(m.content || '')
+    }));
 }
 
 async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
