@@ -122,7 +122,6 @@
         .quick-tag { padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
         .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
         #storageBar { height: 3px; border-radius: 9999px; transition: width 0.5s; }
-
         @keyframes swordFromLeft {
             0%   { left: -120px; opacity: 1; transform: rotate(0deg) scaleX(1); }
             75%  { left: calc(50% - 80px); opacity: 1; transform: rotate(0deg) scaleX(1); }
@@ -361,9 +360,9 @@
             </div>
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
-                <input id="proxy_url" type="text"     placeholder="Base URL（Claude填域名即可，如 https://xuedingtoken.com）" class="modal-input text-sm">
-                <input id="proxy_key" type="password" placeholder="中转 Key" class="modal-input text-sm">
-                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: gpt-4o,claude-3-5-sonnet-latest" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
+                <input id="proxy_url" type="text" placeholder="Base URL（无需填写，已由Worker代理）" class="modal-input text-sm">
+                <input id="proxy_key" type="password" placeholder="中转 Key（填你的API Key）" class="modal-input text-sm">
+                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: claude-haiku-4-5-20251001" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
             </div>
         </div>
         <div class="flex gap-2.5 mb-5">
@@ -412,6 +411,9 @@
 </div>
 
 <script>
+// ✅ 你的 Cloudflare Worker 地址（已固定，无需在配置中心填写）
+const CLAUDE_WORKER_URL = 'https://little-thunder-b8e0.463023386.workers.dev';
+
 const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
 1. 叙事结构与情节逻辑
 2. 人物塑造与对话风格
@@ -724,8 +726,7 @@ function updateModelDropdowns() {
 }
 
 function isClaudeModel(model) {
-    const m = String(model || '').toLowerCase();
-    return m.includes('claude');
+    return String(model || '').toLowerCase().includes('claude');
 }
 
 function normalizeClaudeMessages(messages) {
@@ -739,19 +740,14 @@ function normalizeClaudeMessages(messages) {
 }
 
 async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
-    if (!flowConfig.proxy_url) {
-        targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置 Claude 中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
-        return;
-    }
-
-    const base = flowConfig.proxy_url.replace(/\/+$/,'');
-    const url = base.endsWith('/v1') ? `${base}/messages` : `${base}/v1/messages`;
     const key = flowConfig.proxy_key;
-
     if (!key || !key.trim()) {
-        targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
+        targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 未配置 API Key，请前往 ⚙️ 配置中心 → 中转Key 填写</span>`;
         return;
     }
+
+    // ✅ 直接使用 Worker 地址，绕过 CORS
+    const url = CLAUDE_WORKER_URL + '/v1/messages';
 
     const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1);
     const claudeMessages = normalizeClaudeMessages(messages);
@@ -762,8 +758,7 @@ async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': key.trim(),
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
+                'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
                 model,
@@ -801,13 +796,10 @@ async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
             for (const line of chunks) {
                 const l = line.trim();
                 if (!l.startsWith('data:')) continue;
-
                 const s = l.slice(5).trim();
                 if (!s || s === '[DONE]') continue;
-
                 try {
                     const data = JSON.parse(s);
-
                     if (data.type === 'content_block_delta' && data.delta?.text) {
                         rawText += data.delta.text;
                         targetEl.textContent = rawText;
@@ -901,7 +893,6 @@ async function streamCallOpenAICompatible(model, sysPrompt, messages, targetEl, 
                 if (!l.startsWith('data: ')) continue;
                 const s = l.slice(6);
                 if (s === '[DONE]') continue;
-
                 try {
                     const c = JSON.parse(s)?.choices?.[0]?.delta?.content;
                     if (c) {
@@ -1021,7 +1012,7 @@ function playSwordClash() {
         swordR.textContent = '🗡️';
         document.body.appendChild(swordR);
 
-        const centerX = window.innerWidth  / 2;
+        const centerX = window.innerWidth / 2;
         const duration = 800;
         let start = null;
 
@@ -1033,11 +1024,7 @@ function playSwordClash() {
             const targetR = window.innerWidth - centerX - 80;
             swordL.style.left  = (-120 + e * (targetL + 120)) + 'px';
             swordR.style.right = (-120 + e * (targetR + 120)) + 'px';
-            if (p < 1) {
-                requestAnimationFrame(flyIn);
-            } else {
-                triggerClash();
-            }
+            if (p < 1) { requestAnimationFrame(flyIn); } else { triggerClash(); }
         }
         requestAnimationFrame(flyIn);
 
@@ -1094,9 +1081,7 @@ function playSwordClash() {
             }, 200);
 
             setTimeout(() => {
-                [swordL, swordR, ring, boom, overlay].forEach(el => {
-                    if (el && el.parentNode) el.remove();
-                });
+                [swordL, swordR, ring, boom, overlay].forEach(el => { if (el && el.parentNode) el.remove(); });
                 resolve();
             }, 3000);
         }
@@ -1149,11 +1134,7 @@ window.extractGene = async function(idx) {
         saveJSON(SK.samples, sampleLibrary);
         renderSampleLibrary();
         showToast(`✅ 《${sample.name}》基因提取完成`);
-    } finally {
-        isGenerating=false;
-        abortController=null;
-        resetSendButton();
-    }
+    } finally { isGenerating=false; abortController=null; resetSendButton(); }
 };
 window.deleteSample = function(idx) {
     sampleLibrary.splice(idx,1);
@@ -1174,19 +1155,10 @@ async function handleFileImport(e) {
                     r.readAsArrayBuffer(f);
                 })
                 : await f.text();
-            if (text.trim()) {
-                sampleLibrary.push({name:f.name,text,gene:''});
-                imported++;
-            }
-        } catch {
-            showToast(`⚠️ 导入 ${f.name} 失败`);
-        }
+            if (text.trim()) { sampleLibrary.push({name:f.name,text,gene:''}); imported++; }
+        } catch { showToast(`⚠️ 导入 ${f.name} 失败`); }
     }
-    if (imported) {
-        saveJSON(SK.samples,sampleLibrary);
-        renderSampleLibrary();
-        showToast(`✅ 成功导入 ${imported} 个文件`);
-    }
+    if (imported) { saveJSON(SK.samples,sampleLibrary); renderSampleLibrary(); showToast(`✅ 成功导入 ${imported} 个文件`); }
     e.target.value = '';
 }
 
@@ -1228,9 +1200,7 @@ function addMsgActions(container, rawText) {
         if (conversationHistory[conversationHistory.length-1].role === 'assistant') conversationHistory.pop();
         const allW = dom.displayArea.querySelectorAll('.msg-wrapper');
         if (allW.length) allW[allW.length-1].remove();
-        isGenerating=true;
-        abortController=new AbortController();
-        setSendButtonStop();
+        isGenerating=true; abortController=new AbortController(); setSendButtonStop();
         try {
             const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
             conversationHistory.push({role:'user', content:lastUser.content});
@@ -1241,11 +1211,7 @@ function addMsgActions(container, rawText) {
             conversationHistory.push({role:'assistant', content:aiReply});
             addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
             showToast('🔄 已重新生成');
-        } finally {
-            isGenerating=false;
-            abortController=null;
-            resetSendButton();
-        }
+        } finally { isGenerating=false; abortController=null; resetSendButton(); }
     });
     const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
         const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
@@ -1316,23 +1282,14 @@ function importSystemData(e) {
             if (data.workspace !== undefined) dom.workspace.value = data.workspace;
             refreshUI();
             showToast('✅ 备份导入成功');
-        } catch {
-            showToast('❌ 导入失败，文件格式不正确');
-        }
+        } catch { showToast('❌ 导入失败，文件格式不正确'); }
     };
     reader.readAsText(file);
     e.target.value = '';
 }
 function refreshUI() {
-    initConfigInputs();
-    loadWorkspace();
-    renderBookLibrary();
-    renderSampleLibrary();
-    renderSelect();
-    updateModelDropdowns();
-    renderHistorySelect();
-    updateSidebarPromptBadge();
-    updateStorageBar();
+    initConfigInputs(); loadWorkspace(); renderBookLibrary(); renderSampleLibrary();
+    renderSelect(); updateModelDropdowns(); renderHistorySelect(); updateSidebarPromptBadge(); updateStorageBar();
 }
 function saveAllData() {
     saveJSON(SK.flow,    flowConfig);
@@ -1439,12 +1396,7 @@ function initResizer() {
 
 function bindEvents() {
     dom.sendBtn.onclick     = handleSend;
-    dom.userInput.onkeydown = e => {
-        if (e.key==='Enter'&&!e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-    };
+    dom.userInput.onkeydown = e => { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); handleSend(); } };
     dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length+'字'; };
     dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
@@ -1461,11 +1413,7 @@ function bindEvents() {
     document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
     document.getElementById('saveSettings').onclick  = saveConfig;
 
-    document.getElementById('openPromptModalBtn').onclick = () => {
-        renderModalPromptList();
-        resetPromptEditor();
-        document.getElementById('promptModal').classList.remove('hidden');
-    };
+    document.getElementById('openPromptModalBtn').onclick = () => { renderModalPromptList(); resetPromptEditor(); document.getElementById('promptModal').classList.remove('hidden'); };
     document.getElementById('closePromptModal').onclick   = () => document.getElementById('promptModal').classList.add('hidden');
     document.getElementById('savePromptBtn').onclick      = savePrompt;
     document.getElementById('resetPromptBtn').onclick     = resetPromptEditor;
