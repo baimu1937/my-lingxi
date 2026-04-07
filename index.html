@@ -200,8 +200,8 @@
         </section>
         <section class="pb-8">
             <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">🧬 例文克隆中心</span>
-                <button onclick="document.getElementById('fileImport').click()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
+                <span class="text-[13px] font-black text-gray-500 uppercase tracking-widest">🧬 例文克隆中心</span>
+                <button onclick="document.getElementById('fileImport').click()" class="text-blue-400 text-[12px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
             </div>
             <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
             <div id="sampleLibrary" class="space-y-1.5"></div>
@@ -746,8 +746,10 @@ async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
         return;
     }
 
-    // ✅ 直接使用 Worker 地址，绕过 CORS
-    const url = CLAUDE_WORKER_URL + '/v1/messages';
+    // ✅ 优先使用用户配置的代理地址，否则使用默认 Worker
+    let baseUrl = flowConfig.proxy_url || CLAUDE_WORKER_URL;
+    baseUrl = baseUrl.replace(/\/+$/,''); // 移除末尾斜杠
+    const url = baseUrl + '/v1/messages';
 
     const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1);
     const claudeMessages = normalizeClaudeMessages(messages);
