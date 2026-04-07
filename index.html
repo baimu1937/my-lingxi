@@ -749,7 +749,8 @@ async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
     // ✅ 优先使用用户配置的代理地址，否则使用默认 Worker
     let baseUrl = flowConfig.proxy_url || CLAUDE_WORKER_URL;
     baseUrl = baseUrl.replace(/\/+$/,''); // 移除末尾斜杠
-    const url = baseUrl + '/v1/messages';
+    // 处理 URL 路径：如果已经以 /v1 结尾，直接加 /messages；否则加 /v1/messages
+    const url = baseUrl.endsWith('/v1') ? baseUrl + '/messages' : baseUrl + '/v1/messages';
 
     const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1);
     const claudeMessages = normalizeClaudeMessages(messages);
