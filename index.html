@@ -120,6 +120,71 @@
         .book-item { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem 0.8rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .book-item:hover { border-color: #3b82f6; background: rgba(59,130,246,0.05); }
         .book-item.active { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        
+        /* 🎹 钢琴键样式 */
+        .piano-key { 
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%); 
+            border: 1px solid #e0e0e0; 
+            border-radius: 0 0 8px 8px; 
+            margin-bottom: 2px; 
+            padding: 0.8rem 1rem; 
+            cursor: pointer; 
+            transition: all 0.15s ease; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .piano-key::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .piano-key:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+            border-color: #3b82f6;
+        }
+        .piano-key:hover::before {
+            opacity: 1;
+        }
+        .piano-key.active { 
+            background: linear-gradient(to bottom, #eff6ff 0%, #dbeafe 100%);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 16px rgba(59,130,246,0.2);
+        }
+        .piano-key.active::before {
+            opacity: 1;
+        }
+        .piano-key-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .piano-key-meta {
+            font-size: 10px;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .piano-key-wordcount {
+            background: rgba(59,130,246,0.1);
+            color: #3b82f6;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        
         .tool-btn { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
         .tool-btn:hover { border-color: #3b82f6; color: #3b82f6; }
         .tool-btn.active { border-color: #3b82f6; background: rgba(59,130,246,0.1); color: #3b82f6; }
@@ -260,7 +325,6 @@
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
             <button id="toggleToolBtn" onclick="toggleToolPanel()" class="pill-btn">🛠️ 工具箱</button>
-            <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
         </div>
@@ -581,14 +645,22 @@ function renderBookLibrary() {
     const fragment  = document.createDocumentFragment();
     bookLibrary.forEach((book, i) => {
         const item = document.createElement('div');
-        item.className = 'book-item';
-        const left = document.createElement('div');
-        left.className = 'flex-1 min-w-0';
-        left.innerHTML = `
-            <div class="text-[11px] font-bold truncate">${book.name}</div>
-            <div class="text-[10px] text-gray-500 mt-0.5">${(book.content||'').length}字</div>
+        item.className = 'piano-key';
+        if (i === currentManagerBookId) {
+            item.classList.add('active');
+        }
+        
+        const wordCount = (book.content || '').length;
+        const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+        
+        item.innerHTML = `
+            <div class="piano-key-title">${book.name}</div>
+            <div class="piano-key-meta">
+                <span>${dateStr}</span>
+                <span class="piano-key-wordcount">${wordCount}字</span>
+            </div>
         `;
-        item.appendChild(left);
+        
         item.onclick = () => {
             showBookManager();
             loadBookIntoManager(i);
@@ -1345,7 +1417,6 @@ function bindEvents() {
     dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
 
-    document.getElementById('toggleSpace').onclick  = () => document.getElementById('mainEditor').classList.toggle('editor-active');
     document.getElementById('newChatBtn').onclick   = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
     document.getElementById('typesetBtn').onclick   = typesetContent;
     document.getElementById('clearChatBtn').onclick = clearChat;
