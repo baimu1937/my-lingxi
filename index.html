@@ -237,6 +237,13 @@
             <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
             <div id="sampleLibrary" class="space-y-1.5"></div>
         </section>
+        <section class="pb-8">
+            <div class="flex justify-between items-center mb-2 px-0.5">
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">📊 分析报告</span>
+                <button onclick="addNewAnalysisReport()" class="text-purple-400 text-[10px] font-bold hover:text-purple-300 px-2 py-1 bg-purple-500/10 rounded-lg hover:bg-purple-500/20 transition">+ 新建</button>
+            </div>
+            <div id="analysisReports" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
+        </section>
     </div>
     <div class="px-4 py-2 border-t border-white/5">
         <div class="flex justify-between items-center mb-1">
@@ -353,7 +360,13 @@
                         <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
                         <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
                         <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
-                        <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
+                        <div class="relative group">
+                            <button class="quick-tag">🔍 分析 ▼</button>
+                            <div class="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[200px] hidden group-hover:block z-50">
+                                <button onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议（注意：不能出现例文专属情节）')" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 text-gray-700">📊 内容分析</button>
+                                <button onclick="showGeneExtractModal()" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 text-gray-700">🧬 基因提取</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -513,10 +526,12 @@ let prompts             = loadJSON(SK.prompts) || { "灵犀助手": "你是一�
 let history             = loadJSON(SK.history) || [];
 let sampleLibrary       = loadJSON(SK.samples) || [];
 let bookLibrary         = loadJSON(SK.books)   || [];
+let analysisReports     = loadJSON('lingxi_analysis_reports') || [];  // 分析报告库
 let conversationHistory = [];
 let currentEditingBookId  = null;
 let editingOldPromptName  = null;
 let selectedSampleIndices = [];
+let selectedReportIndices = [];  // 选中的分析报告索引
 let isGenerating    = false;
 let abortController = null;
 let autoBackupTimer = null;
@@ -535,6 +550,7 @@ function init() {
     loadWorkspace();
     renderBookLibrary();
     renderSampleLibrary();
+    renderAnalysisReports();  // 初始化分析报告列表
     renderSelect();
     updateModelDropdowns();
     renderHistorySelect();
@@ -1067,9 +1083,17 @@ async function handleSend() {
     dom.charCount.textContent = '0字';
 
     let ref = '';
+    
+    // 添加选中的例文作为参考
     selectedSampleIndices.forEach(idx => {
         const s = sampleLibrary[idx];
         if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
+    });
+    
+    // 添加选中的分析报告作为参考
+    selectedReportIndices.forEach(idx => {
+        const r = analysisReports[idx];
+        if (r && r.content) ref += `\n【参考分析报告：${r.name}】\n${r.content}\n`;
     });
 
     const sys        = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
@@ -1238,7 +1262,6 @@ function renderSampleLibrary() {
                     <span class="truncate font-bold">${s.name}</span>
                 </label>
                 <div class="flex gap-1.5 ml-2 flex-shrink-0">
-                    <button onclick="extractGene(${i})" title="提取风格基因" class="text-blue-400 hover:text-white transition text-sm">🧬</button>
                     <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>
@@ -1266,10 +1289,19 @@ window.extractGene = async function(idx) {
     try {
         await streamCallAI(document.getElementById('singleModel').value, '你是专业的文学分析专家。',
             `${GENE_PROMPT}\n\n待分析文本：\n${sample.text.slice(0,6000)}`, targetEl, 0.3);
-        sampleLibrary[idx].gene = targetEl.innerText;
-        saveJSON(SK.samples, sampleLibrary);
-        renderSampleLibrary();
-        showToast(`✅ 《${sample.name}》基因提取完成`);
+        
+        // 将分析结果保存到分析报告库
+        const reportName = `《${sample.name}》风格基因分析`;
+        analysisReports.push({
+            name: reportName,
+            content: targetEl.innerText,
+            sourceSample: sample.name,
+            createTime: new Date().toLocaleString()
+        });
+        saveJSON('lingxi_analysis_reports', analysisReports);
+        renderAnalysisReports();
+        
+        showToast(`✅ 《${sample.name}》基因提取完成，已保存至分析报告`);
     } finally { isGenerating=false; abortController=null; resetSendButton(); }
 };
 window.deleteSample = function(idx) {
@@ -1278,6 +1310,120 @@ window.deleteSample = function(idx) {
     saveJSON(SK.samples, sampleLibrary);
     renderSampleLibrary();
 };
+
+// 分析报告管理函数
+function renderAnalysisReports() {
+    const container = document.getElementById('analysisReports');
+    if (!container) return;
+    
+    const frag = document.createDocumentFragment();
+    analysisReports.forEach((r,i) => {
+        const isSelected = selectedReportIndices.includes(i);
+        const div = document.createElement('div');
+        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${isSelected ? 'bg-purple-500/10 border-purple-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        div.innerHTML = `
+            <div class="flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0">
+                    <input type="checkbox" class="accent-purple-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleReport(${i})">
+                    <span class="truncate font-bold">${r.name}</span>
+                </label>
+                <div class="flex gap-1.5 ml-2 flex-shrink-0">
+                    <button onclick="viewReport(${i})" title="查看报告" class="text-purple-400 hover:text-white transition text-sm">👁️</button>
+                    <button onclick="deleteReport(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
+                </div>
+            </div>
+            <div class="mt-1 text-[9px] text-gray-400 truncate">来源: ${r.sourceSample || '手动创建'} · ${r.createTime}</div>`;
+        frag.appendChild(div);
+    });
+    container.innerHTML = '';
+    container.appendChild(frag);
+}
+
+window.toggleReport = function(idx) {
+    selectedReportIndices = selectedReportIndices.includes(idx)
+        ? selectedReportIndices.filter(i=>i!==idx)
+        : [...selectedReportIndices, idx];
+    renderAnalysisReports();
+};
+
+window.viewReport = function(idx) {
+    const report = analysisReports[idx];
+    appendMsg('user', `📊 查看分析报告：${report.name}`);
+    const wrapper = appendMsg('ai', '');
+    const targetEl = wrapper.querySelector('.msg-body');
+    targetEl.innerHTML = `<strong>${report.name}</strong><br/><br/>${marked.parse(report.content)}`;
+};
+
+window.deleteReport = function(idx) {
+    analysisReports.splice(idx,1);
+    selectedReportIndices = selectedReportIndices.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
+    saveJSON('lingxi_analysis_reports', analysisReports);
+    renderAnalysisReports();
+};
+
+window.addNewAnalysisReport = function() {
+    const name = prompt('请输入分析报告名称：');
+    if (!name || !name.trim()) return;
+    
+    analysisReports.push({
+        name: name.trim(),
+        content: '',
+        sourceSample: '手动创建',
+        createTime: new Date().toLocaleString()
+    });
+    saveJSON('lingxi_analysis_reports', analysisReports);
+    renderAnalysisReports();
+    showToast(`✅ 已创建分析报告：${name}`);
+};
+
+// 基因提取模态框
+window.showGeneExtractModal = function() {
+    if (sampleLibrary.length === 0) {
+        showToast('⚠️ 请先导入例文');
+        return;
+    }
+    
+    // 创建模态框HTML
+    const modal = document.createElement('div');
+    modal.id = 'geneExtractModal';
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">🧬 选择例文进行基因提取</h3>
+            <div class="max-h-64 overflow-y-auto space-y-2 mb-4">
+                ${sampleLibrary.map((s,i) => `
+                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200">
+                        <input type="radio" name="geneSample" value="${i}" class="accent-blue-500">
+                        <span class="text-sm text-gray-700">${s.name}</span>
+                    </label>
+                `).join('')}
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeGeneExtractModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition">取消</button>
+                <button onclick="confirmGeneExtract()" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition font-bold">开始提取</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+window.closeGeneExtractModal = function() {
+    const modal = document.getElementById('geneExtractModal');
+    if (modal) modal.remove();
+};
+
+window.confirmGeneExtract = function() {
+    const selected = document.querySelector('input[name="geneSample"]:checked');
+    if (!selected) {
+        showToast('⚠️ 请选择一个例文');
+        return;
+    }
+    
+    const idx = parseInt(selected.value);
+    closeGeneExtractModal();
+    extractGene(idx);
+};
+
 async function handleFileImport(e) {
     const files = e.target.files;
     if (!files||!files.length) return;
@@ -1415,7 +1561,7 @@ function loadHistory() {
 }
 
 function exportSystemData() {
-    const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, sampleLibrary, history, books:bookLibrary, workspace:dom.workspace.value};
+    const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, sampleLibrary, analysisReports, history, books:bookLibrary, workspace:dom.workspace.value};
     saveAs(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}), `灵犀备份_${Date.now()}.json`);
     showToast('✅ 备份导出成功');
 }
@@ -1429,6 +1575,7 @@ function importSystemData(e) {
             if (data.flowConfig)    flowConfig    = data.flowConfig;
             if (data.prompts)       prompts       = data.prompts;
             if (data.sampleLibrary) sampleLibrary = data.sampleLibrary;
+            if (data.analysisReports) analysisReports = data.analysisReports;
             if (data.history)       history       = data.history;
             if (data.books)         bookLibrary   = data.books;
             saveAllData();
@@ -1448,6 +1595,7 @@ function saveAllData() {
     saveJSON(SK.flow,    flowConfig);
     saveJSON(SK.prompts, prompts);
     saveJSON(SK.samples, sampleLibrary);
+    saveJSON('lingxi_analysis_reports', analysisReports);  // 保存分析报告
     saveJSON(SK.history, history);
     saveJSON(SK.books,   bookLibrary);
 }
