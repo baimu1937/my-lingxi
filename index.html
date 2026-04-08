@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵犀 - 智能创作平台 [已优化v2.0]</title>
+    <title>灵犀 - 智能创作平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
@@ -70,36 +70,21 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.4); }
-        /* 输出区滚动条样式 */
-        #displayArea::-webkit-scrollbar { width: 8px; }
-        #displayArea::-webkit-scrollbar-track { background: transparent; }
-        #displayArea::-webkit-scrollbar-thumb { background: rgba(156,163,175,0.4); border-radius: 4px; transition: background 0.3s; }
-        #displayArea::-webkit-scrollbar-thumb:hover { background: rgba(156,163,175,0.6); }
-        /* Firefox滚动条 */
-        #displayArea { scrollbar-width: thin; scrollbar-color: rgba(156,163,175,0.4) transparent; }
         .sidebar { width: 280px; min-width: 280px; background: var(--bg-sidebar); color: white; z-index: 50; transition: all 0.3s; height: 100vh; }
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; width: 250px; height: 100vh; left: -250px; top: 0; transition: left 0.3s; z-index: 100; }
-            .sidebar.mobile-open { left: 0; }
-            .editor-container { flex: 0 0 auto; max-width: 100%; display: none; }
-            .editor-active { display: flex !important; }
-            #rightPanel { flex: 1; }
-        }
         .mode-btn { flex: 1; padding: 0.6rem 0; font-size: 14px; font-weight: 900; font-style: italic; transition: all 0.3s; border-radius: 8px; color: #9ca3af; }
         .mode-btn-active { background: #3b82f6; color: white !important; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
         .msg-wrapper { margin-bottom: 1.8rem; display: flex; flex-direction: column; }
-        .user-msg { background: var(--accent-blue); color: white; padding: 1rem 1.4rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.2); word-wrap: break-word; overflow-wrap: break-word; }
-        .ai-msg { background: var(--card-bg); color: var(--text-primary); padding: 1.4rem 1.8rem; border-radius: 20px 20px 20px 4px; border: 1px solid var(--border-color); align-self: flex-start; max-width: 92%; line-height: 1.8; box-shadow: 0 2px 12px rgba(0,0,0,0.04); word-wrap: break-word; overflow-wrap: break-word; }
-        .msg-body { word-break: break-word; white-space: pre-wrap; }
+        .user-msg { background: var(--accent-blue); color: white; padding: 1rem 1.4rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.2); }
+        .ai-msg { background: var(--card-bg); color: var(--text-primary); padding: 1.4rem 1.8rem; border-radius: 20px 20px 20px 4px; border: 1px solid var(--border-color); align-self: flex-start; max-width: 92%; line-height: 1.8; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
         .msg-body h1,.msg-body h2,.msg-body h3 { font-weight: 800; margin: 0.8em 0 0.4em; }
         .msg-body h1 { font-size: 1.3em; }
         .msg-body h2 { font-size: 1.15em; }
         .msg-body h3 { font-size: 1.05em; }
-        .msg-body p  { margin: 0.5em 0; line-height: 1.8; }
+        .msg-body p  { margin: 0.5em 0; }
         .msg-body ul,.msg-body ol { padding-left: 1.4em; margin: 0.4em 0; }
         .msg-body li { margin: 0.2em 0; }
         .msg-body code { background: rgba(59,130,246,0.1); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.88em; font-family: monospace; }
-        .msg-body pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 10px; overflow-x: auto; margin: 0.6em 0; white-space: pre-wrap; word-wrap: break-word; }
+        .msg-body pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 10px; overflow-x: auto; margin: 0.6em 0; }
         .msg-body pre code { background: none; padding: 0; color: inherit; }
         .msg-body blockquote { border-left: 3px solid #3b82f6; padding-left: 0.8em; color: var(--text-secondary); margin: 0.4em 0; }
         .msg-body strong { font-weight: 700; }
@@ -111,28 +96,6 @@
         .theme-dot.dark    { background: linear-gradient(135deg,#0f172a,#1e293b); }
         .theme-dot.eye     { background: linear-gradient(135deg,#f0f9f0,#d1e7d1); }
         .theme-dot.retro   { background: linear-gradient(135deg,#fff8e6,#ffdead); }
-        
-        /* 折叠面板样式 */
-        .section-header { cursor: pointer; user-select: none; transition: all 0.2s; }
-        .section-header:hover { opacity: 0.8; }
-        .collapse-icon { display: inline-block; transition: transform 0.3s ease; font-size: 10px; margin-right: 4px; }
-        .collapsed .collapse-icon { transform: rotate(-90deg); }
-        .collapsible-content { overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
-        .collapsed + .collapsible-content { max-height: 0 !important; opacity: 0; }
-        
-        /* 诗词书法展示样式 */
-        .poetry-container {
-            border: 1px solid rgba(209, 213, 219, 0.4);
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(249,250,251,0.4));
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-        .poetry-content p:first-child {
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
-            letter-spacing: 0.15em;
-        }
-        
         .editor-container { flex: 0 0 380px; display: none; background: var(--card-bg); border-right: 1px solid var(--border-color); flex-direction: column; }
         .editor-active { display: flex !important; }
         .writing-area { width: 100%; height: 100%; padding: 32px; font-size: 15px; line-height: 2; outline: none; border: none; background: transparent; color: var(--text-primary); resize: none; }
@@ -159,6 +122,8 @@
         .quick-tag { padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
         .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
         #storageBar { height: 3px; border-radius: 9999px; transition: width 0.5s; }
+
+        /* ⚔️ 竞技擂台动画 */
         @keyframes swordFromLeft {
             0%   { left: -120px; opacity: 1; transform: rotate(0deg) scaleX(1); }
             75%  { left: calc(50% - 80px); opacity: 1; transform: rotate(0deg) scaleX(1); }
@@ -199,18 +164,18 @@
         @keyframes slideFromRight { from { transform: translateX(120px);  opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes clashFlash     { 0%{opacity:0;transform:scale(0.5)} 30%{opacity:1;transform:scale(1.4)} 60%{opacity:1;transform:scale(1.1)} 100%{opacity:0;transform:scale(0.8)} }
         @keyframes clashShake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-        @keyframes fade-in        { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .animate-fade-in { animation: fade-in 0.3s ease-out; }
         .pk-col-left  { animation: slideFromLeft  0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
         .pk-col-right { animation: slideFromRight 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
         .pk-clash-shake { animation: clashShake 0.35s ease 0.45s both; }
         #clashEffect  { pointer-events:none; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:48px; z-index:100; animation: clashFlash 0.7s ease 0.4s both; }
+        /* 拖拽分隔线 */
         #resizer { width: 5px; cursor: col-resize; background: var(--border-color); flex-shrink: 0; transition: background 0.2s; }
         #resizer:hover { background: #3b82f6; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
+<!-- 左侧边栏 -->
 <div class="sidebar flex flex-col shadow-2xl">
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
@@ -221,7 +186,7 @@
     </div>
     <div class="flex-1 overflow-y-auto custom-scroll p-5 space-y-6">
         <div class="flex bg-black/20 p-1 rounded-xl border border-white/5 gap-1">
-            <button id="modeChat" class="mode-btn mode-btn-active">✍️ 个人创作</button>
+            <button id="modeChat" class="mode-btn mode-btn-active">✍️ 创作</button>
             <button id="modePK"   class="mode-btn">⚔️ 竞技擂台</button>
         </div>
         <section>
@@ -231,26 +196,11 @@
             </button>
         </section>
         <section>
-            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('bookLibrary')">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>📖 书稿管理</span>
-                <button onclick="event.stopPropagation(); addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
+            <div class="flex justify-between items-center mb-2 px-0.5">
+                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
+                <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
-            <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll collapsible-content"></div>
-        </section>
-        <section class="pb-8">
-            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('sampleLibrary')">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>🧬 例文中心</span>
-                <button onclick="event.stopPropagation(); document.getElementById('fileImport').click()" class="text-blue-400 text-[12px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
-            </div>
-            <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
-            <div id="sampleLibrary" class="space-y-1.5 collapsible-content"></div>
-        </section>
-        <section class="pb-8">
-            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('analysisReports')">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>📊 分析报告</span>
-                <button onclick="event.stopPropagation(); addNewAnalysisReport()" class="text-purple-400 text-[10px] font-bold hover:text-purple-300 px-2 py-1 bg-purple-500/10 rounded-lg hover:bg-purple-500/20 transition">+ 新建</button>
-            </div>
-            <div id="analysisReports" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll collapsible-content"></div>
+            <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
         </section>
     </div>
     <div class="px-4 py-2 border-t border-white/5">
@@ -264,10 +214,10 @@
     </div>
 </div>
 
+<!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200">✅ v2.0已优化</span>
             <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
@@ -302,6 +252,7 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden">
+        <!-- 草稿区 -->
         <div id="mainEditor" class="editor-container">
             <div class="flex items-center justify-between px-4 py-2 border-b" style="border-color:var(--border-color);background:var(--bg-main)">
                 <span class="text-xs font-black" style="color:var(--text-secondary)">✍️ 草稿区</span>
@@ -318,31 +269,20 @@
             <textarea id="workspace" class="writing-area custom-scroll flex-1" placeholder="在此自由创作，左侧AI对话不会覆盖这里..."></textarea>
         </div>
 
+        <!-- 拖拽分隔线 -->
         <div id="resizer"></div>
 
+        <!-- 右侧内容区 -->
         <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
             <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
-                    <div class="text-7xl mb-4 animate-pulse">✨</div>
-                    <h2 class="text-3xl font-black tracking-wider mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">灵犀一点通</h2>
-                    <p class="text-sm opacity-40 mb-8 max-w-md text-center leading-relaxed">智能创作助手 · 激发无限灵感</p>
-                    <div class="poetry-container mt-6 px-8 py-6 max-w-2xl">
-                        <div class="poetry-content text-center space-y-3 opacity-40 hover:opacity-70 transition-opacity duration-500">
-                            <p class="text-lg font-serif tracking-widest leading-loose" style="font-family: 'STKaiti', 'KaiTi', serif; color: #4a5568;">
-                                先天下之忧而忧，后天下之乐而乐。
-                            </p>
-                            <p class="text-sm font-serif tracking-wide" style="font-family: 'STKaiti', 'KaiTi', serif; color: #718096;">
-                                —— 范仲淹《岳阳楼记》
-                            </p>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-200/30">
-                            <p class="text-xs text-center italic opacity-30" style="color: #a0aec0;">
-                                "不以物喜，不以己悲"
-                            </p>
-                        </div>
-                    </div>
-                    <div class="mt-8 text-[11px] opacity-30">
-                        💡 按 <kbd class="px-2 py-1 rounded bg-gray-200 text-gray-700 font-mono">?</kbd> 查看快捷键帮助
+                    <div class="text-6xl mb-6 opacity-20">✨</div>
+                    <h2 class="text-2xl font-black tracking-widest opacity-30 italic mb-4">灵犀一点通</h2>
+                    <div class="flex flex-wrap gap-3 justify-center opacity-25 pointer-events-none">
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🗡️ 选择神兵武库提示词</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚡ 使用快捷指令</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🧬 导入例文提取基因</div>
+                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚔️ 竞技擂台对比模型</div>
                     </div>
                 </div>
             </main>
@@ -357,28 +297,26 @@
                         </div>
                         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
                             <span class="font-black" style="color:var(--text-secondary)">📜 历史:</span>
-                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)" multiple size="1">
+                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)">
                                 <option value="">-- 选择历史 --</option>
                             </select>
-                            <button id="deleteHistoryBtn" title="批量删除选中历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
+                            <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
-                    <div id="quickActionsContainer" class="flex gap-2 mb-2.5 flex-wrap">
-                        <!-- 快捷按钮将通过JavaScript动态渲染 -->
+                    <!-- 快捷指令标签：默认不激活，点击填入 -->
+                    <div class="flex gap-2 mb-2.5 flex-wrap">
+                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。')">⚡ 续写</button>
+                        <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
+                        <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
+                        <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
+                        <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
-                            class="w-full bg-transparent border-none pl-5 pr-16 pt-4 pb-16 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
-                            placeholder="在此输入情节需求..."></textarea>
-                        <!-- 用户输入区复制按钮 -->
-                        <button id="copyInputBtn" title="复制输入内容" 
-                            class="absolute top-3 right-3 text-gray-400 hover:text-blue-500 text-xs opacity-0 hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-blue-50">
-                            📋
-                        </button>
-                        <div class="absolute bottom-12 left-5 text-[11px]" style="color:var(--text-secondary)">💡 Enter 发送 | Shift+Enter 换行 | Ctrl+S 保存草稿</div>
+                            class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
+                            placeholder="在此输入情节需求... (Enter发送，Shift+Enter换行)"></textarea>
                         <div class="absolute bottom-3 right-3 flex items-center gap-2">
-                            <span id="charCount" class="text-[10px] font-bold" style="color:var(--text-secondary)">0字 | <span id="totalWords">总0字</span></span>
-                            <button id="exportWordBtn" title="导出为Word" class="text-blue-500 hover:text-blue-600 font-black text-sm transition">📄</button>
+                            <span id="charCount" class="text-[10px] font-bold" style="color:var(--text-secondary)">0字</span>
                             <button id="sendBtn" class="bg-blue-600 text-white px-5 py-2 rounded-[12px] font-black shadow hover:bg-blue-500 hover:shadow-lg transition-all flex items-center gap-1.5 text-sm active:scale-95">
                                 <span>🚀</span> 执行
                             </button>
@@ -390,68 +328,59 @@
     </div>
 </div>
 
-<div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl flex flex-col" style="max-height: 85vh;">
-        <div class="flex justify-between items-center mb-5 pb-4 border-b" style="border-color:var(--border-color)">
-            <h3 class="text-lg font-black">⚙️ 配置中心</h3>
-            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
+<!-- 书稿弹窗 -->
+<div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black text-blue-500 italic">📖 书稿编辑</h3>
+            <button onclick="closeBookModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
         </div>
-        <div class="flex-1 overflow-y-auto custom-scroll pr-2">
-            <div class="grid grid-cols-2 gap-6 mb-5">
+        <div class="flex flex-col flex-1 overflow-hidden gap-3">
+            <div class="flex gap-3 items-center flex-shrink-0">
+                <input id="bookNameInput" type="text" placeholder="书稿名称" class="modal-input flex-1 text-sm font-bold">
+                <span class="text-xs font-bold text-blue-500 flex-shrink-0">字数：<span id="bookWordCount">0</span></span>
+            </div>
+            <textarea id="bookContent" class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
+            <div class="flex gap-3 flex-shrink-0">
+                <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存书稿</button>
+                <button onclick="appendBookToDraft()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm" style="background:var(--bg-main);color:var(--text-secondary)">追加到草稿</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 配置中心弹窗 -->
+<div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl">
+        <h3 class="text-lg font-black mb-5 text-center pb-4 border-b" style="border-color:var(--border-color)">⚙️ 配置中心</h3>
+        <div class="grid grid-cols-2 gap-6 mb-5">
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                <input id="ds_key"      type="password" placeholder="DeepSeek API Key"         class="modal-input text-sm">
-                <input id="qw_key"      type="password" placeholder="通义千问 Qwen Key"        class="modal-input text-sm">
-                <input id="db_key"      type="password" placeholder="豆包 Doubao Key"          class="modal-input text-sm">
-                <input id="db_model"    type="text"     placeholder="豆包模型ID (ep-xxx)"      class="modal-input text-sm">
-                <input id="claude_key"  type="password" placeholder="Claude API Key (sk-ant-)" class="modal-input text-sm">
-                <input id="gemini_key"  type="password" placeholder="Google Gemini API Key"    class="modal-input text-sm">
+                <input id="ds_key"   type="password" placeholder="DeepSeek API Key"    class="modal-input text-sm">
+                <input id="qw_key"   type="password" placeholder="通义千问 Qwen Key"   class="modal-input text-sm">
+                <input id="db_key"   type="password" placeholder="豆包 Doubao Key"     class="modal-input text-sm">
+                <input id="db_model" type="text"     placeholder="豆包模型ID (ep-xxx)" class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
-                <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">本地 / 中转</h4>
-                <input id="ollama_url" type="text" placeholder="Ollama地址 (http://localhost:11434)" class="modal-input text-sm">
-                <input id="proxy_url"  type="text" placeholder="中转 Base URL" class="modal-input text-sm">
-                <input id="proxy_key"  type="password" placeholder="中转 Key" class="modal-input text-sm">
-                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: llama3,gemma2,qwen2.5" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
+                <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
+                <input id="proxy_url" type="text"     placeholder="Base URL (含/v1)"   class="modal-input text-sm">
+                <input id="proxy_key" type="password" placeholder="中转 Key"           class="modal-input text-sm">
+                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: gpt-4o,claude-sonnet-4-6" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
             </div>
         </div>
-        
-        <!-- 基因提取提示词配置 -->
-        <div class="mb-5 space-y-2.5">
-            <h4 class="text-[11px] font-black text-blue-600 border-l-4 border-blue-500 pl-2 uppercase flex justify-between items-center">
-                <span>🧬 基因提取提示词模板</span>
-                <button onclick="resetGenePrompt()" class="text-[10px] text-gray-500 hover:text-blue-600 underline">恢复默认</button>
-            </h4>
-            <textarea id="gene_prompt_editor" placeholder="自定义基因提取的提示词..." class="modal-input text-xs resize-none custom-scroll w-full" style="height:120px;font-family:monospace;line-height:1.5;"></textarea>
-            <p class="text-[9px] text-gray-500 italic">💡 提示：可使用变量 {text} 代表待分析文本内容</p>
-        </div>
-        
-        <!-- 快捷按钮自定义配置 -->
-        <div class="mb-5 space-y-2.5">
-            <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase flex justify-between items-center">
-                <span>⚡ 快捷按钮自定义</span>
-                <button onclick="resetQuickActions()" class="text-[10px] text-gray-500 hover:text-green-600 underline">恢复默认</button>
-            </h4>
-            <div id="quickActionsEditor" class="space-y-2 max-h-64 overflow-y-auto custom-scroll">
-                <!-- 动态生成编辑表单 -->
-            </div>
-            <button onclick="addNewQuickAction()" class="w-full py-2 text-xs font-bold text-green-600 border-2 border-dashed border-green-300 rounded-lg hover:bg-green-50 transition">+ 添加新按钮</button>
-        </div>
-        
         <div class="flex gap-2.5 mb-5">
             <button onclick="document.getElementById('importSystemInput').click()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-80" style="background:var(--bg-main);color:var(--text-secondary)">📂 导入备份</button>
             <button onclick="exportSystemData()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-80" style="background:var(--bg-main);color:var(--text-secondary)">💾 导出备份</button>
             <input type="file" id="importSystemInput" class="hidden" accept=".json">
         </div>
-    </div>
-    
-    <div class="pt-4 mt-4 border-t flex justify-end gap-3" style="border-color:var(--border-color)">
-        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="px-5 py-2.5 rounded-xl font-bold transition hover:bg-gray-100" style="background:#f3f4f6; color:var(--text-primary)">取消</button>
-        <button onclick="saveConfig()" class="px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95" style="background:linear-gradient(135deg, var(--primary-color), #8b5cf6)">💾 保存配置</button>
-    </div>
+        <div class="flex gap-3">
+            <button id="saveSettings"  class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow transition">保存并激活</button>
+            <button id="closeSettings" class="flex-1 font-bold py-3 rounded-xl transition" style="background:var(--bg-main);color:var(--text-secondary)">关闭</button>
+        </div>
     </div>
 </div>
 
+<!-- 神兵武库弹窗 -->
 <div id="promptModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[24px] p-6 w-full max-w-5xl shadow-2xl flex flex-col" style="height:82vh">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
@@ -486,11 +415,7 @@
 </div>
 
 <script>
-// ✅ 你的 Cloudflare Worker 地址（已固定，无需在配置中心填写）
-const CLAUDE_WORKER_URL = 'https://little-thunder-b8e0.463023386.workers.dev';
-
-// 基因提取提示词（可从localStorage加载，支持自定义）
-const DEFAULT_GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
+const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
 1. 叙事结构与情节逻辑
 2. 人物塑造与对话风格
 3. 情感张力与写作技法
@@ -498,67 +423,19 @@ const DEFAULT_GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生
 5. 语言风格与意象特征
 请用简洁的语言归纳，便于后续仿写参考。`;
 
-let genePrompt = localStorage.getItem('lingxi_gene_prompt') || DEFAULT_GENE_PROMPT;
-
-// 快捷按钮配置（支持自定义）
-const DEFAULT_QUICK_ACTIONS = [
-    { icon: '⚡', label: '续写', prompt: '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。' },
-    { icon: '✨', label: '润色', prompt: '请优化以上文字的语言表达，使其更加流畅优美' },
-    { icon: '📝', label: '扩写', prompt: '请扩写以上内容，增加细节描写和心理活动' },
-    { icon: '💬', label: '加对话', prompt: '请增加一段精彩的对话来推进情节发展' },
-    { icon: '🔍', label: '分析', action: 'showGeneExtractModal()' }
-];
-
-let quickActions = [];
-try {
-    const saved = localStorage.getItem('lingxi_quick_actions');
-    quickActions = saved ? JSON.parse(saved) : [...DEFAULT_QUICK_ACTIONS];
-} catch {
-    quickActions = [...DEFAULT_QUICK_ACTIONS];
-}
-
 const SK = {
-    flow:'lingxi_flow', prompts:'lingxi_prompts', samples:'lingxi_samples',
+    flow:'lingxi_flow', prompts:'lingxi_prompts',
     history:'lingxi_history', workspace:'lingxi_workspace', theme:'lingxi_theme',
     sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
 
-// 导出 Word 功能
-async function exportToWord() {
-    const content = dom.displayArea.innerText;
-    if (!content.trim()) {
-        showToast('⚠️ 内容为空，无法导出');
-        return;
-    }
-    try {
-        const doc = new docx.Document({
-            sections: [{
-                children: content.split('\n').map(line => new docx.Paragraph({
-                    text: line || '',
-                    spacing: { line: 360 },
-                    font: 'PingFang SC'
-                }))
-            }]
-        });
-        const blob = await docx.Packer.toBlob(doc);
-        saveAs(blob, `灵犀-${new Date().toLocaleString()}.docx`);
-        showToast('✅ Word 文档已导出');
-    } catch(e) {
-        showToast('❌ 导出失败：' + e.message);
-    }
-}
-
-let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', claude_key:'', gemini_key:'', ollama_url:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
 let prompts             = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
 let history             = loadJSON(SK.history) || [];
-let sampleLibrary       = loadJSON(SK.samples) || [];
 let bookLibrary         = loadJSON(SK.books)   || [];
-let analysisReports     = loadJSON('lingxi_analysis_reports') || [];  // 分析报告库
 let conversationHistory = [];
 let currentEditingBookId  = null;
 let editingOldPromptName  = null;
-let selectedSampleIndices = [];
-let selectedReportIndices = [];  // 选中的分析报告索引
 let isGenerating    = false;
 let abortController = null;
 let autoBackupTimer = null;
@@ -576,10 +453,7 @@ function init() {
     initConfigInputs();
     loadWorkspace();
     renderBookLibrary();
-    renderSampleLibrary();
-    renderAnalysisReports();  // 初始化分析报告列表
     renderSelect();
-    renderQuickActions();  // 渲染快捷按钮
     updateModelDropdowns();
     renderHistorySelect();
     updateSidebarPromptBadge();
@@ -661,65 +535,45 @@ function renderBookLibrary() {
         left.textContent = `${book.name} (${(book.content||'').length}字)`;
         const btns = document.createElement('div');
         btns.className = 'flex gap-1 flex-shrink-0';
+        btns.appendChild(makeBtn('✏️','text-blue-400 hover:bg-blue-500/20', () => editBook(i)));
         btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-500/20',  () => deleteBook(i)));
         item.append(left, btns);
-        item.onclick = e => { if (!e.target.closest('button')) openBookToViewer(i); };
+        item.onclick = e => { if (!e.target.closest('button')) editBook(i); };
         fragment.appendChild(item);
     });
     container.innerHTML = '';
     container.appendChild(fragment);
 }
-// 在右侧面板显示书稿（统一布局）
-window.openBookToViewer = function(i) {
-    const book = bookLibrary[i];
-    if (!book) return;
-    conversationHistory = [];
-    const displayArea = document.getElementById('displayArea');
-    displayArea.innerHTML = '';
-    const container = document.createElement('div');
-    container.className = 'max-w-4xl mx-auto pb-20';
-    container.innerHTML = `
-        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
-            <div class="flex justify-between items-start mb-3">
-                <h2 class="text-2xl font-black text-blue-600 italic">📖 ${escapeHtml(book.name)}</h2>
-                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
-            </div>
-            <div class="flex gap-4 text-xs text-gray-500">
-                <span>字数：${(book.content || '').length}</span>
-                <span>类型：书稿</span>
-            </div>
-        </div>
-        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
-            <pre class="whitespace-pre-wrap leading-relaxed text-sm" style="font-family: inherit;">${escapeHtml(book.content || '')}</pre>
-        </div>
-        <div class="mt-6 flex gap-3">
-            <button onclick="copyBookText(${i})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">📋 复制全文</button>
-            <button onclick="appendBookToDraftFromViewer(${i})" class="px-4 py-2 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600 transition text-sm">📝 追加到草稿</button>
-            <button onclick="deleteBook(${i})" class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition text-sm">🗑️ 删除</button>
-        </div>
-    `;
-    displayArea.appendChild(container);
-};
-window.copyBookText = function(i) {
-    navigator.clipboard.writeText(bookLibrary[i].content || '').then(() => showToast('✅ 已复制'));
-};
-window.appendBookToDraftFromViewer = function(i) {
-    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + (bookLibrary[i].content || '');
-    debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
-};
 window.addNewBook = function() {
-    bookLibrary.push({name:`新书稿_${bookLibrary.length+1}`, content:''});
-    saveJSON(SK.books, bookLibrary); renderBookLibrary();
-    openBookToViewer(bookLibrary.length - 1);
+    currentEditingBookId = null;
+    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length+1}`;
+    document.getElementById('bookContent').value = '';
+    document.getElementById('bookWordCount').textContent = '0';
+    document.getElementById('bookModal').classList.remove('hidden');
 };
 window.editBook = function(i) {
-    openBookToViewer(i);
+    currentEditingBookId = i;
+    document.getElementById('bookNameInput').value = bookLibrary[i].name;
+    document.getElementById('bookContent').value   = bookLibrary[i].content || '';
+    document.getElementById('bookWordCount').textContent = (bookLibrary[i].content||'').length;
+    document.getElementById('bookModal').classList.remove('hidden');
 };
 window.deleteBook = function(i) {
     if (!confirm(`确认删除【${bookLibrary[i].name}】？`)) return;
-    bookLibrary.splice(i,1);
-    saveJSON(SK.books, bookLibrary); renderBookLibrary();
-    closeContentViewer();
+    bookLibrary.splice(i,1); saveJSON(SK.books, bookLibrary); renderBookLibrary();
+};
+window.saveCurrentBook = function() {
+    const name    = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
+    const content = document.getElementById('bookContent').value;
+    if (currentEditingBookId !== null) bookLibrary[currentEditingBookId] = {name,content};
+    else bookLibrary.push({name,content});
+    saveJSON(SK.books, bookLibrary); renderBookLibrary(); closeBookModal();
+    showToast(`✅ 书稿【${name}】已保存`);
+};
+window.closeBookModal   = function() { document.getElementById('bookModal').classList.add('hidden'); };
+window.appendBookToDraft = function() {
+    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + document.getElementById('bookContent').value;
+    debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
 };
 window.saveDraftToBook = function() {
     const draft = dom.workspace.value.trim();
@@ -731,31 +585,14 @@ window.saveDraftToBook = function() {
 function typesetContent() {
     let text = dom.workspace.value.trim();
     if (!text) { showToast('⚠️ 草稿区为空'); return; }
-    
-    // 统一换行符
     text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-    
-    // 去除所有空行和多余空格
-    text = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .join('\n');
-    
-    // 标点符号后强制换行（句号、问号、叹号、省略号）
-    text = text.replace(/([。！？…]+)/g, '$1\n');
-    
-    // 引号后的标点也要换行
-    text = text.replace(/([」』"'])\s*([。！？…])/g, '$1$2\n');
-    
-    // 确保每句一行，符合手机阅读习惯
-    text = text.replace(/([^\n])([。！？…])/g, '$1$2\n');
-    
-    // 再次清理多余空行
-    text = text.replace(/\n{2,}/g, '\n');
-    
+    text = text.replace(/([。！？…]+[」"']?)\s*/g,'$1\n');
+    text = text.replace(/\n{3,}/g,'\n\n');
+    text = text.replace(/[ \t]+/g,' ');
+    text = text.split('\n').map(l=>l.trimStart()).join('\n').trim();
     dom.workspace.value = text;
     debouncedSaveWorkspace(text);
-    showToast('📝 智能排版完成（左对齐·无空行·一句一行）');
+    showToast('📝 智能排版完成');
 }
 
 function fillInput(text) {
@@ -839,349 +676,38 @@ function renderSelect() {
     if (cur && prompts[cur]) s.value = cur;
 }
 
-// 渲染快捷按钮
-function renderQuickActions() {
-    const container = document.getElementById('quickActionsContainer');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    quickActions.forEach((action, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'quick-tag';
-        
-        if (action.action) {
-            // 如果是执行函数（如分析）
-            btn.onclick = () => {
-                try {
-                    eval(action.action);
-                } catch(err) {
-                    showToast(`⚠️ 执行失败: ${err.message}`);
-                }
-            };
-        } else if (action.prompt) {
-            // 如果有提示词，直接发送到AI
-            btn.onclick = () => {
-                const userInput = document.getElementById('userInput');
-                const currentText = userInput.value.trim();
-                
-                if (!currentText) {
-                    showToast('⚠️ 请先在输入框中输入内容');
-                    return;
-                }
-                
-                // 直接使用提示词作为系统指令发送
-                sendMessageWithPrompt(action.prompt);
-            };
-        }
-        
-        btn.textContent = `${action.icon} ${action.label}`;
-        container.appendChild(btn);
-    });
-}
-
 function initConfigInputs() {
-    ['ds_key','qw_key','db_key','db_model','claude_key','gemini_key','ollama_url','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
-    // 加载基因提取提示词
-    const genePromptEditor = document.getElementById('gene_prompt_editor');
-    if (genePromptEditor) {
-        genePromptEditor.value = genePrompt;
-    }
-    // 加载快捷按钮编辑器
-    renderQuickActionsEditor();
 }
-
 function saveConfig() {
     flowConfig = {};
-    ['ds_key','qw_key','db_key','db_model','claude_key','gemini_key','ollama_url','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
         flowConfig[id] = document.getElementById(id).value.trim();
     });
-    
-    // 保存基因提取提示词
-    const genePromptEditor = document.getElementById('gene_prompt_editor');
-    if (genePromptEditor && genePromptEditor.value.trim()) {
-        genePrompt = genePromptEditor.value.trim();
-        localStorage.setItem('lingxi_gene_prompt', genePrompt);
-    }
-    
     saveJSON(SK.flow, flowConfig);
     updateModelDropdowns();
     showToast('✅ 配置已保存并激活');
     document.getElementById('settingsModal').classList.add('hidden');
 }
-
-// 重置基因提取提示词为默认值
-window.resetGenePrompt = function() {
-    if (confirm('确定要恢复默认的基因提取提示词吗？')) {
-        genePrompt = DEFAULT_GENE_PROMPT;
-        localStorage.removeItem('lingxi_gene_prompt');
-        const genePromptEditor = document.getElementById('gene_prompt_editor');
-        if (genePromptEditor) {
-            genePromptEditor.value = DEFAULT_GENE_PROMPT;
-        }
-        showToast('✅ 已恢复默认基因提取提示词');
-    }
-};
-
-// 渲染快捷按钮编辑器
-function renderQuickActionsEditor() {
-    const container = document.getElementById('quickActionsEditor');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    quickActions.forEach((action, idx) => {
-        const div = document.createElement('div');
-        div.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
-        div.innerHTML = `
-            <div class="flex gap-2 items-center">
-                <input type="text" value="${action.icon}" placeholder="图标" class="w-12 px-2 py-1 text-xs border rounded" onchange="updateQuickAction(${idx}, 'icon', this.value)">
-                <input type="text" value="${action.label}" placeholder="按钮名称" class="flex-1 px-2 py-1 text-xs border rounded font-bold" onchange="updateQuickAction(${idx}, 'label', this.value)">
-                <button onclick="removeQuickAction(${idx})" class="text-red-500 hover:text-red-700 text-sm font-bold">×</button>
-            </div>
-            ${action.action ? 
-                `<input type="text" value="${action.action}" placeholder="执行函数（如：showGeneExtractModal()）" class="w-full px-2 py-1 text-xs border rounded font-mono" onchange="updateQuickAction(${idx}, 'action', this.value)">` :
-                `<textarea placeholder="提示词内容..." class="w-full px-2 py-1 text-xs border rounded resize-none" rows="2" onchange="updateQuickAction(${idx}, 'prompt', this.value)">${action.prompt || ''}</textarea>`
-            }
-            <div class="flex gap-2">
-                <button onclick="convertToFunction(${idx})" class="text-[9px] text-blue-600 hover:underline">${action.action ? '改为提示词' : '改为执行函数'}</button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
-}
-
-// 更新快捷按钮配置
-window.updateQuickAction = function(idx, field, value) {
-    quickActions[idx][field] = value;
-    saveQuickActions();
-    renderQuickActions();
-};
-
-// 删除快捷按钮
-window.removeQuickAction = function(idx) {
-    if (quickActions.length <= 1) {
-        showToast('⚠️ 至少保留一个快捷按钮');
-        return;
-    }
-    quickActions.splice(idx, 1);
-    saveQuickActions();
-    renderQuickActionsEditor();
-    renderQuickActions();
-};
-
-// 添加新快捷按钮
-window.addNewQuickAction = function() {
-    quickActions.push({
-        icon: '🆕',
-        label: '新按钮',
-        prompt: '请输入提示词...'
-    });
-    saveQuickActions();
-    renderQuickActionsEditor();
-    renderQuickActions();
-    showToast('✅ 已添加新按钮，请编辑配置');
-};
-
-// 转换按钮类型（提示词 <-> 执行函数）
-window.convertToFunction = function(idx) {
-    const action = quickActions[idx];
-    if (action.action) {
-        // 从函数转为提示词
-        delete action.action;
-        action.prompt = '请输入提示词...';
-    } else {
-        // 从提示词转为函数
-        delete action.prompt;
-        action.action = 'fillInput(\'请输入提示词\')';
-    }
-    saveQuickActions();
-    renderQuickActionsEditor();
-    renderQuickActions();
-};
-
-// 保存快捷按钮配置
-function saveQuickActions() {
-    localStorage.setItem('lingxi_quick_actions', JSON.stringify(quickActions));
-}
-
-// 重置快捷按钮为默认值
-window.resetQuickActions = function() {
-    if (confirm('确定要恢复默认的快捷按钮配置吗？')) {
-        quickActions = [...DEFAULT_QUICK_ACTIONS];
-        saveQuickActions();
-        renderQuickActionsEditor();
-        renderQuickActions();
-        showToast('✅ 已恢复默认快捷按钮');
-    }
-};
-
 function updateModelDropdowns() {
     const official = [];
-    
-    // DeepSeek
-    if (flowConfig.ds_key) {
-        official.push({value:'deepseek-chat',label:'🔥 DeepSeek Chat'});
-        official.push({value:'deepseek-reasoner',label:'🧠 DeepSeek R1'});
-    }
-    
-    // Qwen
-    if (flowConfig.qw_key) {
-        official.push({value:'qwen3.5-max-preview',label:'⭐ Qwen3.5 Max'});
-        official.push({value:'qwen3.5-plus',label:'✨ Qwen3.5 Plus'});
-    }
-    
-    // Doubao
-    if (flowConfig.db_key && flowConfig.db_model) {
-        official.push({value:flowConfig.db_model, label:`🎯 豆包(${flowConfig.db_model.slice(0,10)}...)`});
-    }
-    
-    // Claude
-    if (flowConfig.claude_key) {
-        official.push({value:'claude-3-5-sonnet-20241022',label:'👑 Claude 3.5 Sonnet'});
-        official.push({value:'claude-3-5-haiku-20241022',label:'⚡ Claude 3.5 Haiku'});
-        official.push({value:'claude-3-opus-20240229',label:'💎 Claude 3 Opus'});
-    }
-    
-    // Gemini
-    if (flowConfig.gemini_key) {
-        official.push({value:'gemini-2.0-flash-exp',label:'🚀 Gemini 2.0 Flash'});
-        official.push({value:'gemini-1.5-pro',label:'🌟 Gemini 1.5 Pro'});
-    }
-    
-    // Ollama本地模型
-    if (flowConfig.ollama_url) {
-        official.push({value:'ollama-llama3',label:'🏠 Ollama Llama3'});
-        official.push({value:'ollama-gemma2',label:'🏠 Ollama Gemma2'});
-        official.push({value:'ollama-qwen2.5',label:'🏠 Ollama Qwen2.5'});
-    }
-    
-    // 中转/自定义模型 - 支持多种分隔符（逗号、中文逗号、空格、换行）
-    const proxy = flowConfig.proxy_models
-        ? flowConfig.proxy_models
-            .split(/[,，\s\n]+/)  // 支持英文逗号、中文逗号、空格、换行
-            .map(s => s.trim())
-            .filter(Boolean)
-            .map(m => ({value: m, label: `🔧 ${m}`}))
-        : [];
-    
+    if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek Chat'}); official.push({value:'deepseek-reasoner',label:'DeepSeek R1'}); }
+    if (flowConfig.qw_key) { official.push({value:'qwen3.5-plus',label:'Qwen3.5 最新'}); official.push({value:'qwen3.5-flash',label:'Qwen3.5 Flash 极速'}); official.push({value:'qwen3-max-preview',label:'Qwen3-Max 旗舰推理'}); }
+    if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
+    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:m})) : [];
     const all = [...official, ...proxy];
     if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
-
     ['singleModel','modelA','modelB'].forEach(id => {
         const el = document.getElementById(id), cur = el.value;
         el.innerHTML = '';
-        all.forEach(({value,label}) => {
-            const o=document.createElement('option');
-            o.value=value;
-            o.textContent=label;
-            el.appendChild(o);
-        });
+        all.forEach(({value,label}) => { const o=document.createElement('option'); o.value=value; o.textContent=label; el.appendChild(o); });
         if (cur && all.find(m=>m.value===cur)) el.value = cur;
     });
 }
 
-function isClaudeModel(model) {
-    return String(model || '').toLowerCase().includes('claude');
-}
-
-function normalizeClaudeMessages(messages) {
-    const arr = Array.isArray(messages) ? messages : [{ role:'user', content: messages }];
-    return arr
-        .filter(m => m.role !== 'system')
-        .map(m => ({
-            role: m.role === 'assistant' ? 'assistant' : 'user',
-            content: typeof m.content === 'string' ? m.content : String(m.content || '')
-        }));
-}
-
-async function streamCallClaude(model, sysPrompt, messages, targetEl, temp) {
-    const key = flowConfig.proxy_key;
-    if (!key || !key.trim()) {
-        targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 未配置 API Key，请前往 ⚙️ 配置中心 → 中转Key 填写</span>`;
-        return;
-    }
-
-    // ✅ 优先使用用户配置的代理地址，否则使用默认 Worker
-    let baseUrl = flowConfig.proxy_url || CLAUDE_WORKER_URL;
-    baseUrl = baseUrl.replace(/\/+$/,''); // 移除末尾斜杠
-    // 处理 URL 路径：如果已经以 /v1 结尾，直接加 /messages；否则加 /v1/messages
-    const url = baseUrl.endsWith('/v1') ? baseUrl + '/messages' : baseUrl + '/v1/messages';
-
-    const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1);
-    const claudeMessages = normalizeClaudeMessages(messages);
-
-    try {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': key.trim(),
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model,
-                system: sysPrompt || '',
-                messages: claudeMessages,
-                max_tokens: 2048,
-                temperature: safeTemp,
-                stream: true
-            }),
-            signal: abortController ? abortController.signal : undefined
-        });
-
-        if (!res.ok) {
-            const err = await res.text();
-            targetEl.innerHTML = `<div style="color:#ef4444"><span>❌ Claude请求失败 (${res.status})：${err.slice(0,200)}</span><br><button onclick="location.reload()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-sm font-black hover:bg-red-600">🔄 重试</button></div>`;
-            return;
-        }
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let rawText = '';
-        let buffer = '';
-
-        targetEl.textContent = '';
-        targetEl.classList.add('streaming-cursor');
-
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, {stream:true});
-            const chunks = buffer.split('\n');
-            buffer = chunks.pop() || '';
-
-            for (const line of chunks) {
-                const l = line.trim();
-                if (!l.startsWith('data:')) continue;
-                const s = l.slice(5).trim();
-                if (!s || s === '[DONE]') continue;
-                try {
-                    const data = JSON.parse(s);
-                    if (data.type === 'content_block_delta' && data.delta?.text) {
-                        rawText += data.delta.text;
-                        targetEl.textContent = rawText;
-                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-                    }
-                } catch {}
-            }
-        }
-
-        targetEl.classList.remove('streaming-cursor');
-        targetEl.innerHTML = marked.parse(rawText || '');
-        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-    } catch(e) {
-        targetEl.classList.remove('streaming-cursor');
-        if (e.name === 'AbortError') {
-            targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
-        } else {
-            targetEl.innerHTML = `<span style="color:#ef4444">❌ Claude网络错误：${e.message}</span>`;
-        }
-    }
-}
-
-async function streamCallOpenAICompatible(model, sysPrompt, messages, targetEl, temp) {
+async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
     if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
         url = 'https://api.deepseek.com/chat/completions';
@@ -1200,22 +726,16 @@ async function streamCallOpenAICompatible(model, sysPrompt, messages, targetEl, 
         url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
         key = flowConfig.proxy_key;
     }
-
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
         return;
     }
-
     const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1.5);
     const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
-
     try {
         const res = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type':'application/json',
-                'Authorization':`Bearer ${key.trim()}`
-            },
+            headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${key.trim()}` },
             body: JSON.stringify({
                 model,
                 messages: [{ role:'system', content:sysPrompt }, ...msgArray],
@@ -1224,161 +744,61 @@ async function streamCallOpenAICompatible(model, sysPrompt, messages, targetEl, 
             }),
             signal: abortController ? abortController.signal : undefined
         });
-
         if (!res.ok) {
             const err = await res.text();
             targetEl.innerHTML = `<span style="color:#ef4444">❌ 请求失败 (${res.status})：${err.slice(0,200)}</span>`;
             return;
         }
-
         const reader  = res.body.getReader();
         const decoder = new TextDecoder();
         let rawText = '';
-        let buffer = '';
-
         targetEl.textContent = '';
         targetEl.classList.add('streaming-cursor');
-
         while (true) {
             const {done,value} = await reader.read();
             if (done) break;
-
-            buffer += decoder.decode(value,{stream:true});
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
+            const lines = decoder.decode(value,{stream:true}).split('\n');
             for (const line of lines) {
                 const l = line.trim();
                 if (!l.startsWith('data: ')) continue;
                 const s = l.slice(6);
-                if (s === '[DONE]') continue;
+                if (s === '[DONE]') break;
                 try {
                     const c = JSON.parse(s)?.choices?.[0]?.delta?.content;
-                    if (c) {
-                        rawText += c;
-                        targetEl.textContent = rawText;
-                        dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
-                    }
+                    if (c) { rawText += c; targetEl.textContent = rawText; dom.displayArea.scrollTop = dom.displayArea.scrollHeight; }
                 } catch {}
             }
         }
-
         targetEl.classList.remove('streaming-cursor');
         targetEl.innerHTML = marked.parse(rawText);
         dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
     } catch(e) {
         targetEl.classList.remove('streaming-cursor');
-        if (e.name === 'AbortError') {
-            targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
-        } else {
-            targetEl.innerHTML = `<span style="color:#ef4444">❌ 网络错误：${e.message}</span>`;
-        }
+        if (e.name === 'AbortError') targetEl.innerHTML += '<br><span style="color:#94a3b8;font-size:12px">⏹️ 已停止生成</span>';
+        else targetEl.innerHTML = `<span style="color:#ef4444">❌ 网络错误：${e.message}</span>`;
     }
-}
-
-async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
-    if (isClaudeModel(model)) {
-        return await streamCallClaude(model, sysPrompt, messages, targetEl, temp);
-    }
-    return await streamCallOpenAICompatible(model, sysPrompt, messages, targetEl, temp);
 }
 
 async function handleSend() {
     if (isGenerating) { if (abortController) abortController.abort(); return; }
     const text = dom.userInput.value.trim();
     if (!text) { showToast('⚠️ 请先输入内容'); return; }
-
-    // 立即清空输入区
-    dom.userInput.value = '';
-    dom.charCount.textContent = '0字';
-
     let ref = '';
-    
-    // 添加选中的例文作为参考
     selectedSampleIndices.forEach(idx => {
         const s = sampleLibrary[idx];
         if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
     });
-    
-    // 添加选中的分析报告作为参考
-    selectedReportIndices.forEach(idx => {
-        const r = analysisReports[idx];
-        if (r && r.content) ref += `\n【参考分析报告：${r.name}】\n${r.content}\n`;
-    });
-
     const sys        = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
     const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
     const isPK       = !document.getElementById('pkSelectBox').classList.contains('hidden');
-
-    isGenerating = true;
-    abortController = new AbortController();
-    setSendButtonStop();
-
+    isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
         if (isPK) await handlePKMode(sys, fullPrompt);
         else      await handleSingleMode(text, sys, fullPrompt);
     } finally {
-        isGenerating = false;
-        abortController = null;
-        resetSendButton();
-        dom.charCount.textContent = '0字';
-        saveHistory();
-        renderHistorySelect();
-        updateStorageBar();
-    }
-}
-
-// 使用指定提示词直接发送（快捷按钮专用）
-async function sendMessageWithPrompt(customPrompt) {
-    if (isGenerating) { 
-        showToast('⚠️ 请等待当前生成完成'); 
-        return; 
-    }
-    
-    const text = dom.userInput.value.trim();
-    if (!text) { 
-        showToast('⚠️ 请先在输入框中输入内容'); 
-        return; 
-    }
-
-    // 立即清空输入区
-    dom.userInput.value = '';
-    dom.charCount.textContent = '0字';
-
-    let ref = '';
-    
-    // 添加选中的例文作为参考
-    selectedSampleIndices.forEach(idx => {
-        const s = sampleLibrary[idx];
-        if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
-    });
-    
-    // 添加选中的分析报告作为参考
-    selectedReportIndices.forEach(idx => {
-        const r = analysisReports[idx];
-        if (r && r.content) ref += `\n【参考分析报告：${r.name}】\n${r.content}\n`;
-    });
-
-    // 使用自定义提示词作为系统指令
-    const sys = customPrompt;
-    const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
-    const isPK = !document.getElementById('pkSelectBox').classList.contains('hidden');
-
-    isGenerating = true;
-    abortController = new AbortController();
-    setSendButtonStop();
-
-    try {
-        if (isPK) await handlePKMode(sys, fullPrompt);
-        else      await handleSingleMode(text, sys, fullPrompt);
-    } finally {
-        isGenerating = false;
-        abortController = null;
-        resetSendButton();
-        dom.charCount.textContent = '0字';
-        saveHistory();
-        renderHistorySelect();
-        updateStorageBar();
+        isGenerating = false; abortController = null; resetSendButton();
+        dom.userInput.value = ''; dom.charCount.textContent = '0字';
+        saveHistory(); renderHistorySelect(); updateStorageBar();
     }
 }
 
@@ -1415,7 +835,6 @@ async function handlePKMode(sys, prompt) {
         streamCallAI(mA, sys, prompt, colA.querySelector('.pk-body'), temp),
         streamCallAI(mB, sys, prompt, colB.querySelector('.pk-body'), temp)
     ]);
-
     addMsgActions(colA, colA.querySelector('.pk-body').innerText);
     addMsgActions(colB, colB.querySelector('.pk-body').innerText);
 }
@@ -1436,7 +855,7 @@ function playSwordClash() {
         swordR.textContent = '🗡️';
         document.body.appendChild(swordR);
 
-        const centerX = window.innerWidth / 2;
+        const centerX = window.innerWidth  / 2;
         const duration = 800;
         let start = null;
 
@@ -1448,23 +867,31 @@ function playSwordClash() {
             const targetR = window.innerWidth - centerX - 80;
             swordL.style.left  = (-120 + e * (targetL + 120)) + 'px';
             swordR.style.right = (-120 + e * (targetR + 120)) + 'px';
-            if (p < 1) { requestAnimationFrame(flyIn); } else { triggerClash(); }
+            if (p < 1) {
+                requestAnimationFrame(flyIn);
+            } else {
+                triggerClash();
+            }
         }
         requestAnimationFrame(flyIn);
 
         function triggerClash() {
+            // 屏幕震动
             document.body.style.animation = 'screenShake 0.4s ease';
             setTimeout(() => { document.body.style.animation = ''; }, 400);
 
+            // 闪光圈
             const ring = document.createElement('div');
             ring.style.cssText = 'position:fixed;left:50%;top:50%;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,rgba(255,200,50,0.6) 50%,transparent 70%);z-index:10001;pointer-events:none;animation:flashRing 0.6s ease forwards;';
             document.body.appendChild(ring);
 
+            // 碰撞符号
             const boom = document.createElement('div');
             boom.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;z-index:10002;pointer-events:none;animation:flashRing 0.8s ease forwards;';
             boom.textContent = '💥';
             document.body.appendChild(boom);
 
+            // 火花粒子
             const colors = ['#FFD700','#FF6B00','#FF3300','#FFF700','#FFFFFF','#FF9500'];
             for (let i = 0; i < 28; i++) {
                 const spark = document.createElement('div');
@@ -1481,6 +908,7 @@ function playSwordClash() {
                 setTimeout(() => spark.remove(), (dur + delay) * 1000 + 100);
             }
 
+            // 音效
             try {
                 const ctx  = new (window.AudioContext || window.webkitAudioContext)();
                 const osc  = ctx.createOscillator();
@@ -1495,6 +923,7 @@ function playSwordClash() {
                 osc.stop(ctx.currentTime + 0.5);
             } catch {}
 
+            // 剑弹开淡出
             setTimeout(() => {
                 swordL.style.transition = 'all 0.4s ease';
                 swordR.style.transition = 'all 0.4s ease';
@@ -1504,507 +933,31 @@ function playSwordClash() {
                 swordR.style.opacity = '0';
             }, 200);
 
+            // 3秒后清理所有元素，开始生成
             setTimeout(() => {
-                [swordL, swordR, ring, boom, overlay].forEach(el => { if (el && el.parentNode) el.remove(); });
+                [swordL, swordR, ring, boom, overlay].forEach(el => {
+                    if (el && el.parentNode) el.remove();
+                });
                 resolve();
             }, 3000);
         }
     });
 }
 
-function renderSampleLibrary() {
-    const container = document.getElementById('sampleLibrary');
-    const frag = document.createDocumentFragment();
-    sampleLibrary.forEach((s,i) => {
-        const isSelected = selectedSampleIndices.includes(i);
-        const div = document.createElement('div');
-        div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-        div.dataset.index = i; // 存储索引用于事件委托
-        div.innerHTML = `
-            <div class="flex items-center justify-between pointer-events-none">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0 pointer-events-auto" onclick="event.stopPropagation()">
-                    <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleSample(${i})">
-                    <span class="truncate font-bold">${s.name}</span>
-                </label>
-                <div class="flex gap-1.5 ml-2 flex-shrink-0 pointer-events-auto">
-                    <button onclick="event.stopPropagation(); deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
-                </div>
-            </div>`;
-        frag.appendChild(div);
-    });
-    container.innerHTML = '';
-    container.appendChild(frag);
-    
-    // 使用事件委托处理点击打开
-    container.onclick = (e) => {
-        const card = e.target.closest('[data-index]');
-        if (!card || e.target.closest('input') || e.target.closest('button')) return;
-        openSampleToEditor(parseInt(card.dataset.index));
-    };
-}
-
-// 折叠/展开功能
-window.toggleSection = function(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (!section) return;
-    
-    // 查找对应的header（通过遍历section的父元素的子元素）
-    const parentSection = section.parentElement;
-    const header = parentSection.querySelector('.section-header');
-    if (!header) return;
-    
-    // 切换collapsed类
-    header.classList.toggle('collapsed');
-    
-    // 设置max-height实现动画
-    if (header.classList.contains('collapsed')) {
-        section.style.maxHeight = '0';
-        section.style.opacity = '0';
-    } else {
-        // 恢复原来的高度限制
-        if (sectionId === 'bookLibrary' || sectionId === 'analysisReports') {
-            section.style.maxHeight = '176px'; // max-h-44 = 11rem = 176px
-        } else {
-            section.style.maxHeight = 'none';
-        }
-        section.style.opacity = '1';
-    }
-};
-
-window.toggleSample = function(idx) {
-    selectedSampleIndices = selectedSampleIndices.includes(idx)
-        ? selectedSampleIndices.filter(i=>i!==idx)
-        : [...selectedSampleIndices, idx];
-    renderSampleLibrary();
-};
-window.extractGene = async function(idx) {
-    if (isGenerating) { showToast('⚠️ 请等待当前生成完成'); return; }
-    const sample = sampleLibrary[idx];
-    appendMsg('user', `🧬 正在分析《${sample.name}》的风格基因...`);
-    const wrapper  = appendMsg('ai','');
-    const targetEl = wrapper.querySelector('.msg-body');
-    isGenerating = true;
-    abortController = new AbortController();
-    setSendButtonStop();
-    try {
-        await streamCallAI(document.getElementById('singleModel').value, '你是专业的文学分析专家。',
-            `${genePrompt}\n\n待分析文本：\n${sample.text.slice(0,6000)}`, targetEl, 0.3);
-        
-        // 将分析结果保存到分析报告库
-        const reportName = `《${sample.name}》风格基因分析`;
-        analysisReports.push({
-            name: reportName,
-            content: targetEl.innerText,
-            sourceSample: sample.name,
-            createTime: new Date().toLocaleString()
-        });
-        saveJSON('lingxi_analysis_reports', analysisReports);
-        renderAnalysisReports();
-        
-        showToast(`✅ 《${sample.name}》基因提取完成，已保存至分析报告`);
-    } finally { isGenerating=false; abortController=null; resetSendButton(); }
-};
-window.deleteSample = function(idx) {
-    sampleLibrary.splice(idx,1);
-    selectedSampleIndices = selectedSampleIndices.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
-    saveJSON(SK.samples, sampleLibrary);
-    renderSampleLibrary();
-};
-
-// 分析报告管理函数
-function renderAnalysisReports() {
-    const container = document.getElementById('analysisReports');
-    if (!container) return;
-    
-    const frag = document.createDocumentFragment();
-    analysisReports.forEach((r,i) => {
-        const isSelected = selectedReportIndices.includes(i);
-        const div = document.createElement('div');
-        div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-purple-500/10 border-purple-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
-        div.dataset.index = i; // 存储索引用于事件委托
-        div.innerHTML = `
-            <div class="flex items-center justify-between pointer-events-none">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0 pointer-events-auto" onclick="event.stopPropagation()">
-                    <input type="checkbox" class="accent-purple-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleReport(${i})">
-                    <span class="truncate font-bold">${r.name}</span>
-                </label>
-                <div class="flex gap-1.5 ml-2 flex-shrink-0 pointer-events-auto">
-                    <button onclick="event.stopPropagation(); deleteReport(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
-                </div>
-            </div>
-            <div class="mt-1 text-[9px] text-gray-400 truncate">来源: ${r.sourceSample || '手动创建'} · ${r.createTime}</div>`;
-        frag.appendChild(div);
-    });
-    container.innerHTML = '';
-    container.appendChild(frag);
-    
-    // 使用事件委托处理点击打开
-    container.onclick = (e) => {
-        const card = e.target.closest('[data-index]');
-        if (!card || e.target.closest('input') || e.target.closest('button')) return;
-        openReportToEditor(parseInt(card.dataset.index));
-    };
-}
-
-window.toggleReport = function(idx) {
-    selectedReportIndices = selectedReportIndices.includes(idx)
-        ? selectedReportIndices.filter(i=>i!==idx)
-        : [...selectedReportIndices, idx];
-    renderAnalysisReports();
-};
-
-window.viewReport = function(idx) {
-    const report = analysisReports[idx];
-    appendMsg('user', `📊 查看分析报告：${report.name}`);
-    const wrapper = appendMsg('ai', '');
-    const targetEl = wrapper.querySelector('.msg-body');
-    targetEl.innerHTML = `<strong>${report.name}</strong><br/><br/>${marked.parse(report.content)}`;
-};
-
-// 打开例文到右侧主编辑区（类似书稿管理）
-window.openSampleToEditor = function(idx) {
-    const sample = sampleLibrary[idx];
-    if (!sample) return;
-    
-    // 清空当前对话历史
-    conversationHistory = [];
-    document.getElementById('displayArea').innerHTML = '';
-    
-    // 创建例文查看界面
-    const container = document.createElement('div');
-    container.className = 'max-w-4xl mx-auto pb-20';
-    container.innerHTML = `
-        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
-            <div class="flex justify-between items-start mb-3">
-                <h2 class="text-2xl font-black text-blue-600 italic">🧬 ${sample.name}</h2>
-                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
-            </div>
-            <div class="flex gap-4 text-xs text-gray-500">
-                <span>字数：${(sample.text || '').length}</span>
-                <span>类型：例文素材</span>
-            </div>
-        </div>
-        
-        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
-            <pre class="whitespace-pre-wrap leading-relaxed text-sm" style="font-family: inherit;">${escapeHtml(sample.text || '')}</pre>
-        </div>
-        
-        <div class="mt-6 flex gap-3">
-            <button onclick="copySampleText(${idx})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">📋 复制全文</button>
-            <button onclick="sendSampleToAI(${idx})" class="px-4 py-2 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600 transition text-sm">💬 发送给AI分析</button>
-        </div>
-    `;
-    
-    document.getElementById('displayArea').appendChild(container);
-    showToast(`✅ 已打开例文：${sample.name}`);
-};
-
-// 打开分析报告到右侧主编辑区
-window.openReportToEditor = function(idx) {
-    const report = analysisReports[idx];
-    if (!report) return;
-    
-    // 清空当前对话历史
-    conversationHistory = [];
-    document.getElementById('displayArea').innerHTML = '';
-    
-    // 创建报告查看界面（先显示加载中）
-    const container = document.createElement('div');
-    container.className = 'max-w-4xl mx-auto pb-20';
-    container.innerHTML = `
-        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
-            <div class="flex justify-between items-start mb-3">
-                <h2 class="text-2xl font-black text-purple-600 italic">📊 ${report.name}</h2>
-                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
-            </div>
-            <div class="flex gap-4 text-xs text-gray-500">
-                <span>字数：${(report.content || '').length}</span>
-                <span>来源：${report.sourceSample || '手动创建'}</span>
-                <span>时间：${report.createTime}</span>
-            </div>
-        </div>
-        
-        <div id="reportContentArea" class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
-            <div class="flex items-center justify-center py-12">
-                <div class="text-center">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-3"></div>
-                    <p class="text-sm text-gray-500">正在渲染内容...</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-6 flex gap-3">
-            <button onclick="copyReportContent(${idx})" class="px-4 py-2 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600 transition text-sm">📋 复制全文</button>
-            <button onclick="editReportInline(${idx})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">✏️ 编辑报告</button>
-        </div>
-    `;
-    
-    document.getElementById('displayArea').appendChild(container);
-    showToast(`✅ 已打开报告：${report.name}`);
-    
-    // 延迟渲染Markdown内容，避免阻塞UI
-    setTimeout(() => {
-        const contentArea = document.getElementById('reportContentArea');
-        if (contentArea) {
-            const content = report.content || '暂无内容';
-            try {
-                contentArea.innerHTML = `<div class="prose max-w-none">${marked.parse(content)}</div>`;
-            } catch (err) {
-                console.error('[报告渲染] Markdown解析失败:', err);
-                contentArea.innerHTML = `<pre class="whitespace-pre-wrap text-sm">${escapeHtml(content)}</pre>`;
-            }
-        }
-    }, 50);
-};
-
-// 关闭内容查看器，恢复空状态
-window.closeContentViewer = function() {
-    document.getElementById('displayArea').innerHTML = '';
-    renderEmptyState();
-};
-
-// 辅助函数：转义HTML特殊字符
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// 渲染空状态
-function renderEmptyState() {
-    document.getElementById('displayArea').innerHTML = `
-        <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
-            <div class="text-7xl mb-4 animate-pulse">✨</div>
-            <h2 class="text-3xl font-black tracking-wider mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">灵犀一点通</h2>
-            <p class="text-sm opacity-40 mb-8 max-w-md text-center leading-relaxed">智能创作助手 · 激发无限灵感</p>
-        </div>
-    `;
-}
-
-// 复制例文文本
-window.copySampleText = function(idx) {
-    const sample = sampleLibrary[idx];
-    if (!sample) return;
-    navigator.clipboard.writeText(sample.text || '').then(() => showToast('✅ 已复制'));
-};
-
-// 发送例文给AI分析
-window.sendSampleToAI = function(idx) {
-    const sample = sampleLibrary[idx];
-    if (!sample) return;
-    dom.userInput.value = `请帮我分析这篇例文的写作风格和特点：\n\n${sample.text.slice(0, 3000)}`;
-    dom.charCount.textContent = dom.userInput.value.length + '字';
-    dom.userInput.focus();
-    showToast('📤 已填入输入框');
-};
-
-// 复制报告内容
-window.copyReportContent = function(idx) {
-    const report = analysisReports[idx];
-    if (!report) return;
-    navigator.clipboard.writeText(report.content || '').then(() => showToast('✅ 已复制'));
-};
-
-// 内联编辑报告
-window.editReportInline = function(idx) {
-    const report = analysisReports[idx];
-    if (!report) return;
-    const container = document.querySelector('#displayArea > div.max-w-4xl');
-    if (!container) return;
-    const contentDiv = container.querySelector('.prose');
-    if (!contentDiv) return;
-    const textarea = document.createElement('textarea');
-    textarea.className = 'w-full min-h-[400px] p-4 rounded-lg border resize-y custom-scroll text-sm leading-relaxed';
-    textarea.style.borderColor = 'var(--border-color)';
-    textarea.value = report.content || '';
-    contentDiv.replaceWith(textarea);
-    const btnContainer = container.querySelector('.mt-6.flex');
-    if (btnContainer) {
-        btnContainer.innerHTML = `
-            <button onclick="saveReportInline(${idx})" class="px-4 py-2 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600 transition text-sm">💾 保存修改</button>
-            <button onclick="openReportToEditor(${idx})" class="px-4 py-2 rounded-lg bg-gray-500 text-white font-bold hover:bg-gray-600 transition text-sm">取消</button>
-        `;
-    }
-};
-
-// 保存内联编辑的报告
-window.saveReportInline = function(idx) {
-    const textarea = document.querySelector('#displayArea textarea');
-    if (!textarea) return;
-    analysisReports[idx].content = textarea.value;
-    saveJSON('lingxi_analysis_reports', analysisReports);
-    showToast('✅ 已保存');
-    openReportToEditor(idx);
-};
-
-// 取消编辑报告
-window.cancelEditReport = function(idx) {
-    openReportToEditor(idx);
-};
-
-window.deleteReport = function(idx) {
-    analysisReports.splice(idx,1);
-    selectedReportIndices = selectedReportIndices.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
-    saveJSON('lingxi_analysis_reports', analysisReports);
-    renderAnalysisReports();
-};
-
-window.addNewAnalysisReport = function() {
-    const name = prompt('请输入分析报告名称：');
-    if (!name || !name.trim()) return;
-    
-    analysisReports.push({
-        name: name.trim(),
-        content: '',
-        sourceSample: '手动创建',
-        createTime: new Date().toLocaleString()
-    });
-    saveJSON('lingxi_analysis_reports', analysisReports);
-    renderAnalysisReports();
-    showToast(`✅ 已创建分析报告：${name}`);
-};
-
-// 基因提取模态框
-window.showGeneExtractModal = function() {
-    if (sampleLibrary.length === 0) {
-        showToast('⚠️ 请先导入例文');
-        return;
-    }
-    
-    // 创建模态框HTML
-    const modal = document.createElement('div');
-    modal.id = 'geneExtractModal';
-    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
-    modal.innerHTML = `
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">🧬 选择例文进行基因提取</h3>
-            <div class="max-h-64 overflow-y-auto space-y-2 mb-4">
-                ${sampleLibrary.map((s,i) => `
-                    <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-blue-50 cursor-pointer border border-transparent hover:border-blue-200">
-                        <input type="radio" name="geneSample" value="${i}" class="accent-blue-500">
-                        <span class="text-sm text-gray-700">${s.name}</span>
-                    </label>
-                `).join('')}
-            </div>
-            <div class="flex gap-2 justify-end">
-                <button onclick="closeGeneExtractModal()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition">取消</button>
-                <button onclick="confirmGeneExtract()" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition font-bold">开始提取</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
-
-window.closeGeneExtractModal = function() {
-    const modal = document.getElementById('geneExtractModal');
-    if (modal) modal.remove();
-};
-
-window.confirmGeneExtract = function() {
-    const selected = document.querySelector('input[name="geneSample"]:checked');
-    if (!selected) {
-        showToast('⚠️ 请选择一个例文');
-        return;
-    }
-    
-    const idx = parseInt(selected.value);
-    closeGeneExtractModal();
-    
-    // 自动勾选该例文
-    if (!selectedSampleIndices.includes(idx)) {
-        selectedSampleIndices.push(idx);
-        renderSampleLibrary();
-    }
-    
-    extractGene(idx);
-};
-
-async function handleFileImport(e) {
-    const files = e.target.files;
-    if (!files || !files.length) return;
-    
-    showToast(`📂 正在导入 ${files.length} 个文件...`);
-    
-    let imported = 0;
-    let failed = 0;
-    
-    for (const file of files) {
-        try {
-            let text = '';
-            const ext = file.name.split('.').pop().toLowerCase();
-            
-            if (ext === 'docx') {
-                if (typeof mammoth === 'undefined') {
-                    throw new Error('mammoth库未加载');
-                }
-                const arrayBuffer = await file.arrayBuffer();
-                const result = await mammoth.extractRawText({ arrayBuffer });
-                text = result.value || '';
-            } else if (ext === 'txt') {
-                text = await file.text();
-            } else {
-                text = await file.text();
-            }
-            
-            if (text && text.trim()) {
-                sampleLibrary.push({
-                    name: file.name,
-                    text: text,
-                    gene: ''
-                });
-                imported++;
-            } else {
-                failed++;
-            }
-        } catch (err) {
-            console.error(`导入失败: ${file.name}`, err);
-            failed++;
-        }
-    }
-    
-    if (imported > 0) {
-        saveJSON(SK.samples, sampleLibrary);
-        renderSampleLibrary();
-        showToast(`✅ 成功导入 ${imported} 个文件${failed > 0 ? `，${failed} 个失败` : ''}`);
-    } else {
-        showToast('❌ 导入失败，请检查文件格式');
-    }
-    
-    e.target.value = '';
-}
 
 function appendMsg(role, content) {
-    const wrap = document.createElement('div');
-    wrap.className = 'msg-wrapper';
-    const msg  = document.createElement('div');
-    msg.className  = role==='user' ? 'user-msg' : 'ai-msg';
-    const body = document.createElement('div');
-    body.className = 'msg-body';
+    const wrap = document.createElement('div'); wrap.className = 'msg-wrapper';
+    const msg  = document.createElement('div'); msg.className  = role==='user' ? 'user-msg' : 'ai-msg';
+    const body = document.createElement('div'); body.className = 'msg-body';
     if (role === 'user') body.textContent = content;
     else body.innerHTML = content ? marked.parse(content) : '';
-    msg.appendChild(body);
-    
-    // 为用户消息添加底部复制按钮
-    if (role === 'user') {
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'mt-2 text-xs text-white/70 hover:text-white opacity-80 hover:opacity-100 transition-all flex items-center gap-1 self-end';
-        copyBtn.innerHTML = '<span class="text-sm">📋</span><span>复制</span>';
-        copyBtn.title = '复制此消息';
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制'));
-        };
-        msg.appendChild(copyBtn);
-    }
-    
-    wrap.appendChild(msg);
-    dom.displayArea.appendChild(wrap);
-    checkEmptyState();
+    msg.appendChild(body); wrap.appendChild(msg);
+    dom.displayArea.appendChild(wrap); checkEmptyState();
     dom.displayArea.scrollTop = dom.displayArea.scrollHeight;
     return wrap;
 }
 function makePKCol(model) {
-    const col = document.createElement('div');
-    col.className = 'pk-col flex-1';
+    const col = document.createElement('div'); col.className = 'pk-col flex-1';
     col.innerHTML = `<div class="pk-col-header">${model}</div><div class="pk-body"></div>`;
     return col;
 }
@@ -2012,10 +965,10 @@ function addMsgActions(container, rawText) {
     const footer = document.createElement('div');
     footer.className = 'flex gap-2 mt-4 pt-3 border-t flex-wrap';
     footer.style.borderColor = 'var(--border-color)';
-    
-    // 只保留4个核心功能：复制、存稿、重新生成、导出Word
     const btnCopy    = makeActionBtn('📋 复制','text-green-500',   () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
     const btnBook    = makeActionBtn('📖 存稿','text-blue-500',    () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
+    const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
+    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500',   () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
     const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
         if (isGenerating) return;
         if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
@@ -2028,8 +981,7 @@ function addMsgActions(container, rawText) {
         try {
             const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
             conversationHistory.push({role:'user', content:lastUser.content});
-            const wrapper=appendMsg('ai','');
-            const targetEl=wrapper.querySelector('.msg-body');
+            const wrapper=appendMsg('ai',''); const targetEl=wrapper.querySelector('.msg-body');
             await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
             const aiReply=targetEl.innerText;
             conversationHistory.push({role:'assistant', content:aiReply});
@@ -2037,20 +989,18 @@ function addMsgActions(container, rawText) {
             showToast('🔄 已重新生成');
         } finally { isGenerating=false; abortController=null; resetSendButton(); }
     });
-    const btnWord = makeActionBtn('📄 导语WORD','text-gray-400', () => {
+    const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
         const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
         docx.Packer.toBlob(doc).then(blob=>{ saveAs(blob,`灵犀_${new Date().toLocaleTimeString()}.docx`); showToast('✅ Word导出成功'); });
     });
-    
-    footer.append(btnCopy, btnBook, btnRegen, btnWord);
+    footer.append(btnCopy, btnBook, btnAppend, btnContinue, btnRegen, btnWord);
     container.appendChild(footer);
 }
 function makeActionBtn(text, cls, onClick) {
     const btn = document.createElement('button');
     btn.className = `text-xs font-bold ${cls} hover:opacity-70 px-2.5 py-1.5 rounded-lg transition`;
     btn.style.background = 'var(--bg-main)';
-    btn.textContent = text;
-    btn.onclick = onClick;
+    btn.textContent = text; btn.onclick = onClick;
     return btn;
 }
 
@@ -2064,13 +1014,9 @@ function saveHistory() {
 }
 function renderHistorySelect() {
     const sel = document.getElementById('historySelect');
-    sel.innerHTML = '';
-    
-    // 倒序显示，最新的在最上面
-    [...history].reverse().forEach((h, reversedIdx) => {
-        const originalIdx = history.length - 1 - reversedIdx;
-        const o = document.createElement('option');
-        o.value = originalIdx;
+    sel.innerHTML = '<option value="">-- 选择历史 --</option>';
+    history.forEach((h,i) => {
+        const o = document.createElement('option'); o.value = i;
         o.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
         sel.appendChild(o);
     });
@@ -2090,62 +1036,46 @@ function loadHistory() {
 }
 
 function exportSystemData() {
-    const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, sampleLibrary, analysisReports, history, books:bookLibrary, workspace:dom.workspace.value};
+    const data = {version:'2.0', exportTime:new Date().toLocaleString(), flowConfig, prompts, history, books:bookLibrary, workspace:dom.workspace.value};
     saveAs(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}), `灵犀备份_${Date.now()}.json`);
     showToast('✅ 备份导出成功');
 }
 function importSystemData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
         try {
             const data = JSON.parse(ev.target.result);
             if (data.flowConfig)    flowConfig    = data.flowConfig;
             if (data.prompts)       prompts       = data.prompts;
-            if (data.sampleLibrary) sampleLibrary = data.sampleLibrary;
-            if (data.analysisReports) analysisReports = data.analysisReports;
             if (data.history)       history       = data.history;
             if (data.books)         bookLibrary   = data.books;
             saveAllData();
             if (data.workspace !== undefined) dom.workspace.value = data.workspace;
-            refreshUI();
-            showToast('✅ 备份导入成功');
+            refreshUI(); showToast('✅ 备份导入成功');
         } catch { showToast('❌ 导入失败，文件格式不正确'); }
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.readAsText(file); e.target.value = '';
 }
 function refreshUI() {
-    initConfigInputs(); loadWorkspace(); renderBookLibrary(); renderSampleLibrary();
+    initConfigInputs(); loadWorkspace(); renderBookLibrary();
     renderSelect(); updateModelDropdowns(); renderHistorySelect(); updateSidebarPromptBadge(); updateStorageBar();
 }
 function saveAllData() {
     saveJSON(SK.flow,    flowConfig);
     saveJSON(SK.prompts, prompts);
-    saveJSON(SK.samples, sampleLibrary);
-    saveJSON('lingxi_analysis_reports', analysisReports);  // 保存分析报告
     saveJSON(SK.history, history);
     saveJSON(SK.books,   bookLibrary);
 }
 function loadWorkspace() {
     const val = localStorage.getItem(SK.workspace);
-    if (val !== null) {
-        try { dom.workspace.value = JSON.parse(val); }
-        catch { dom.workspace.value = val; }
-    }
+    if (val !== null) { try { dom.workspace.value = JSON.parse(val); } catch { dom.workspace.value = val; } }
 }
 
 function initAutoBackup() {
     if (autoBackupTimer) clearInterval(autoBackupTimer);
     autoBackupTimer = setInterval(() => {
-        saveJSON(SK.autoBackup, {
-            flowConfig, prompts, sampleLibrary,
-            history:history.slice(0,10),
-            bookLibrary,
-            workspace:dom.workspace.value,
-            timestamp:new Date().toLocaleString()
-        });
+        saveJSON(SK.autoBackup, {flowConfig, prompts, sampleLibrary, history:history.slice(0,10), bookLibrary, workspace:dom.workspace.value, timestamp:new Date().toLocaleString()});
     }, 5*60*1000);
 }
 
@@ -2170,16 +1100,13 @@ function resetSendButton() {
 function showToast(msg) {
     const t = document.createElement('div');
     t.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:rgba(30,41,59,0.95);color:white;padding:8px 18px;border-radius:999px;z-index:9999;font-size:12px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,0.2);backdrop-filter:blur(8px);transition:opacity 0.5s;pointer-events:none;';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(()=>t.style.opacity='0', 2200);
-    setTimeout(()=>t.remove(), 2700);
+    t.textContent = msg; document.body.appendChild(t);
+    setTimeout(()=>t.style.opacity='0', 2200); setTimeout(()=>t.remove(), 2700);
 }
 function makeBtn(icon, cls, onClick) {
     const btn = document.createElement('button');
     btn.className = `${cls} p-1 rounded-md transition text-sm`;
-    btn.innerHTML = icon;
-    btn.onclick = e => { e.stopPropagation(); onClick(); };
+    btn.innerHTML = icon; btn.onclick = e => { e.stopPropagation(); onClick(); };
     return btn;
 }
 function switchToChatMode() {
@@ -2193,11 +1120,13 @@ function switchToPKMode() {
     document.getElementById('modeChat').classList.remove('mode-btn-active');
     document.getElementById('singleSelectBox').classList.add('hidden');
     document.getElementById('pkSelectBox').classList.remove('hidden');
+    // 按钮震动提示
     const btn = document.getElementById('modePK');
     btn.style.transform = 'scale(1.08)';
     setTimeout(() => { btn.style.transform = ''; }, 200);
 }
 
+// ─── 拖拽分隔线 ───
 function initResizer() {
     const resizer = document.getElementById('resizer');
     const editor  = document.getElementById('mainEditor');
@@ -2224,41 +1153,13 @@ function initResizer() {
     });
 }
 
+// ─── 事件绑定 ───
 function bindEvents() {
-    dom.sendBtn.onclick     = handleSend;
-    dom.userInput.onkeydown = e => { 
-        if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); handleSend(); }
-        if (e.ctrlKey && e.key==='s') { e.preventDefault(); showToast('💾 草稿已自动保存'); }
-    };
-    dom.userInput.oninput  = () => { 
-        const len = dom.userInput.value.length;
-        dom.charCount.textContent = len+'字'; 
-        
-        // 输入区有内容时显示复制按钮
-        const copyBtn = document.getElementById('copyInputBtn');
-        if (copyBtn) {
-            copyBtn.style.opacity = len > 0 ? '1' : '0';
-        }
-    };
-    
-    // 用户输入区复制按钮
-    document.getElementById('copyInputBtn').onclick = () => {
-        const text = dom.userInput.value.trim();
-        if (!text) { showToast('⚠️ 输入区为空'); return; }
-        navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制输入内容'));
-    };
-    
-    dom.workspace.oninput  = () => { 
-        const wsLen = dom.workspace.value.length;
-        const totalLen = (dom.userInput.value.length + dom.displayArea.innerText.length + wsLen);
-        dom.wsWordCount.textContent = wsLen+'字'; 
-        document.getElementById('totalWords') && (document.getElementById('totalWords').textContent = '总' + totalLen + '字');
-        debouncedSaveWorkspace(dom.workspace.value); 
-    };
+    dom.sendBtn.onclick    = handleSend;
+    dom.userInput.onkeydown = e => { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); handleSend(); } };
+    dom.userInput.oninput  = () => { dom.charCount.textContent = dom.userInput.value.length+'字'; };
+    dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
-    
-    // 导出Word按钮
-    document.getElementById('exportWordBtn').onclick = exportToWord;
 
     document.getElementById('toggleSpace').onclick  = () => document.getElementById('mainEditor').classList.toggle('editor-active');
     document.getElementById('newChatBtn').onclick   = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
@@ -2291,75 +1192,10 @@ function bindEvents() {
     document.getElementById('importSystemInput').onchange = importSystemData;
     document.getElementById('historySelect').onchange     = loadHistory;
     document.getElementById('deleteHistoryBtn').onclick   = () => {
-        const sel = document.getElementById('historySelect');
-        const selectedOptions = Array.from(sel.selectedOptions);
-        
-        if (selectedOptions.length === 0) {
-            showToast('⚠️ 请先选择要删除的历史记录（可按住Ctrl多选）');
-            return;
-        }
-        
-        if (!confirm(`确认删除选中的 ${selectedOptions.length} 条历史记录？`)) return;
-        
-        // 从后往前删除，避免索引变化
-        const indicesToDelete = selectedOptions.map(opt => parseInt(opt.value)).sort((a,b) => b-a);
-        indicesToDelete.forEach(idx => {
-            history.splice(idx, 1);
-        });
-        
-        saveJSON(SK.history, history);
-        renderHistorySelect();
-        showToast(`🗑️ 已删除 ${indicesToDelete.length} 条历史记录`);
+        const idx = document.getElementById('historySelect').value;
+        if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
+        deleteHistory(parseInt(idx));
     };
-}
-
-// 快捷键帮助面板
-document.addEventListener('keydown', (e) => {
-    if (e.key === '?' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        showShortcutHelp();
-    }
-});
-
-function showShortcutHelp() {
-    const modal = document.createElement('div');
-    modal.id = 'shortcutModal';
-    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] backdrop-blur-sm';
-    modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 animate-fade-in">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">⌨️ 快捷键帮助</h3>
-                <button onclick="this.closest('#shortcutModal').remove()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="space-y-3 text-sm">
-                <div class="flex justify-between items-center py-2 border-b">
-                    <span class="text-gray-600">发送消息</span>
-                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Enter</kbd>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b">
-                    <span class="text-gray-600">换行</span>
-                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Shift + Enter</kbd>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b">
-                    <span class="text-gray-600">保存草稿</span>
-                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Ctrl + S</kbd>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b">
-                    <span class="text-gray-600">停止生成</span>
-                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Esc</kbd>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b">
-                    <span class="text-gray-600">显示此帮助</span>
-                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">?</kbd>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t text-center text-xs text-gray-500">
-                💡 提示：在输入框外按 ? 可随时查看此帮助
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 window.onload = init;
