@@ -1309,16 +1309,15 @@ function appendMsg(role, content) {
     else body.innerHTML = content ? marked.parse(content) : '';
     msg.appendChild(body);
     
-    // 为用户消息添加复制按钮
+    // 为用户消息添加底部复制按钮
     if (role === 'user') {
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'absolute top-2 right-2 text-white/80 hover:text-white text-sm opacity-60 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/20';
-        copyBtn.innerHTML = '📋';
+        copyBtn.className = 'mt-2 text-xs text-white/70 hover:text-white opacity-80 hover:opacity-100 transition-all flex items-center gap-1 self-end';
+        copyBtn.innerHTML = '<span class="text-sm">📋</span><span>复制</span>';
         copyBtn.title = '复制此消息';
         copyBtn.onclick = () => {
             navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制'));
         };
-        msg.style.position = 'relative';
         msg.appendChild(copyBtn);
     }
     
