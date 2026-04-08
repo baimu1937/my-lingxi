@@ -1326,8 +1326,10 @@ window.toggleSection = function(sectionId) {
     const section = document.getElementById(sectionId);
     if (!section) return;
     
-    const header = section.previousElementSibling;
-    if (!header || !header.classList.contains('section-header')) return;
+    // 查找对应的header（通过遍历section的父元素的子元素）
+    const parentSection = section.parentElement;
+    const header = parentSection.querySelector('.section-header');
+    if (!header) return;
     
     // 切换collapsed类
     header.classList.toggle('collapsed');
@@ -1442,7 +1444,7 @@ window.openSampleToEditor = function(idx) {
     
     // 将例文内容填充到输入框
     dom.userInput.value = sample.text || '';
-    updateCharCount();
+    dom.charCount.textContent = (sample.text || '').length + '字';
     showToast(`✅ 已加载《${sample.name}》到编辑区`);
 };
 
@@ -1453,7 +1455,7 @@ window.openReportToEditor = function(idx) {
     
     // 将报告内容填充到输入框
     dom.userInput.value = report.content || '';
-    updateCharCount();
+    dom.charCount.textContent = (report.content || '').length + '字';
     showToast(`✅ 已加载《${report.name}》到编辑区`);
 };
 
