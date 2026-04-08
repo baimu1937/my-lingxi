@@ -315,7 +315,10 @@
         </div>
         <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
             <button onclick="addNewTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
-            <button onclick="saveToolConfig()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存配置</button>
+            <div class="flex gap-2">
+                <button onclick="closeToolConfig()" class="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">✕ 取消</button>
+                <button onclick="saveToolConfig()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存配置</button>
+            </div>
         </div>
     </div>
 </div>
@@ -657,7 +660,10 @@ function renderBookLibrary() {
                 <span>${dateStr}</span>
                 <span class="piano-key-wordcount">${wordCount}字</span>
             </div>
+            <button onclick="event.stopPropagation(); deleteBook(${i})" class="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-opacity" title="删除稿件">×</button>
         `;
+        
+        item.style.position = 'relative';
         
         // 简化点击行为：直接打开分屏并加载内容
         item.onclick = () => {
@@ -825,7 +831,11 @@ function renderToolButtons() {
         const btn = document.createElement('button');
         btn.className = `tool-btn ${currentToolMode === tool.id ? 'active' : ''}`;
         btn.dataset.mode = tool.id;
-        btn.onclick = () => setToolMode(tool.id);
+        btn.onclick = () => {
+            setToolMode(tool.id);
+            // 自动执行工具功能
+            setTimeout(() => executeTool(), 100);
+        };
         btn.innerHTML = `
             <span class="text-lg">${tool.icon}</span>
             <span class="text-[10px] font-bold">${tool.name}</span>
@@ -853,6 +863,73 @@ window.setToolMode = function(mode) {
     if (tool) {
         document.getElementById('currentPromptDisplay').textContent = tool.prompt;
         showToast(`🛠️ 已切换到【${tool.name}】模式`);
+    }
+};
+
+// 执行工具功能 - 调用AI
+window.executeTool = async function() {
+    const tool = toolConfig.find(t => t.id === currentToolMode);
+    if (!tool) {
+        showToast('⚠️ 请先选择一个工具');
+        return;
+    }
+    
+    const selectedText = dom.workspace.value.substring(dom.workspace.selectionStart, dom.workspace.selectionEnd);
+    const contextText = selectedText || dom.workspace.value;
+    
+    if (!contextText.trim()) {
+        showToast('⚠️ 请先输入或选择要处理的文本');
+        return;
+    }
+    
+    if (isGenerating) {
+        showToast('⚠️ 请等待当前生成完成');
+        return;
+    }
+    
+    // 构建完整的提示词
+    const fullPrompt = `${tool.prompt}\n\n待处理文本：\n${contextText}`;
+    
+    // 调用AI
+    appendMsg('user', `🛠️ 使用【${tool.name}】工具处理文本...`);
+    const wrapper = appendMsg('ai', '');
+    const targetEl = wrapper.querySelector('.msg-body');
+    
+    isGenerating = true;
+    abortController = new AbortController();
+    setSendButtonStop();
+    
+    try {
+        await streamCallAI(
+            document.getElementById('singleModel').value,
+            '你是一个专业的写作助手。',
+            fullPrompt,
+            targetEl,
+            parseFloat(dom.tempSlider.value)
+        );
+        
+        // 将结果插入到光标位置或追加到末尾
+        const result = targetEl.innerText;
+        if (selectedText) {
+            // 替换选中的文本
+            const start = dom.workspace.selectionStart;
+            const end = dom.workspace.selectionEnd;
+            dom.workspace.value = dom.workspace.value.substring(0, start) + result + dom.workspace.value.substring(end);
+        } else {
+            // 追加到末尾
+            dom.workspace.value += '\n\n' + result;
+        }
+        
+        debouncedSaveWorkspace(dom.workspace.value);
+        dom.wsWordCount.textContent = dom.workspace.value.length + '字';
+        showToast(`✅ 【${tool.name}】完成`);
+    } catch (error) {
+        console.error('Tool execution error:', error);
+        showToast('❌ 执行失败：' + error.message);
+    } finally {
+        isGenerating = false;
+        abortController = null;
+        resetSendButton();
     }
 };
 
