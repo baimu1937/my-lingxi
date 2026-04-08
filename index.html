@@ -363,12 +363,8 @@
                             <button id="deleteHistoryBtn" title="批量删除选中历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
-                    <div class="flex gap-2 mb-2.5 flex-wrap">
-                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。')">⚡ 续写</button>
-                        <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
-                        <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
-                        <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
-                        <button class="quick-tag" onclick="showGeneExtractModal()">🔍 分析</button>
+                    <div id="quickActionsContainer" class="flex gap-2 mb-2.5 flex-wrap">
+                        <!-- 快捷按钮将通过JavaScript动态渲染 -->
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -414,6 +410,27 @@
     </div>
 </div>
 
+<!-- 通用内容编辑模态框（用于例文和分析报告） -->
+<div id="contentEditorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 id="contentEditorTitle" class="text-lg font-black text-purple-500 italic">📄 内容查看</h3>
+            <button onclick="closeContentEditorModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
+        </div>
+        <div class="flex flex-col flex-1 overflow-hidden gap-3">
+            <div class="flex gap-3 items-center flex-shrink-0">
+                <input id="contentEditorName" type="text" readonly class="modal-input flex-1 text-sm font-bold bg-gray-50 cursor-not-allowed">
+                <span class="text-xs font-bold text-purple-500 flex-shrink-0">字数：<span id="contentEditorWordCount">0</span></span>
+            </div>
+            <textarea id="contentEditorBody" class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0" readonly></textarea>
+            <div class="flex gap-3 flex-shrink-0">
+                <button onclick="copyContentFromEditor()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">📋 复制全文</button>
+                <button onclick="sendContentToChat()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">💬 发送到对话</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl">
         <h3 class="text-lg font-black mb-5 text-center pb-4 border-b" style="border-color:var(--border-color)">⚙️ 配置中心</h3>
@@ -444,6 +461,18 @@
             </h4>
             <textarea id="gene_prompt_editor" placeholder="自定义基因提取的提示词..." class="modal-input text-xs resize-none custom-scroll w-full" style="height:120px;font-family:monospace;line-height:1.5;"></textarea>
             <p class="text-[9px] text-gray-500 italic">💡 提示：可使用变量 {text} 代表待分析文本内容</p>
+        </div>
+        
+        <!-- 快捷按钮自定义配置 -->
+        <div class="mb-5 space-y-2.5">
+            <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase flex justify-between items-center">
+                <span>⚡ 快捷按钮自定义</span>
+                <button onclick="resetQuickActions()" class="text-[10px] text-gray-500 hover:text-green-600 underline">恢复默认</button>
+            </h4>
+            <div id="quickActionsEditor" class="space-y-2 max-h-64 overflow-y-auto custom-scroll">
+                <!-- 动态生成编辑表单 -->
+            </div>
+            <button onclick="addNewQuickAction()" class="w-full py-2 text-xs font-bold text-green-600 border-2 border-dashed border-green-300 rounded-lg hover:bg-green-50 transition">+ 添加新按钮</button>
         </div>
         
         <div class="flex gap-2.5 mb-5">
@@ -505,6 +534,23 @@ const DEFAULT_GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生
 请用简洁的语言归纳，便于后续仿写参考。`;
 
 let genePrompt = localStorage.getItem('lingxi_gene_prompt') || DEFAULT_GENE_PROMPT;
+
+// 快捷按钮配置（支持自定义）
+const DEFAULT_QUICK_ACTIONS = [
+    { icon: '⚡', label: '续写', prompt: '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。' },
+    { icon: '✨', label: '润色', prompt: '请优化以上文字的语言表达，使其更加流畅优美' },
+    { icon: '📝', label: '扩写', prompt: '请扩写以上内容，增加细节描写和心理活动' },
+    { icon: '💬', label: '加对话', prompt: '请增加一段精彩的对话来推进情节发展' },
+    { icon: '🔍', label: '分析', action: 'showGeneExtractModal()' }
+];
+
+let quickActions = [];
+try {
+    const saved = localStorage.getItem('lingxi_quick_actions');
+    quickActions = saved ? JSON.parse(saved) : [...DEFAULT_QUICK_ACTIONS];
+} catch {
+    quickActions = [...DEFAULT_QUICK_ACTIONS];
+}
 
 const SK = {
     flow:'lingxi_flow', prompts:'lingxi_prompts', samples:'lingxi_samples',
@@ -568,6 +614,7 @@ function init() {
     renderSampleLibrary();
     renderAnalysisReports();  // 初始化分析报告列表
     renderSelect();
+    renderQuickActions();  // 渲染快捷按钮
     updateModelDropdowns();
     renderHistorySelect();
     updateSidebarPromptBadge();
@@ -807,6 +854,29 @@ function renderSelect() {
     if (cur && prompts[cur]) s.value = cur;
 }
 
+// 渲染快捷按钮
+function renderQuickActions() {
+    const container = document.getElementById('quickActionsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    quickActions.forEach((action, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag';
+        
+        if (action.action) {
+            // 如果是执行函数（如分析）
+            btn.onclick = () => eval(action.action);
+        } else {
+            // 如果是填充输入框
+            btn.onclick = () => fillInput(action.prompt);
+        }
+        
+        btn.textContent = `${action.icon} ${action.label}`;
+        container.appendChild(btn);
+    });
+}
+
 function initConfigInputs() {
     ['ds_key','qw_key','db_key','db_model','claude_key','gemini_key','ollama_url','proxy_url','proxy_key','proxy_models'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
@@ -816,6 +886,8 @@ function initConfigInputs() {
     if (genePromptEditor) {
         genePromptEditor.value = genePrompt;
     }
+    // 加载快捷按钮编辑器
+    renderQuickActionsEditor();
 }
 
 function saveConfig() {
@@ -847,6 +919,98 @@ window.resetGenePrompt = function() {
             genePromptEditor.value = DEFAULT_GENE_PROMPT;
         }
         showToast('✅ 已恢复默认基因提取提示词');
+    }
+};
+
+// 渲染快捷按钮编辑器
+function renderQuickActionsEditor() {
+    const container = document.getElementById('quickActionsEditor');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    quickActions.forEach((action, idx) => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2';
+        div.innerHTML = `
+            <div class="flex gap-2 items-center">
+                <input type="text" value="${action.icon}" placeholder="图标" class="w-12 px-2 py-1 text-xs border rounded" onchange="updateQuickAction(${idx}, 'icon', this.value)">
+                <input type="text" value="${action.label}" placeholder="按钮名称" class="flex-1 px-2 py-1 text-xs border rounded font-bold" onchange="updateQuickAction(${idx}, 'label', this.value)">
+                <button onclick="removeQuickAction(${idx})" class="text-red-500 hover:text-red-700 text-sm font-bold">×</button>
+            </div>
+            ${action.action ? 
+                `<input type="text" value="${action.action}" placeholder="执行函数（如：showGeneExtractModal()）" class="w-full px-2 py-1 text-xs border rounded font-mono" onchange="updateQuickAction(${idx}, 'action', this.value)">` :
+                `<textarea placeholder="提示词内容..." class="w-full px-2 py-1 text-xs border rounded resize-none" rows="2" onchange="updateQuickAction(${idx}, 'prompt', this.value)">${action.prompt || ''}</textarea>`
+            }
+            <div class="flex gap-2">
+                <button onclick="convertToFunction(${idx})" class="text-[9px] text-blue-600 hover:underline">${action.action ? '改为提示词' : '改为执行函数'}</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// 更新快捷按钮配置
+window.updateQuickAction = function(idx, field, value) {
+    quickActions[idx][field] = value;
+    saveQuickActions();
+    renderQuickActions();
+};
+
+// 删除快捷按钮
+window.removeQuickAction = function(idx) {
+    if (quickActions.length <= 1) {
+        showToast('⚠️ 至少保留一个快捷按钮');
+        return;
+    }
+    quickActions.splice(idx, 1);
+    saveQuickActions();
+    renderQuickActionsEditor();
+    renderQuickActions();
+};
+
+// 添加新快捷按钮
+window.addNewQuickAction = function() {
+    quickActions.push({
+        icon: '🆕',
+        label: '新按钮',
+        prompt: '请输入提示词...'
+    });
+    saveQuickActions();
+    renderQuickActionsEditor();
+    renderQuickActions();
+    showToast('✅ 已添加新按钮，请编辑配置');
+};
+
+// 转换按钮类型（提示词 <-> 执行函数）
+window.convertToFunction = function(idx) {
+    const action = quickActions[idx];
+    if (action.action) {
+        // 从函数转为提示词
+        delete action.action;
+        action.prompt = '请输入提示词...';
+    } else {
+        // 从提示词转为函数
+        delete action.prompt;
+        action.action = 'fillInput(\'请输入提示词\')';
+    }
+    saveQuickActions();
+    renderQuickActionsEditor();
+    renderQuickActions();
+};
+
+// 保存快捷按钮配置
+function saveQuickActions() {
+    localStorage.setItem('lingxi_quick_actions', JSON.stringify(quickActions));
+}
+
+// 重置快捷按钮为默认值
+window.resetQuickActions = function() {
+    if (confirm('确定要恢复默认的快捷按钮配置吗？')) {
+        quickActions = [...DEFAULT_QUICK_ACTIONS];
+        saveQuickActions();
+        renderQuickActionsEditor();
+        renderQuickActions();
+        showToast('✅ 已恢复默认快捷按钮');
     }
 };
 
@@ -1437,26 +1601,62 @@ window.viewReport = function(idx) {
     targetEl.innerHTML = `<strong>${report.name}</strong><br/><br/>${marked.parse(report.content)}`;
 };
 
-// 打开例文到编辑区
+// 打开例文到编辑模态框
 window.openSampleToEditor = function(idx) {
     const sample = sampleLibrary[idx];
     if (!sample) return;
     
-    // 将例文内容填充到输入框
-    dom.userInput.value = sample.text || '';
-    dom.charCount.textContent = (sample.text || '').length + '字';
-    showToast(`✅ 已加载《${sample.name}》到编辑区`);
+    document.getElementById('contentEditorTitle').textContent = '🧬 例文查看';
+    document.getElementById('contentEditorName').value = sample.name;
+    document.getElementById('contentEditorBody').value = sample.text || '';
+    document.getElementById('contentEditorWordCount').textContent = (sample.text || '').length;
+    document.getElementById('contentEditorModal').classList.remove('hidden');
 };
 
-// 打开分析报告到编辑区
+// 打开分析报告到编辑模态框
 window.openReportToEditor = function(idx) {
     const report = analysisReports[idx];
     if (!report) return;
     
-    // 将报告内容填充到输入框
-    dom.userInput.value = report.content || '';
-    dom.charCount.textContent = (report.content || '').length + '字';
-    showToast(`✅ 已加载《${report.name}》到编辑区`);
+    document.getElementById('contentEditorTitle').textContent = '📊 分析报告';
+    document.getElementById('contentEditorName').value = report.name;
+    document.getElementById('contentEditorBody').value = report.content || '';
+    document.getElementById('contentEditorWordCount').textContent = (report.content || '').length;
+    document.getElementById('contentEditorModal').classList.remove('hidden');
+};
+
+// 关闭内容编辑模态框
+window.closeContentEditorModal = function() {
+    document.getElementById('contentEditorModal').classList.add('hidden');
+};
+
+// 复制内容编辑器中的全文
+window.copyContentFromEditor = function() {
+    const content = document.getElementById('contentEditorBody').value;
+    navigator.clipboard.writeText(content).then(() => {
+        showToast('✅ 已复制到剪贴板');
+    }).catch(() => {
+        showToast('❌ 复制失败');
+    });
+};
+
+// 将内容发送到对话区
+window.sendContentToChat = function() {
+    const content = document.getElementById('contentEditorBody').value;
+    const name = document.getElementById('contentEditorName').value;
+    if (!content) {
+        showToast('⚠️ 内容为空');
+        return;
+    }
+    
+    // 关闭模态框
+    closeContentEditorModal();
+    
+    // 将内容填充到输入框
+    dom.userInput.value = content;
+    dom.charCount.textContent = content.length + '字';
+    dom.userInput.focus();
+    showToast(`✅ 《${name}》已加载到输入区`);
 };
 
 window.deleteReport = function(idx) {
@@ -1526,6 +1726,13 @@ window.confirmGeneExtract = function() {
     
     const idx = parseInt(selected.value);
     closeGeneExtractModal();
+    
+    // 自动勾选该例文
+    if (!selectedSampleIndices.includes(idx)) {
+        selectedSampleIndices.push(idx);
+        renderSampleLibrary();
+    }
+    
     extractGene(idx);
 };
 
