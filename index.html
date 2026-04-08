@@ -647,9 +647,6 @@ function renderBookLibrary() {
     bookLibrary.forEach((book, i) => {
         const item = document.createElement('div');
         item.className = 'piano-key';
-        if (i === currentManagerBookId) {
-            item.classList.add('active');
-        }
         
         const wordCount = (book.content || '').length;
         const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
@@ -662,9 +659,17 @@ function renderBookLibrary() {
             </div>
         `;
         
+        // 简化点击行为：直接打开分屏并加载内容
         item.onclick = () => {
-            showBookManager();
-            loadBookIntoManager(i);
+            // 确保分屏开启
+            if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
+                document.getElementById('mainEditor').classList.add('editor-active');
+            }
+            // 加载内容到编辑器
+            dom.workspace.value = book.content || '';
+            dom.wsWordCount.textContent = (book.content || '').length + '字';
+            debouncedSaveWorkspace(dom.workspace.value);
+            showToast(`📖 已打开【${book.name}】`);
         };
         fragment.appendChild(item);
     });
