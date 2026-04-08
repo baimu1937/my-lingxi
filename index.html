@@ -111,6 +111,20 @@
         .theme-dot.dark    { background: linear-gradient(135deg,#0f172a,#1e293b); }
         .theme-dot.eye     { background: linear-gradient(135deg,#f0f9f0,#d1e7d1); }
         .theme-dot.retro   { background: linear-gradient(135deg,#fff8e6,#ffdead); }
+        
+        /* 诗词书法展示样式 */
+        .poetry-container {
+            border: 1px solid rgba(209, 213, 219, 0.4);
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(249,250,251,0.4));
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .poetry-content p:first-child {
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+            letter-spacing: 0.15em;
+        }
+        
         .editor-container { flex: 0 0 380px; display: none; background: var(--card-bg); border-right: 1px solid var(--border-color); flex-direction: column; }
         .editor-active { display: flex !important; }
         .writing-area { width: 100%; height: 100%; padding: 32px; font-size: 15px; line-height: 2; outline: none; border: none; background: transparent; color: var(--text-primary); resize: none; }
@@ -297,22 +311,19 @@
                     <div class="text-7xl mb-4 animate-pulse">✨</div>
                     <h2 class="text-3xl font-black tracking-wider mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">灵犀一点通</h2>
                     <p class="text-sm opacity-40 mb-8 max-w-md text-center leading-relaxed">智能创作助手 · 激发无限灵感</p>
-                    <div class="grid grid-cols-2 gap-3 max-w-lg">
-                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer" style="border-color:var(--border-color)">
-                            <div class="text-lg mb-1">🗡️</div>
-                            <div>选择提示词模板</div>
+                    <div class="poetry-container mt-6 px-8 py-6 max-w-2xl">
+                        <div class="poetry-content text-center space-y-3 opacity-40 hover:opacity-70 transition-opacity duration-500">
+                            <p class="text-lg font-serif tracking-widest leading-loose" style="font-family: 'STKaiti', 'KaiTi', serif; color: #4a5568;">
+                                先天下之忧而忧，后天下之乐而乐。
+                            </p>
+                            <p class="text-sm font-serif tracking-wide" style="font-family: 'STKaiti', 'KaiTi', serif; color: #718096;">
+                                —— 范仲淹《岳阳楼记》
+                            </p>
                         </div>
-                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-green-400 hover:bg-green-50 transition cursor-pointer" style="border-color:var(--border-color)">
-                            <div class="text-lg mb-1">⚡</div>
-                            <div>使用快捷指令</div>
-                        </div>
-                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-purple-400 hover:bg-purple-50 transition cursor-pointer" style="border-color:var(--border-color)">
-                            <div class="text-lg mb-1">🧬</div>
-                            <div>导入例文提取基因</div>
-                        </div>
-                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-orange-400 hover:bg-orange-50 transition cursor-pointer" style="border-color:var(--border-color)">
-                            <div class="text-lg mb-1">⚔️</div>
-                            <div>竞技擂台对比模型</div>
+                        <div class="mt-4 pt-4 border-t border-gray-200/30">
+                            <p class="text-xs text-center italic opacity-30" style="color: #a0aec0;">
+                                "不以物喜，不以己悲"
+                            </p>
                         </div>
                     </div>
                     <div class="mt-8 text-[11px] opacity-30">
@@ -1301,9 +1312,9 @@ function appendMsg(role, content) {
     // 为用户消息添加复制按钮
     if (role === 'user') {
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'absolute top-2 right-2 text-white/60 hover:text-white text-xs opacity-0 hover:opacity-100 transition-opacity';
+        copyBtn.className = 'absolute top-2 right-2 text-white/80 hover:text-white text-sm opacity-60 hover:opacity-100 transition-all p-1.5 rounded-lg hover:bg-white/20';
         copyBtn.innerHTML = '📋';
-        copyBtn.title = '复制';
+        copyBtn.title = '复制此消息';
         copyBtn.onclick = () => {
             navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制'));
         };
