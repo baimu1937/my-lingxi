@@ -177,6 +177,8 @@
         @keyframes slideFromRight { from { transform: translateX(120px);  opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes clashFlash     { 0%{opacity:0;transform:scale(0.5)} 30%{opacity:1;transform:scale(1.4)} 60%{opacity:1;transform:scale(1.1)} 100%{opacity:0;transform:scale(0.8)} }
         @keyframes clashShake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        @keyframes fade-in        { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out; }
         .pk-col-left  { animation: slideFromLeft  0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
         .pk-col-right { animation: slideFromRight 0.5s cubic-bezier(0.22,1,0.36,1) forwards; }
         .pk-clash-shake { animation: clashShake 0.35s ease 0.45s both; }
@@ -292,13 +294,29 @@
         <div id="rightPanel" class="flex-1 flex flex-col overflow-hidden" style="min-width:300px;">
             <main id="displayArea" class="flex-1 overflow-y-auto p-8 custom-scroll relative">
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
-                    <div class="text-6xl mb-6 opacity-20">✨</div>
-                    <h2 class="text-2xl font-black tracking-widest opacity-30 italic mb-4">灵犀一点通</h2>
-                    <div class="flex flex-wrap gap-3 justify-center opacity-25 pointer-events-none">
-                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🗡️ 选择神兵武库提示词</div>
-                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚡ 使用快捷指令</div>
-                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">🧬 导入例文提取基因</div>
-                        <div class="px-4 py-2 rounded-xl border text-xs font-bold" style="border-color:var(--border-color)">⚔️ 竞技擂台对比模型</div>
+                    <div class="text-7xl mb-4 animate-pulse">✨</div>
+                    <h2 class="text-3xl font-black tracking-wider mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">灵犀一点通</h2>
+                    <p class="text-sm opacity-40 mb-8 max-w-md text-center leading-relaxed">智能创作助手 · 激发无限灵感</p>
+                    <div class="grid grid-cols-2 gap-3 max-w-lg">
+                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer" style="border-color:var(--border-color)">
+                            <div class="text-lg mb-1">🗡️</div>
+                            <div>选择提示词模板</div>
+                        </div>
+                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-green-400 hover:bg-green-50 transition cursor-pointer" style="border-color:var(--border-color)">
+                            <div class="text-lg mb-1">⚡</div>
+                            <div>使用快捷指令</div>
+                        </div>
+                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-purple-400 hover:bg-purple-50 transition cursor-pointer" style="border-color:var(--border-color)">
+                            <div class="text-lg mb-1">🧬</div>
+                            <div>导入例文提取基因</div>
+                        </div>
+                        <div class="px-4 py-3 rounded-xl border text-xs font-bold hover:border-orange-400 hover:bg-orange-50 transition cursor-pointer" style="border-color:var(--border-color)">
+                            <div class="text-lg mb-1">⚔️</div>
+                            <div>竞技擂台对比模型</div>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-[11px] opacity-30">
+                        💡 按 <kbd class="px-2 py-1 rounded bg-gray-200 text-gray-700 font-mono">?</kbd> 查看快捷键帮助
                     </div>
                 </div>
             </main>
@@ -328,8 +346,13 @@
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
-                            class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-16 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
+                            class="w-full bg-transparent border-none pl-5 pr-16 pt-4 pb-16 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
                             placeholder="在此输入情节需求..."></textarea>
+                        <!-- 用户输入区复制按钮 -->
+                        <button id="copyInputBtn" title="复制输入内容" 
+                            class="absolute top-3 right-3 text-gray-400 hover:text-blue-500 text-xs opacity-0 hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-blue-50">
+                            📋
+                        </button>
                         <div class="absolute bottom-12 left-5 text-[11px]" style="color:var(--text-secondary)">💡 Enter 发送 | Shift+Enter 换行 | Ctrl+S 保存草稿</div>
                         <div class="absolute bottom-3 right-3 flex items-center gap-2">
                             <span id="charCount" class="text-[10px] font-bold" style="color:var(--text-secondary)">0字 | <span id="totalWords">总0字</span></span>
@@ -1288,22 +1311,6 @@ function appendMsg(role, content) {
         msg.appendChild(copyBtn);
     }
     
-    // 为AI消息底部也添加复制按钮
-    if (role === 'ai') {
-        const bottomCopyBar = document.createElement('div');
-        bottomCopyBar.className = 'mt-3 pt-2 border-t flex justify-end';
-        bottomCopyBar.style.borderColor = 'var(--border-color)';
-        const copyBtnBottom = document.createElement('button');
-        copyBtnBottom.className = 'text-xs text-blue-500 hover:text-blue-600 font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg transition';
-        copyBtnBottom.style.background = 'var(--bg-main)';
-        copyBtnBottom.innerHTML = '<span>📋</span><span>复制全文</span>';
-        copyBtnBottom.onclick = () => {
-            navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制到剪贴板'));
-        };
-        bottomCopyBar.appendChild(copyBtnBottom);
-        msg.appendChild(bottomCopyBar);
-    }
-    
     wrap.appendChild(msg);
     dom.displayArea.appendChild(wrap);
     checkEmptyState();
@@ -1539,7 +1546,21 @@ function bindEvents() {
     dom.userInput.oninput  = () => { 
         const len = dom.userInput.value.length;
         dom.charCount.textContent = len+'字'; 
+        
+        // 输入区有内容时显示复制按钮
+        const copyBtn = document.getElementById('copyInputBtn');
+        if (copyBtn) {
+            copyBtn.style.opacity = len > 0 ? '1' : '0';
+        }
     };
+    
+    // 用户输入区复制按钮
+    document.getElementById('copyInputBtn').onclick = () => {
+        const text = dom.userInput.value.trim();
+        if (!text) { showToast('⚠️ 输入区为空'); return; }
+        navigator.clipboard.writeText(text).then(() => showToast('✅ 已复制输入内容'));
+    };
+    
     dom.workspace.oninput  = () => { 
         const wsLen = dom.workspace.value.length;
         const totalLen = (dom.userInput.value.length + dom.displayArea.innerText.length + wsLen);
@@ -1603,6 +1624,55 @@ function bindEvents() {
         renderHistorySelect();
         showToast(`🗑️ 已删除 ${indicesToDelete.length} 条历史记录`);
     };
+}
+
+// 快捷键帮助面板
+document.addEventListener('keydown', (e) => {
+    if (e.key === '?' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        showShortcutHelp();
+    }
+});
+
+function showShortcutHelp() {
+    const modal = document.createElement('div');
+    modal.id = 'shortcutModal';
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] backdrop-blur-sm';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">⌨️ 快捷键帮助</h3>
+                <button onclick="this.closest('#shortcutModal').remove()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between items-center py-2 border-b">
+                    <span class="text-gray-600">发送消息</span>
+                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Enter</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b">
+                    <span class="text-gray-600">换行</span>
+                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Shift + Enter</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b">
+                    <span class="text-gray-600">保存草稿</span>
+                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Ctrl + S</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b">
+                    <span class="text-gray-600">停止生成</span>
+                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">Esc</kbd>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b">
+                    <span class="text-gray-600">显示此帮助</span>
+                    <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">?</kbd>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t text-center text-xs text-gray-500">
+                💡 提示：在输入框外按 ? 可随时查看此帮助
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 window.onload = init;
