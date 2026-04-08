@@ -488,7 +488,7 @@
     
     <div class="pt-4 mt-4 border-t flex justify-end gap-3" style="border-color:var(--border-color)">
         <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="px-5 py-2.5 rounded-xl font-bold transition hover:bg-gray-100" style="background:#f3f4f6; color:var(--text-primary)">取消</button>
-        <button onclick="saveSettings()" class="px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95" style="background:linear-gradient(135deg, var(--primary-color), #8b5cf6)">保存配置</button>
+        <button onclick="saveConfig()" class="px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95" style="background:linear-gradient(135deg, var(--primary-color), #8b5cf6)">💾 保存配置</button>
     </div>
     </div>
 </div>
@@ -872,10 +872,27 @@ function renderQuickActions() {
         
         if (action.action) {
             // 如果是执行函数（如分析）
-            btn.onclick = () => eval(action.action);
-        } else {
-            // 如果是填充输入框
-            btn.onclick = () => fillInput(action.prompt);
+            btn.onclick = () => {
+                try {
+                    eval(action.action);
+                } catch(err) {
+                    showToast(`⚠️ 执行失败: ${err.message}`);
+                }
+            };
+        } else if (action.prompt) {
+            // 如果有提示词，直接发送到AI
+            btn.onclick = () => {
+                const userInput = document.getElementById('userInput');
+                const currentText = userInput.value.trim();
+                
+                if (!currentText) {
+                    showToast('⚠️ 请先在输入框中输入内容');
+                    return;
+                }
+                
+                // 直接使用提示词作为系统指令发送
+                sendMessageWithPrompt(action.prompt);
+            };
         }
         
         btn.textContent = `${action.icon} ${action.label}`;
@@ -1332,6 +1349,60 @@ async function handleSend() {
     }
 }
 
+// 使用指定提示词直接发送（快捷按钮专用）
+async function sendMessageWithPrompt(customPrompt) {
+    if (isGenerating) { 
+        showToast('⚠️ 请等待当前生成完成'); 
+        return; 
+    }
+    
+    const text = dom.userInput.value.trim();
+    if (!text) { 
+        showToast('⚠️ 请先在输入框中输入内容'); 
+        return; 
+    }
+
+    // 立即清空输入区
+    dom.userInput.value = '';
+    dom.charCount.textContent = '0字';
+
+    let ref = '';
+    
+    // 添加选中的例文作为参考
+    selectedSampleIndices.forEach(idx => {
+        const s = sampleLibrary[idx];
+        if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
+    });
+    
+    // 添加选中的分析报告作为参考
+    selectedReportIndices.forEach(idx => {
+        const r = analysisReports[idx];
+        if (r && r.content) ref += `\n【参考分析报告：${r.name}】\n${r.content}\n`;
+    });
+
+    // 使用自定义提示词作为系统指令
+    const sys = customPrompt;
+    const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
+    const isPK = !document.getElementById('pkSelectBox').classList.contains('hidden');
+
+    isGenerating = true;
+    abortController = new AbortController();
+    setSendButtonStop();
+
+    try {
+        if (isPK) await handlePKMode(sys, fullPrompt);
+        else      await handleSingleMode(text, sys, fullPrompt);
+    } finally {
+        isGenerating = false;
+        abortController = null;
+        resetSendButton();
+        dom.charCount.textContent = '0字';
+        saveHistory();
+        renderHistorySelect();
+        updateStorageBar();
+    }
+}
+
 async function handleSingleMode(displayText, sys, prompt) {
     appendMsg('user', displayText);
     conversationHistory.push({ role:'user', content:prompt });
@@ -1748,21 +1819,51 @@ window.confirmGeneExtract = function() {
 
 async function handleFileImport(e) {
     const files = e.target.files;
-    if (!files||!files.length) return;
+    if (!files || !files.length) return;
+    
     let imported = 0;
     for (const f of files) {
         try {
-            let text = f.name.endsWith('.docx')
-                ? await new Promise((res,rej) => {
-                    const r=new FileReader();
-                    r.onload=ev=>mammoth.extractRawText({arrayBuffer:ev.target.result}).then(x=>res(x.value)).catch(rej);
-                    r.readAsArrayBuffer(f);
-                })
-                : await f.text();
-            if (text.trim()) { sampleLibrary.push({name:f.name,text,gene:''}); imported++; }
-        } catch { showToast(`⚠️ 导入 ${f.name} 失败`); }
+            let text = '';
+            
+            if (f.name.endsWith('.docx')) {
+                // 处理.docx文件
+                const arrayBuffer = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => resolve(ev.target.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(f);
+                });
+                
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                text = result.value;
+            } else {
+                // 处理.txt等其他文本文件
+                text = await f.text();
+            }
+            
+            if (text && text.trim()) {
+                sampleLibrary.push({
+                    name: f.name,
+                    text: text,
+                    gene: ''
+                });
+                imported++;
+            }
+        } catch (err) {
+            console.error(`导入失败: ${f.name}`, err);
+            showToast(`⚠️ 导入 ${f.name} 失败: ${err.message}`);
+        }
     }
-    if (imported) { saveJSON(SK.samples,sampleLibrary); renderSampleLibrary(); showToast(`✅ 成功导入 ${imported} 个文件`); }
+    
+    if (imported > 0) {
+        saveJSON(SK.samples, sampleLibrary);
+        renderSampleLibrary();
+        showToast(`✅ 成功导入 ${imported} 个文件`);
+    } else {
+        showToast('⚠️ 没有成功导入任何文件');
+    }
+    
     e.target.value = '';
 }
 
