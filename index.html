@@ -287,36 +287,36 @@
 <div id="toolPanel" class="hidden border-b px-4 py-3 flex-shrink-0" style="background:var(--bg-main);border-color:var(--border-color)">
     <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-black text-blue-500 uppercase tracking-wider">🛠️ 创作工具箱</span>
-        <button onclick="toggleToolPanel()" class="text-gray-400 hover:text-red-500 transition text-sm">✕ 关闭</button>
+        <div class="flex gap-2">
+            <button onclick="openToolConfig()" class="text-[10px] text-blue-500 hover:text-blue-400 font-bold px-2 py-1 bg-blue-500/10 rounded-lg transition">⚙️ 配置</button>
+            <button onclick="toggleToolPanel()" class="text-gray-400 hover:text-red-500 transition text-sm">✕ 关闭</button>
+        </div>
     </div>
-    <div class="grid grid-cols-5 gap-2">
-        <button onclick="setToolMode('continue')" class="tool-btn active" data-mode="continue">
-            <span class="text-lg">✍️</span>
-            <span class="text-[10px] font-bold">续写</span>
-        </button>
-        <button onclick="setToolMode('polish')" class="tool-btn" data-mode="polish">
-            <span class="text-lg">✨</span>
-            <span class="text-[10px] font-bold">润色</span>
-        </button>
-        <button onclick="setToolMode('expand')" class="tool-btn" data-mode="expand">
-            <span class="text-lg">📈</span>
-            <span class="text-[10px] font-bold">扩写</span>
-        </button>
-        <button onclick="setToolMode('dialogue')" class="tool-btn" data-mode="dialogue">
-            <span class="text-lg">💬</span>
-            <span class="text-[10px] font-bold">加对话</span>
-        </button>
-        <button onclick="setToolMode('analyze')" class="tool-btn" data-mode="analyze">
-            <span class="text-lg">🔍</span>
-            <span class="text-[10px] font-bold">分析</span>
-        </button>
+    <div id="toolButtonsContainer" class="grid grid-cols-5 gap-2">
+        <!-- 动态生成的工具按钮将在这里 -->
     </div>
     <div class="mt-3 pt-3 border-t" style="border-color:var(--border-color)">
         <div class="flex items-center justify-between mb-2">
             <span class="text-[10px] font-bold text-gray-500">当前提示词：</span>
-            <button onclick="customizePrompts()" class="text-[10px] text-blue-500 hover:text-blue-400 font-bold">⚙️ 自定义配置</button>
         </div>
         <div id="currentPromptDisplay" class="text-[11px] text-gray-600 bg-white/5 px-3 py-2 rounded-lg leading-relaxed max-h-20 overflow-y-auto custom-scroll"></div>
+    </div>
+</div>
+
+<!-- 工具配置弹窗 -->
+<div id="toolConfigModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[300]">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black text-blue-500 italic">⚙️ 工具箱配置</h3>
+            <button onclick="closeToolConfig()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="toolConfigList">
+            <!-- 动态生成的配置项 -->
+        </div>
+        <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
+            <button onclick="addNewTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
+            <button onclick="saveToolConfig()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存配置</button>
+        </div>
     </div>
 </div>
 
@@ -325,6 +325,7 @@
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
             <button id="toggleToolBtn" onclick="toggleToolPanel()" class="pill-btn">🛠️ 工具箱</button>
+            <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
         </div>
@@ -711,6 +712,14 @@ window.loadBookIntoManager = function(idx) {
     document.getElementById('managerBookContent').value = book.content || '';
     document.getElementById('managerWordCount').textContent = (book.content || '').length;
     renderBookListInManager();
+    
+    // 自动开启分屏并将内容加载到编辑器
+    if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
+        document.getElementById('mainEditor').classList.add('editor-active');
+    }
+    dom.workspace.value = book.content || '';
+    dom.wsWordCount.textContent = (book.content || '').length + '字';
+    debouncedSaveWorkspace(dom.workspace.value);
 };
 
 window.addNewBook = function() {
@@ -786,13 +795,39 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== 多功能工具面板 ==========
 let currentToolMode = 'continue';
 
-const TOOL_PROMPTS = {
-    continue: '请根据上文内容继续创作，保持原有风格和情节发展。',
-    polish: '请对以下文本进行润色优化，提升文笔质量，使表达更加生动流畅，但不要改变原意。',
-    expand: '请在原文基础上进行扩写，增加细节描写、心理活动或环境渲染，使内容更加丰富饱满。',
-    dialogue: '请为这段内容增加人物对话，使场景更加生动，符合人物性格和情境。',
-    analyze: '请分析这段文本的写作特点、情感基调、叙事手法等，给出专业的文学点评。'
-};
+// 默认工具配置
+const DEFAULT_TOOLS = [
+    { id: 'continue', icon: '✍️', name: '续写', prompt: '请根据上文内容继续创作，保持原有风格和情节发展。', enabled: true },
+    { id: 'polish', icon: '✨', name: '润色', prompt: '请对以下文本进行润色优化，提升文笔质量，使表达更加生动流畅，但不要改变原意。', enabled: true },
+    { id: 'expand', icon: '📈', name: '扩写', prompt: '请在原文基础上进行扩写，增加细节描写、心理活动或环境渲染，使内容更加丰富饱满。', enabled: true },
+    { id: 'dialogue', icon: '💬', name: '加对话', prompt: '请为这段内容增加人物对话，使场景更加生动，符合人物性格和情境。', enabled: true },
+    { id: 'analyze', icon: '🔍', name: '分析', prompt: '请分析这段文本的写作特点、情感基调、叙事手法等，给出专业的文学点评。', enabled: true }
+];
+
+// 从localStorage加载工具配置
+let toolConfig = loadJSON('lingxi_tool_config') || [...DEFAULT_TOOLS];
+
+// 渲染工具按钮
+function renderToolButtons() {
+    const container = document.getElementById('toolButtonsContainer');
+    container.innerHTML = '';
+    
+    const enabledTools = toolConfig.filter(t => t.enabled);
+    const cols = Math.min(enabledTools.length, 5);
+    container.className = `grid grid-cols-${cols} gap-2`;
+    
+    enabledTools.forEach(tool => {
+        const btn = document.createElement('button');
+        btn.className = `tool-btn ${currentToolMode === tool.id ? 'active' : ''}`;
+        btn.dataset.mode = tool.id;
+        btn.onclick = () => setToolMode(tool.id);
+        btn.innerHTML = `
+            <span class="text-lg">${tool.icon}</span>
+            <span class="text-[10px] font-bold">${tool.name}</span>
+        `;
+        container.appendChild(btn);
+    });
+}
 
 window.toggleToolPanel = function() {
     const panel = document.getElementById('toolPanel');
@@ -809,32 +844,97 @@ window.setToolMode = function(mode) {
         }
     });
     // 显示当前提示词
-    document.getElementById('currentPromptDisplay').textContent = TOOL_PROMPTS[mode];
-    showToast(`🛠️ 已切换到【${getToolModeName(mode)}】模式`);
+    const tool = toolConfig.find(t => t.id === mode);
+    if (tool) {
+        document.getElementById('currentPromptDisplay').textContent = tool.prompt;
+        showToast(`🛠️ 已切换到【${tool.name}】模式`);
+    }
 };
 
-function getToolModeName(mode) {
-    const names = {
-        continue: '续写',
-        polish: '润色',
-        expand: '扩写',
-        dialogue: '加对话',
-        analyze: '分析'
-    };
-    return names[mode] || mode;
+// 打开工具配置弹窗
+window.openToolConfig = function() {
+    document.getElementById('toolConfigModal').classList.remove('hidden');
+    renderToolConfigList();
+};
+
+window.closeToolConfig = function() {
+    document.getElementById('toolConfigModal').classList.add('hidden');
+};
+
+// 渲染配置列表
+function renderToolConfigList() {
+    const container = document.getElementById('toolConfigList');
+    container.innerHTML = '';
+    
+    toolConfig.forEach((tool, idx) => {
+        const item = document.createElement('div');
+        item.className = 'bg-white/5 border rounded-lg p-3 space-y-2';
+        item.style.borderColor = 'var(--border-color)';
+        item.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 flex-1">
+                    <input type="checkbox" ${tool.enabled ? 'checked' : ''} onchange="toggleToolEnabled(${idx})" class="accent-blue-500">
+                    <input type="text" value="${tool.icon}" onchange="updateToolIcon(${idx}, this.value)" class="w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
+                    <input type="text" value="${tool.name}" onchange="updateToolName(${idx}, this.value)" class="flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
+                </div>
+                <button onclick="deleteTool(${idx})" class="text-red-400 hover:text-red-300 transition text-sm ml-2">🗑️</button>
+            </div>
+            <textarea onchange="updateToolPrompt(${idx}, this.value)" class="w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt}</textarea>
+        `;
+        container.appendChild(item);
+    });
 }
 
-window.customizePrompts = function() {
-    // TODO: 打开自定义提示词配置弹窗
-    showToast('⚙️ 自定义配置功能开发中...');
+window.toggleToolEnabled = function(idx) {
+    toolConfig[idx].enabled = !toolConfig[idx].enabled;
 };
 
-// 初始化时设置默认工具模式
+window.updateToolIcon = function(idx, value) {
+    toolConfig[idx].icon = value;
+};
+
+window.updateToolName = function(idx, value) {
+    toolConfig[idx].name = value;
+};
+
+window.updateToolPrompt = function(idx, value) {
+    toolConfig[idx].prompt = value;
+};
+
+window.deleteTool = function(idx) {
+    if (!confirm('确认删除此工具？')) return;
+    toolConfig.splice(idx, 1);
+    renderToolConfigList();
+};
+
+window.addNewTool = function() {
+    const newId = 'custom_' + Date.now();
+    toolConfig.push({
+        id: newId,
+        icon: '🔧',
+        name: '新工具',
+        prompt: '请输入自定义提示词...',
+        enabled: true
+    });
+    renderToolConfigList();
+};
+
+window.saveToolConfig = function() {
+    saveJSON('lingxi_tool_config', toolConfig);
+    renderToolButtons();
+    closeToolConfig();
+    showToast('✅ 工具配置已保存');
+};
+
+// 初始化时设置默认工具模式并渲染按钮
 if (typeof window.init === 'function') {
     const originalInit = window.init;
     window.init = function() {
         originalInit();
-        setToolMode('continue');
+        renderToolButtons();
+        if (toolConfig.length > 0 && toolConfig[0].enabled) {
+            setToolMode(toolConfig[0].id);
+        }
     };
 }
 
@@ -1417,6 +1517,7 @@ function bindEvents() {
     dom.workspace.oninput  = () => { dom.wsWordCount.textContent=dom.workspace.value.length+'字'; debouncedSaveWorkspace(dom.workspace.value); };
     dom.tempSlider.oninput = () => { dom.tempVal.textContent = dom.tempSlider.value; };
 
+    document.getElementById('toggleSpace').onclick  = () => document.getElementById('mainEditor').classList.toggle('editor-active');
     document.getElementById('newChatBtn').onclick   = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
     document.getElementById('typesetBtn').onclick   = typesetContent;
     document.getElementById('clearChatBtn').onclick = clearChat;
