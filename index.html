@@ -1729,7 +1729,7 @@ window.openReportToEditor = function(idx) {
     conversationHistory = [];
     document.getElementById('displayArea').innerHTML = '';
     
-    // 创建报告查看界面
+    // 创建报告查看界面（先显示加载中）
     const container = document.createElement('div');
     container.className = 'max-w-4xl mx-auto pb-20';
     container.innerHTML = `
@@ -1745,8 +1745,13 @@ window.openReportToEditor = function(idx) {
             </div>
         </div>
         
-        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
-            <div class="prose max-w-none">${marked.parse(report.content || '暂无内容')}</div>
+        <div id="reportContentArea" class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
+            <div class="flex items-center justify-center py-12">
+                <div class="text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-3"></div>
+                    <p class="text-sm text-gray-500">正在渲染内容...</p>
+                </div>
+            </div>
         </div>
         
         <div class="mt-6 flex gap-3">
@@ -1757,6 +1762,20 @@ window.openReportToEditor = function(idx) {
     
     document.getElementById('displayArea').appendChild(container);
     showToast(`✅ 已打开报告：${report.name}`);
+    
+    // 延迟渲染Markdown内容，避免阻塞UI
+    setTimeout(() => {
+        const contentArea = document.getElementById('reportContentArea');
+        if (contentArea) {
+            const content = report.content || '暂无内容';
+            try {
+                contentArea.innerHTML = `<div class="prose max-w-none">${marked.parse(content)}</div>`;
+            } catch (err) {
+                console.error('[报告渲染] Markdown解析失败:', err);
+                contentArea.innerHTML = `<pre class="whitespace-pre-wrap text-sm">${escapeHtml(content)}</pre>`;
+            }
+        }
+    }, 50);
 };
 
 // 关闭内容查看器
@@ -1947,10 +1966,11 @@ async function handleFileImport(e) {
     
     // 如果没有选择文件或用户取消，静默返回
     if (!files || !files.length) {
-        console.log('未选择文件或已取消');
+        console.log('[导入] 未选择文件或已取消');
         return;
     }
     
+    console.log(`[导入] 开始导入 ${files.length} 个文件`);
     showToast(`📂 正在导入 ${files.length} 个文件...`);
     
     let imported = 0;
@@ -1960,23 +1980,36 @@ async function handleFileImport(e) {
         try {
             let text = '';
             
-            if (f.name.endsWith('.docx')) {
+            if (f.name.toLowerCase().endsWith('.docx')) {
                 // 处理.docx文件
-                console.log(`正在解析 .docx 文件: ${f.name}`);
+                console.log(`[导入] 正在解析 .docx 文件: ${f.name}`);
+                
+                if (typeof mammoth === 'undefined') {
+                    throw new Error('mammoth库未加载，请检查网络连接');
+                }
+                
                 const arrayBuffer = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (ev) => resolve(ev.target.result);
+                    reader.onload = (ev) => {
+                        console.log(`[导入] FileReader完成: ${f.name}, 大小: ${ev.target.result.byteLength} bytes`);
+                        resolve(ev.target.result);
+                    };
                     reader.onerror = () => reject(new Error('读取文件失败'));
                     reader.readAsArrayBuffer(f);
                 });
                 
                 const result = await mammoth.extractRawText({ arrayBuffer });
                 text = result.value;
-                console.log(`成功提取文本，长度: ${text.length}`);
-            } else {
-                // 处理.txt等其他文本文件
+                console.log(`[导入] mammoth提取成功，文本长度: ${text.length}`);
+            } else if (f.name.toLowerCase().endsWith('.txt')) {
+                // 处理.txt文件
+                console.log(`[导入] 正在读取 .txt 文件: ${f.name}`);
                 text = await f.text();
-                console.log(`成功读取文本文件，长度: ${text.length}`);
+                console.log(`[导入] 读取成功，文本长度: ${text.length}`);
+            } else {
+                // 尝试作为文本文件读取
+                console.log(`[导入] 未知格式 ${f.name}，尝试作为文本读取`);
+                text = await f.text();
             }
             
             if (text && text.trim()) {
@@ -1986,15 +2019,15 @@ async function handleFileImport(e) {
                     gene: ''
                 });
                 imported++;
-                console.log(`✅ 成功导入: ${f.name}`);
+                console.log(`[导入] ✅ 成功: ${f.name}`);
             } else {
-                console.warn(`⚠️ 文件内容为空: ${f.name}`);
+                console.warn(`[导入] ⚠️ 文件内容为空: ${f.name}`);
                 failed++;
             }
         } catch (err) {
-            console.error(`❌ 导入失败: ${f.name}`, err);
+            console.error(`[导入] ❌ 失败: ${f.name}`, err);
             failed++;
-            showToast(`⚠️ 导入 ${f.name} 失败: ${err.message}`);
+            showToast(`⚠️ ${f.name}: ${err.message}`);
         }
     }
     
@@ -2002,12 +2035,15 @@ async function handleFileImport(e) {
         saveJSON(SK.samples, sampleLibrary);
         renderSampleLibrary();
         showToast(`✅ 成功导入 ${imported} 个文件${failed > 0 ? `，${failed} 个失败` : ''}`);
+        console.log(`[导入] 完成: ${imported} 成功, ${failed} 失败`);
     } else if (failed === files.length) {
-        showToast('❌ 所有文件导入失败，请检查文件格式');
+        showToast('❌ 所有文件导入失败，请检查文件格式和网络连接');
+        console.error('[导入] 全部失败');
     }
     
     // 清空input，允许重复选择同一文件
     e.target.value = '';
+    console.log('[导入] input已清空');
 }
 
 function appendMsg(role, content) {
