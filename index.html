@@ -81,17 +81,18 @@
         .mode-btn { flex: 1; padding: 0.6rem 0; font-size: 14px; font-weight: 900; font-style: italic; transition: all 0.3s; border-radius: 8px; color: #9ca3af; }
         .mode-btn-active { background: #3b82f6; color: white !important; box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
         .msg-wrapper { margin-bottom: 1.8rem; display: flex; flex-direction: column; }
-        .user-msg { background: var(--accent-blue); color: white; padding: 1rem 1.4rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.2); }
-        .ai-msg { background: var(--card-bg); color: var(--text-primary); padding: 1.4rem 1.8rem; border-radius: 20px 20px 20px 4px; border: 1px solid var(--border-color); align-self: flex-start; max-width: 92%; line-height: 1.8; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+        .user-msg { background: var(--accent-blue); color: white; padding: 1rem 1.4rem; border-radius: 20px 20px 4px 20px; align-self: flex-end; max-width: 80%; line-height: 1.8; box-shadow: 0 4px 15px rgba(59,130,246,0.2); word-wrap: break-word; overflow-wrap: break-word; }
+        .ai-msg { background: var(--card-bg); color: var(--text-primary); padding: 1.4rem 1.8rem; border-radius: 20px 20px 20px 4px; border: 1px solid var(--border-color); align-self: flex-start; max-width: 92%; line-height: 1.8; box-shadow: 0 2px 12px rgba(0,0,0,0.04); word-wrap: break-word; overflow-wrap: break-word; }
+        .msg-body { word-break: break-word; white-space: pre-wrap; }
         .msg-body h1,.msg-body h2,.msg-body h3 { font-weight: 800; margin: 0.8em 0 0.4em; }
         .msg-body h1 { font-size: 1.3em; }
         .msg-body h2 { font-size: 1.15em; }
         .msg-body h3 { font-size: 1.05em; }
-        .msg-body p  { margin: 0.5em 0; }
+        .msg-body p  { margin: 0.5em 0; line-height: 1.8; }
         .msg-body ul,.msg-body ol { padding-left: 1.4em; margin: 0.4em 0; }
         .msg-body li { margin: 0.2em 0; }
         .msg-body code { background: rgba(59,130,246,0.1); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.88em; font-family: monospace; }
-        .msg-body pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 10px; overflow-x: auto; margin: 0.6em 0; }
+        .msg-body pre { background: #1e293b; color: #e2e8f0; padding: 1em; border-radius: 10px; overflow-x: auto; margin: 0.6em 0; white-space: pre-wrap; word-wrap: break-word; }
         .msg-body pre code { background: none; padding: 0; color: inherit; }
         .msg-body blockquote { border-left: 3px solid #3b82f6; padding-left: 0.8em; color: var(--text-secondary); margin: 0.4em 0; }
         .msg-body strong { font-weight: 700; }
@@ -200,14 +201,14 @@
         </section>
         <section>
             <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[13px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">📖 书稿管理</span>
                 <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
             <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
         </section>
         <section class="pb-8">
             <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[13px] font-black text-gray-500 uppercase tracking-widest">🧬 例文克隆中心</span>
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">🧬 例文中心</span>
                 <button onclick="document.getElementById('fileImport').click()" class="text-blue-400 text-[12px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
             </div>
             <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
@@ -625,14 +626,31 @@ window.saveDraftToBook = function() {
 function typesetContent() {
     let text = dom.workspace.value.trim();
     if (!text) { showToast('⚠️ 草稿区为空'); return; }
+    
+    // 统一换行符
     text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-    text = text.replace(/([。！？…]+[」"']?)\s*/g,'$1\n');
-    text = text.replace(/\n{3,}/g,'\n\n');
-    text = text.replace(/[ \t]+/g,' ');
-    text = text.split('\n').map(l=>l.trimStart()).join('\n').trim();
+    
+    // 去除所有空行和多余空格
+    text = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join('\n');
+    
+    // 标点符号后强制换行（句号、问号、叹号、省略号）
+    text = text.replace(/([。！？…]+)/g, '$1\n');
+    
+    // 引号后的标点也要换行
+    text = text.replace(/([」』"'])\s*([。！？…])/g, '$1$2\n');
+    
+    // 确保每句一行，符合手机阅读习惯
+    text = text.replace(/([^\n])([。！？…])/g, '$1$2\n');
+    
+    // 再次清理多余空行
+    text = text.replace(/\n{2,}/g, '\n');
+    
     dom.workspace.value = text;
     debouncedSaveWorkspace(text);
-    showToast('📝 智能排版完成');
+    showToast('📝 智能排版完成（左对齐·无空行·一句一行）');
 }
 
 function fillInput(text) {
@@ -999,6 +1017,10 @@ async function handleSend() {
     const text = dom.userInput.value.trim();
     if (!text) { showToast('⚠️ 请先输入内容'); return; }
 
+    // 立即清空输入区
+    dom.userInput.value = '';
+    dom.charCount.textContent = '0字';
+
     let ref = '';
     selectedSampleIndices.forEach(idx => {
         const s = sampleLibrary[idx];
@@ -1020,7 +1042,6 @@ async function handleSend() {
         isGenerating = false;
         abortController = null;
         resetSendButton();
-        dom.userInput.value = '';
         dom.charCount.textContent = '0字';
         saveHistory();
         renderHistorySelect();
@@ -1254,6 +1275,22 @@ function appendMsg(role, content) {
         };
         msg.style.position = 'relative';
         msg.appendChild(copyBtn);
+    }
+    
+    // 为AI消息底部也添加复制按钮
+    if (role === 'ai') {
+        const bottomCopyBar = document.createElement('div');
+        bottomCopyBar.className = 'mt-3 pt-2 border-t flex justify-end';
+        bottomCopyBar.style.borderColor = 'var(--border-color)';
+        const copyBtnBottom = document.createElement('button');
+        copyBtnBottom.className = 'text-xs text-blue-500 hover:text-blue-600 font-bold flex items-center gap-1 px-3 py-1.5 rounded-lg transition';
+        copyBtnBottom.style.background = 'var(--bg-main)';
+        copyBtnBottom.innerHTML = '<span>📋</span><span>复制全文</span>';
+        copyBtnBottom.onclick = () => {
+            navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制到剪贴板'));
+        };
+        bottomCopyBar.appendChild(copyBtnBottom);
+        msg.appendChild(bottomCopyBar);
     }
     
     wrap.appendChild(msg);
