@@ -112,6 +112,14 @@
         .theme-dot.eye     { background: linear-gradient(135deg,#f0f9f0,#d1e7d1); }
         .theme-dot.retro   { background: linear-gradient(135deg,#fff8e6,#ffdead); }
         
+        /* 折叠面板样式 */
+        .section-header { cursor: pointer; user-select: none; transition: all 0.2s; }
+        .section-header:hover { opacity: 0.8; }
+        .collapse-icon { display: inline-block; transition: transform 0.3s ease; font-size: 10px; margin-right: 4px; }
+        .collapsed .collapse-icon { transform: rotate(-90deg); }
+        .collapsible-content { overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
+        .collapsed + .collapsible-content { max-height: 0 !important; opacity: 0; }
+        
         /* 诗词书法展示样式 */
         .poetry-container {
             border: 1px solid rgba(209, 213, 219, 0.4);
@@ -223,26 +231,26 @@
             </button>
         </section>
         <section>
-            <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">📖 书稿管理</span>
-                <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
+            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('bookLibrary')">
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>📖 书稿管理</span>
+                <button onclick="event.stopPropagation(); addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
-            <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
+            <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll collapsible-content"></div>
         </section>
         <section class="pb-8">
-            <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">🧬 例文中心</span>
-                <button onclick="document.getElementById('fileImport').click()" class="text-blue-400 text-[12px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
+            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('sampleLibrary')">
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>🧬 例文中心</span>
+                <button onclick="event.stopPropagation(); document.getElementById('fileImport').click()" class="text-blue-400 text-[12px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 导入</button>
             </div>
             <input type="file" id="fileImport" class="hidden" multiple accept=".txt,.docx">
-            <div id="sampleLibrary" class="space-y-1.5"></div>
+            <div id="sampleLibrary" class="space-y-1.5 collapsible-content"></div>
         </section>
         <section class="pb-8">
-            <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider">📊 分析报告</span>
-                <button onclick="addNewAnalysisReport()" class="text-purple-400 text-[10px] font-bold hover:text-purple-300 px-2 py-1 bg-purple-500/10 rounded-lg hover:bg-purple-500/20 transition">+ 新建</button>
+            <div class="flex justify-between items-center mb-2 px-0.5 section-header" onclick="toggleSection('analysisReports')">
+                <span class="text-[16px] font-black text-gray-700 uppercase tracking-wider"><span class="collapse-icon">▼</span>📊 分析报告</span>
+                <button onclick="event.stopPropagation(); addNewAnalysisReport()" class="text-purple-400 text-[10px] font-bold hover:text-purple-300 px-2 py-1 bg-purple-500/10 rounded-lg hover:bg-purple-500/20 transition">+ 新建</button>
             </div>
-            <div id="analysisReports" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
+            <div id="analysisReports" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll collapsible-content"></div>
         </section>
     </div>
     <div class="px-4 py-2 border-t border-white/5">
@@ -360,13 +368,7 @@
                         <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
                         <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
                         <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
-                        <div class="relative group">
-                            <button class="quick-tag">🔍 分析 ▼</button>
-                            <div class="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[200px] hidden group-hover:block z-50">
-                                <button onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议（注意：不能出现例文专属情节）')" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 text-gray-700">📊 内容分析</button>
-                                <button onclick="showGeneExtractModal()" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 text-gray-700">🧬 基因提取</button>
-                            </div>
-                        </div>
+                        <button class="quick-tag" onclick="showGeneExtractModal()">🔍 分析</button>
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -1296,23 +1298,55 @@ function renderSampleLibrary() {
     sampleLibrary.forEach((s,i) => {
         const isSelected = selectedSampleIndices.includes(i);
         const div = document.createElement('div');
-        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
         div.innerHTML = `
             <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0" onclick="event.stopPropagation()">
                     <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleSample(${i})">
                     <span class="truncate font-bold">${s.name}</span>
                 </label>
                 <div class="flex gap-1.5 ml-2 flex-shrink-0">
-                    <button onclick="deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
+                    <button onclick="event.stopPropagation(); deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
-            </div>
-            ${s.gene ? `<div class="mt-1.5 text-[10px] text-blue-200 bg-blue-500/20 px-2 py-1 rounded-md italic">✅ 已提取基因</div>` : ''}`;
+            </div>`;
+        // 点击整个卡片打开例文到编辑区
+        div.onclick = (e) => {
+            if (!e.target.closest('input') && !e.target.closest('button')) {
+                openSampleToEditor(i);
+            }
+        };
         frag.appendChild(div);
     });
     container.innerHTML = '';
     container.appendChild(frag);
 }
+
+// 折叠/展开功能
+window.toggleSection = function(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    
+    const header = section.previousElementSibling;
+    if (!header || !header.classList.contains('section-header')) return;
+    
+    // 切换collapsed类
+    header.classList.toggle('collapsed');
+    
+    // 设置max-height实现动画
+    if (header.classList.contains('collapsed')) {
+        section.style.maxHeight = '0';
+        section.style.opacity = '0';
+    } else {
+        // 恢复原来的高度限制
+        if (sectionId === 'bookLibrary' || sectionId === 'analysisReports') {
+            section.style.maxHeight = '176px'; // max-h-44 = 11rem = 176px
+        } else {
+            section.style.maxHeight = 'none';
+        }
+        section.style.opacity = '1';
+    }
+};
+
 window.toggleSample = function(idx) {
     selectedSampleIndices = selectedSampleIndices.includes(idx)
         ? selectedSampleIndices.filter(i=>i!==idx)
@@ -1362,19 +1396,24 @@ function renderAnalysisReports() {
     analysisReports.forEach((r,i) => {
         const isSelected = selectedReportIndices.includes(i);
         const div = document.createElement('div');
-        div.className = `p-2.5 rounded-xl border text-[11px] transition-all ${isSelected ? 'bg-purple-500/10 border-purple-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-purple-500/10 border-purple-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
         div.innerHTML = `
             <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0" onclick="event.stopPropagation()">
                     <input type="checkbox" class="accent-purple-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleReport(${i})">
                     <span class="truncate font-bold">${r.name}</span>
                 </label>
                 <div class="flex gap-1.5 ml-2 flex-shrink-0">
-                    <button onclick="viewReport(${i})" title="查看报告" class="text-purple-400 hover:text-white transition text-sm">👁️</button>
-                    <button onclick="deleteReport(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
+                    <button onclick="event.stopPropagation(); deleteReport(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>
             <div class="mt-1 text-[9px] text-gray-400 truncate">来源: ${r.sourceSample || '手动创建'} · ${r.createTime}</div>`;
+        // 点击整个卡片打开报告到编辑区
+        div.onclick = (e) => {
+            if (!e.target.closest('input') && !e.target.closest('button')) {
+                openReportToEditor(i);
+            }
+        };
         frag.appendChild(div);
     });
     container.innerHTML = '';
@@ -1394,6 +1433,28 @@ window.viewReport = function(idx) {
     const wrapper = appendMsg('ai', '');
     const targetEl = wrapper.querySelector('.msg-body');
     targetEl.innerHTML = `<strong>${report.name}</strong><br/><br/>${marked.parse(report.content)}`;
+};
+
+// 打开例文到编辑区
+window.openSampleToEditor = function(idx) {
+    const sample = sampleLibrary[idx];
+    if (!sample) return;
+    
+    // 将例文内容填充到输入框
+    dom.userInput.value = sample.text || '';
+    updateCharCount();
+    showToast(`✅ 已加载《${sample.name}》到编辑区`);
+};
+
+// 打开分析报告到编辑区
+window.openReportToEditor = function(idx) {
+    const report = analysisReports[idx];
+    if (!report) return;
+    
+    // 将报告内容填充到输入框
+    dom.userInput.value = report.content || '';
+    updateCharCount();
+    showToast(`✅ 已加载《${report.name}》到编辑区`);
 };
 
 window.deleteReport = function(idx) {
