@@ -1682,62 +1682,187 @@ window.viewReport = function(idx) {
     targetEl.innerHTML = `<strong>${report.name}</strong><br/><br/>${marked.parse(report.content)}`;
 };
 
-// 打开例文到编辑模态框
+// 打开例文到右侧主编辑区（类似书稿管理）
 window.openSampleToEditor = function(idx) {
     const sample = sampleLibrary[idx];
     if (!sample) return;
     
-    document.getElementById('contentEditorTitle').textContent = '🧬 例文查看';
-    document.getElementById('contentEditorName').value = sample.name;
-    document.getElementById('contentEditorBody').value = sample.text || '';
-    document.getElementById('contentEditorWordCount').textContent = (sample.text || '').length;
-    document.getElementById('contentEditorModal').classList.remove('hidden');
+    // 清空当前对话历史
+    conversationHistory = [];
+    document.getElementById('displayArea').innerHTML = '';
+    
+    // 创建例文查看界面
+    const container = document.createElement('div');
+    container.className = 'max-w-4xl mx-auto pb-20';
+    container.innerHTML = `
+        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
+            <div class="flex justify-between items-start mb-3">
+                <h2 class="text-2xl font-black text-blue-600 italic">🧬 ${sample.name}</h2>
+                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
+            </div>
+            <div class="flex gap-4 text-xs text-gray-500">
+                <span>字数：${(sample.text || '').length}</span>
+                <span>类型：例文素材</span>
+            </div>
+        </div>
+        
+        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
+            <pre class="whitespace-pre-wrap leading-relaxed text-sm" style="font-family: inherit;">${escapeHtml(sample.text || '')}</pre>
+        </div>
+        
+        <div class="mt-6 flex gap-3">
+            <button onclick="copySampleText(${idx})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">📋 复制全文</button>
+            <button onclick="sendSampleToAI(${idx})" class="px-4 py-2 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600 transition text-sm">💬 发送给AI分析</button>
+        </div>
+    `;
+    
+    document.getElementById('displayArea').appendChild(container);
+    showToast(`✅ 已打开例文：${sample.name}`);
 };
 
-// 打开分析报告到编辑模态框
+// 打开分析报告到右侧主编辑区
 window.openReportToEditor = function(idx) {
     const report = analysisReports[idx];
     if (!report) return;
     
-    document.getElementById('contentEditorTitle').textContent = '📊 分析报告';
-    document.getElementById('contentEditorName').value = report.name;
-    document.getElementById('contentEditorBody').value = report.content || '';
-    document.getElementById('contentEditorWordCount').textContent = (report.content || '').length;
-    document.getElementById('contentEditorModal').classList.remove('hidden');
+    // 清空当前对话历史
+    conversationHistory = [];
+    document.getElementById('displayArea').innerHTML = '';
+    
+    // 创建报告查看界面
+    const container = document.createElement('div');
+    container.className = 'max-w-4xl mx-auto pb-20';
+    container.innerHTML = `
+        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
+            <div class="flex justify-between items-start mb-3">
+                <h2 class="text-2xl font-black text-purple-600 italic">📊 ${report.name}</h2>
+                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
+            </div>
+            <div class="flex gap-4 text-xs text-gray-500">
+                <span>字数：${(report.content || '').length}</span>
+                <span>来源：${report.sourceSample || '手动创建'}</span>
+                <span>时间：${report.createTime}</span>
+            </div>
+        </div>
+        
+        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
+            <div class="prose max-w-none">${marked.parse(report.content || '暂无内容')}</div>
+        </div>
+        
+        <div class="mt-6 flex gap-3">
+            <button onclick="copyReportContent(${idx})" class="px-4 py-2 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600 transition text-sm">📋 复制全文</button>
+            <button onclick="editReportInline(${idx})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">✏️ 编辑报告</button>
+        </div>
+    `;
+    
+    document.getElementById('displayArea').appendChild(container);
+    showToast(`✅ 已打开报告：${report.name}`);
 };
 
-// 关闭内容编辑模态框
-window.closeContentEditorModal = function() {
-    document.getElementById('contentEditorModal').classList.add('hidden');
+// 关闭内容查看器
+window.closeContentViewer = function() {
+    document.getElementById('displayArea').innerHTML = '';
+    renderEmptyState();
+    showToast('ℹ️ 已关闭查看');
 };
 
-// 复制内容编辑器中的全文
-window.copyContentFromEditor = function() {
-    const content = document.getElementById('contentEditorBody').value;
-    navigator.clipboard.writeText(content).then(() => {
-        showToast('✅ 已复制到剪贴板');
+// 辅助函数：转义HTML特殊字符
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// 渲染空状态
+function renderEmptyState() {
+    document.getElementById('displayArea').innerHTML = `
+        <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none">
+            <div class="text-7xl mb-4 animate-pulse">✨</div>
+            <h2 class="text-3xl font-black tracking-wider mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">灵犀一点通</h2>
+            <p class="text-sm opacity-40 mb-8 max-w-md text-center leading-relaxed">智能创作助手 · 激发无限灵感</p>
+        </div>
+    `;
+}
+
+// 复制例文文本
+window.copySampleText = function(idx) {
+    const sample = sampleLibrary[idx];
+    if (!sample) return;
+    navigator.clipboard.writeText(sample.text || '').then(() => {
+        showToast('✅ 已复制例文全文');
     }).catch(() => {
         showToast('❌ 复制失败');
     });
 };
 
-// 将内容发送到对话区
-window.sendContentToChat = function() {
-    const content = document.getElementById('contentEditorBody').value;
-    const name = document.getElementById('contentEditorName').value;
-    if (!content) {
-        showToast('⚠️ 内容为空');
-        return;
-    }
+// 发送例文给AI分析
+window.sendSampleToAI = function(idx) {
+    const sample = sampleLibrary[idx];
+    if (!sample) return;
     
-    // 关闭模态框
-    closeContentEditorModal();
-    
-    // 将内容填充到输入框
-    dom.userInput.value = content;
-    dom.charCount.textContent = content.length + '字';
+    dom.userInput.value = `请帮我分析这篇例文的写作风格和特点：\n\n${sample.text.slice(0, 3000)}`;
+    dom.charCount.textContent = dom.userInput.value.length + '字';
     dom.userInput.focus();
-    showToast(`✅ 《${name}》已加载到输入区`);
+    showToast('📤 已将例文填入输入框，可直接发送');
+};
+
+// 复制报告内容
+window.copyReportContent = function(idx) {
+    const report = analysisReports[idx];
+    if (!report) return;
+    navigator.clipboard.writeText(report.content || '').then(() => {
+        showToast('✅ 已复制报告全文');
+    }).catch(() => {
+        showToast('❌ 复制失败');
+    });
+};
+
+// 内联编辑报告
+window.editReportInline = function(idx) {
+    const report = analysisReports[idx];
+    if (!report) return;
+    
+    // 切换到编辑模式
+    const container = document.querySelector('#displayArea > div.max-w-4xl');
+    if (!container) return;
+    
+    const contentDiv = container.querySelector('.prose');
+    if (!contentDiv) return;
+    
+    // 替换为textarea
+    const textarea = document.createElement('textarea');
+    textarea.className = 'w-full min-h-[400px] p-4 rounded-lg border resize-y custom-scroll text-sm leading-relaxed';
+    textarea.style.borderColor = 'var(--border-color)';
+    textarea.value = report.content || '';
+    
+    contentDiv.replaceWith(textarea);
+    
+    // 添加保存按钮
+    const btnContainer = container.querySelector('.mt-6.flex');
+    if (btnContainer) {
+        btnContainer.innerHTML = `
+            <button onclick="saveReportInline(${idx})" class="px-4 py-2 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600 transition text-sm">💾 保存修改</button>
+            <button onclick="cancelEditReport(${idx})" class="px-4 py-2 rounded-lg bg-gray-500 text-white font-bold hover:bg-gray-600 transition text-sm">取消</button>
+        `;
+    }
+};
+
+// 保存内联编辑的报告
+window.saveReportInline = function(idx) {
+    const textarea = document.querySelector('#displayArea textarea');
+    if (!textarea) return;
+    
+    analysisReports[idx].content = textarea.value;
+    saveJSON('lingxi_analysis_reports', analysisReports);
+    showToast('✅ 报告已保存');
+    
+    // 重新打开查看模式
+    openReportToEditor(idx);
+};
+
+// 取消编辑报告
+window.cancelEditReport = function(idx) {
+    openReportToEditor(idx);
 };
 
 window.deleteReport = function(idx) {
@@ -1819,27 +1944,39 @@ window.confirmGeneExtract = function() {
 
 async function handleFileImport(e) {
     const files = e.target.files;
-    if (!files || !files.length) return;
+    
+    // 如果没有选择文件或用户取消，静默返回
+    if (!files || !files.length) {
+        console.log('未选择文件或已取消');
+        return;
+    }
+    
+    showToast(`📂 正在导入 ${files.length} 个文件...`);
     
     let imported = 0;
+    let failed = 0;
+    
     for (const f of files) {
         try {
             let text = '';
             
             if (f.name.endsWith('.docx')) {
                 // 处理.docx文件
+                console.log(`正在解析 .docx 文件: ${f.name}`);
                 const arrayBuffer = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = (ev) => resolve(ev.target.result);
-                    reader.onerror = reject;
+                    reader.onerror = () => reject(new Error('读取文件失败'));
                     reader.readAsArrayBuffer(f);
                 });
                 
                 const result = await mammoth.extractRawText({ arrayBuffer });
                 text = result.value;
+                console.log(`成功提取文本，长度: ${text.length}`);
             } else {
                 // 处理.txt等其他文本文件
                 text = await f.text();
+                console.log(`成功读取文本文件，长度: ${text.length}`);
             }
             
             if (text && text.trim()) {
@@ -1849,9 +1986,14 @@ async function handleFileImport(e) {
                     gene: ''
                 });
                 imported++;
+                console.log(`✅ 成功导入: ${f.name}`);
+            } else {
+                console.warn(`⚠️ 文件内容为空: ${f.name}`);
+                failed++;
             }
         } catch (err) {
-            console.error(`导入失败: ${f.name}`, err);
+            console.error(`❌ 导入失败: ${f.name}`, err);
+            failed++;
             showToast(`⚠️ 导入 ${f.name} 失败: ${err.message}`);
         }
     }
@@ -1859,11 +2001,12 @@ async function handleFileImport(e) {
     if (imported > 0) {
         saveJSON(SK.samples, sampleLibrary);
         renderSampleLibrary();
-        showToast(`✅ 成功导入 ${imported} 个文件`);
-    } else {
-        showToast('⚠️ 没有成功导入任何文件');
+        showToast(`✅ 成功导入 ${imported} 个文件${failed > 0 ? `，${failed} 个失败` : ''}`);
+    } else if (failed === files.length) {
+        showToast('❌ 所有文件导入失败，请检查文件格式');
     }
     
+    // 清空input，允许重复选择同一文件
     e.target.value = '';
 }
 
