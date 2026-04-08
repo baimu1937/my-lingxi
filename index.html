@@ -390,47 +390,6 @@
     </div>
 </div>
 
-<div id="bookModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
-        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
-            <h3 class="text-lg font-black text-blue-500 italic">📖 书稿编辑</h3>
-            <button onclick="closeBookModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
-        </div>
-        <div class="flex flex-col flex-1 overflow-hidden gap-3">
-            <div class="flex gap-3 items-center flex-shrink-0">
-                <input id="bookNameInput" type="text" placeholder="书稿名称" class="modal-input flex-1 text-sm font-bold">
-                <span class="text-xs font-bold text-blue-500 flex-shrink-0">字数：<span id="bookWordCount">0</span></span>
-            </div>
-            <textarea id="bookContent" class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0"></textarea>
-            <div class="flex gap-3 flex-shrink-0">
-                <button onclick="saveCurrentBook()" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">保存书稿</button>
-                <button onclick="appendBookToDraft()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm" style="background:var(--bg-main);color:var(--text-secondary)">追加到草稿</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 通用内容编辑模态框（用于例文和分析报告） -->
-<div id="contentEditorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="modal-box rounded-[24px] p-6 w-full max-w-3xl shadow-2xl flex flex-col" style="height:78vh">
-        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
-            <h3 id="contentEditorTitle" class="text-lg font-black text-purple-500 italic">📄 内容查看</h3>
-            <button onclick="closeContentEditorModal()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
-        </div>
-        <div class="flex flex-col flex-1 overflow-hidden gap-3">
-            <div class="flex gap-3 items-center flex-shrink-0">
-                <input id="contentEditorName" type="text" readonly class="modal-input flex-1 text-sm font-bold bg-gray-50 cursor-not-allowed">
-                <span class="text-xs font-bold text-purple-500 flex-shrink-0">字数：<span id="contentEditorWordCount">0</span></span>
-            </div>
-            <textarea id="contentEditorBody" class="modal-input flex-1 resize-none text-sm custom-scroll leading-relaxed" style="min-height:0" readonly></textarea>
-            <div class="flex gap-3 flex-shrink-0">
-                <button onclick="copyContentFromEditor()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">📋 复制全文</button>
-                <button onclick="sendContentToChat()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 rounded-xl shadow transition text-sm">💬 发送到对话</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl flex flex-col" style="max-height: 85vh;">
         <div class="flex justify-between items-center mb-5 pb-4 border-b" style="border-color:var(--border-color)">
@@ -702,45 +661,65 @@ function renderBookLibrary() {
         left.textContent = `${book.name} (${(book.content||'').length}字)`;
         const btns = document.createElement('div');
         btns.className = 'flex gap-1 flex-shrink-0';
-        btns.appendChild(makeBtn('✏️','text-blue-400 hover:bg-blue-500/20', () => editBook(i)));
         btns.appendChild(makeBtn('🗑️','text-red-400 hover:bg-red-500/20',  () => deleteBook(i)));
         item.append(left, btns);
-        item.onclick = e => { if (!e.target.closest('button')) editBook(i); };
+        item.onclick = e => { if (!e.target.closest('button')) openBookToViewer(i); };
         fragment.appendChild(item);
     });
     container.innerHTML = '';
     container.appendChild(fragment);
 }
+// 在右侧面板显示书稿（统一布局）
+window.openBookToViewer = function(i) {
+    const book = bookLibrary[i];
+    if (!book) return;
+    conversationHistory = [];
+    const displayArea = document.getElementById('displayArea');
+    displayArea.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'max-w-4xl mx-auto pb-20';
+    container.innerHTML = `
+        <div class="mb-6 pb-4 border-b" style="border-color:var(--border-color)">
+            <div class="flex justify-between items-start mb-3">
+                <h2 class="text-2xl font-black text-blue-600 italic">📖 ${escapeHtml(book.name)}</h2>
+                <button onclick="closeContentViewer()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-bold">✕ 关闭</button>
+            </div>
+            <div class="flex gap-4 text-xs text-gray-500">
+                <span>字数：${(book.content || '').length}</span>
+                <span>类型：书稿</span>
+            </div>
+        </div>
+        <div class="bg-white/50 rounded-xl p-6 shadow-inner border" style="border-color:var(--border-color)">
+            <pre class="whitespace-pre-wrap leading-relaxed text-sm" style="font-family: inherit;">${escapeHtml(book.content || '')}</pre>
+        </div>
+        <div class="mt-6 flex gap-3">
+            <button onclick="copyBookText(${i})" class="px-4 py-2 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition text-sm">📋 复制全文</button>
+            <button onclick="appendBookToDraftFromViewer(${i})" class="px-4 py-2 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600 transition text-sm">📝 追加到草稿</button>
+            <button onclick="deleteBook(${i})" class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition text-sm">🗑️ 删除</button>
+        </div>
+    `;
+    displayArea.appendChild(container);
+};
+window.copyBookText = function(i) {
+    navigator.clipboard.writeText(bookLibrary[i].content || '').then(() => showToast('✅ 已复制'));
+};
+window.appendBookToDraftFromViewer = function(i) {
+    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + (bookLibrary[i].content || '');
+    debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
+};
 window.addNewBook = function() {
-    currentEditingBookId = null;
-    document.getElementById('bookNameInput').value = `新书稿_${bookLibrary.length+1}`;
-    document.getElementById('bookContent').value = '';
-    document.getElementById('bookWordCount').textContent = '0';
-    document.getElementById('bookModal').classList.remove('hidden');
+    bookLibrary.push({name:`新书稿_${bookLibrary.length+1}`, content:''});
+    saveJSON(SK.books, bookLibrary); renderBookLibrary();
+    openBookToViewer(bookLibrary.length - 1);
 };
 window.editBook = function(i) {
-    currentEditingBookId = i;
-    document.getElementById('bookNameInput').value = bookLibrary[i].name;
-    document.getElementById('bookContent').value   = bookLibrary[i].content || '';
-    document.getElementById('bookWordCount').textContent = (bookLibrary[i].content||'').length;
-    document.getElementById('bookModal').classList.remove('hidden');
+    openBookToViewer(i);
 };
 window.deleteBook = function(i) {
     if (!confirm(`确认删除【${bookLibrary[i].name}】？`)) return;
-    bookLibrary.splice(i,1); saveJSON(SK.books, bookLibrary); renderBookLibrary();
-};
-window.saveCurrentBook = function() {
-    const name    = document.getElementById('bookNameInput').value.trim() || '未命名书稿';
-    const content = document.getElementById('bookContent').value;
-    if (currentEditingBookId !== null) bookLibrary[currentEditingBookId] = {name,content};
-    else bookLibrary.push({name,content});
-    saveJSON(SK.books, bookLibrary); renderBookLibrary(); closeBookModal();
-    showToast(`✅ 书稿【${name}】已保存`);
-};
-window.closeBookModal   = function() { document.getElementById('bookModal').classList.add('hidden'); };
-window.appendBookToDraft = function() {
-    dom.workspace.value += (dom.workspace.value ? '\n\n' : '') + document.getElementById('bookContent').value;
-    debouncedSaveWorkspace(dom.workspace.value); showToast('📝 已追加到草稿区');
+    bookLibrary.splice(i,1);
+    saveJSON(SK.books, bookLibrary); renderBookLibrary();
+    closeContentViewer();
 };
 window.saveDraftToBook = function() {
     const draft = dom.workspace.value.trim();
@@ -1778,11 +1757,10 @@ window.openReportToEditor = function(idx) {
     }, 50);
 };
 
-// 关闭内容查看器
+// 关闭内容查看器，恢复空状态
 window.closeContentViewer = function() {
     document.getElementById('displayArea').innerHTML = '';
     renderEmptyState();
-    showToast('ℹ️ 已关闭查看');
 };
 
 // 辅助函数：转义HTML特殊字符
@@ -1807,61 +1785,44 @@ function renderEmptyState() {
 window.copySampleText = function(idx) {
     const sample = sampleLibrary[idx];
     if (!sample) return;
-    navigator.clipboard.writeText(sample.text || '').then(() => {
-        showToast('✅ 已复制例文全文');
-    }).catch(() => {
-        showToast('❌ 复制失败');
-    });
+    navigator.clipboard.writeText(sample.text || '').then(() => showToast('✅ 已复制'));
 };
 
 // 发送例文给AI分析
 window.sendSampleToAI = function(idx) {
     const sample = sampleLibrary[idx];
     if (!sample) return;
-    
     dom.userInput.value = `请帮我分析这篇例文的写作风格和特点：\n\n${sample.text.slice(0, 3000)}`;
     dom.charCount.textContent = dom.userInput.value.length + '字';
     dom.userInput.focus();
-    showToast('📤 已将例文填入输入框，可直接发送');
+    showToast('📤 已填入输入框');
 };
 
 // 复制报告内容
 window.copyReportContent = function(idx) {
     const report = analysisReports[idx];
     if (!report) return;
-    navigator.clipboard.writeText(report.content || '').then(() => {
-        showToast('✅ 已复制报告全文');
-    }).catch(() => {
-        showToast('❌ 复制失败');
-    });
+    navigator.clipboard.writeText(report.content || '').then(() => showToast('✅ 已复制'));
 };
 
 // 内联编辑报告
 window.editReportInline = function(idx) {
     const report = analysisReports[idx];
     if (!report) return;
-    
-    // 切换到编辑模式
     const container = document.querySelector('#displayArea > div.max-w-4xl');
     if (!container) return;
-    
     const contentDiv = container.querySelector('.prose');
     if (!contentDiv) return;
-    
-    // 替换为textarea
     const textarea = document.createElement('textarea');
     textarea.className = 'w-full min-h-[400px] p-4 rounded-lg border resize-y custom-scroll text-sm leading-relaxed';
     textarea.style.borderColor = 'var(--border-color)';
     textarea.value = report.content || '';
-    
     contentDiv.replaceWith(textarea);
-    
-    // 添加保存按钮
     const btnContainer = container.querySelector('.mt-6.flex');
     if (btnContainer) {
         btnContainer.innerHTML = `
             <button onclick="saveReportInline(${idx})" class="px-4 py-2 rounded-lg bg-green-500 text-white font-bold hover:bg-green-600 transition text-sm">💾 保存修改</button>
-            <button onclick="cancelEditReport(${idx})" class="px-4 py-2 rounded-lg bg-gray-500 text-white font-bold hover:bg-gray-600 transition text-sm">取消</button>
+            <button onclick="openReportToEditor(${idx})" class="px-4 py-2 rounded-lg bg-gray-500 text-white font-bold hover:bg-gray-600 transition text-sm">取消</button>
         `;
     }
 };
@@ -1870,12 +1831,9 @@ window.editReportInline = function(idx) {
 window.saveReportInline = function(idx) {
     const textarea = document.querySelector('#displayArea textarea');
     if (!textarea) return;
-    
     analysisReports[idx].content = textarea.value;
     saveJSON('lingxi_analysis_reports', analysisReports);
-    showToast('✅ 报告已保存');
-    
-    // 重新打开查看模式
+    showToast('✅ 已保存');
     openReportToEditor(idx);
 };
 
@@ -1963,71 +1921,44 @@ window.confirmGeneExtract = function() {
 
 async function handleFileImport(e) {
     const files = e.target.files;
+    if (!files || !files.length) return;
     
-    // 如果没有选择文件或用户取消，静默返回
-    if (!files || !files.length) {
-        console.log('[导入] 未选择文件或已取消');
-        return;
-    }
-    
-    console.log(`[导入] 开始导入 ${files.length} 个文件`);
     showToast(`📂 正在导入 ${files.length} 个文件...`);
     
     let imported = 0;
     let failed = 0;
     
-    for (const f of files) {
+    for (const file of files) {
         try {
             let text = '';
+            const ext = file.name.split('.').pop().toLowerCase();
             
-            if (f.name.toLowerCase().endsWith('.docx')) {
-                // 处理.docx文件
-                console.log(`[导入] 正在解析 .docx 文件: ${f.name}`);
-                
+            if (ext === 'docx') {
                 if (typeof mammoth === 'undefined') {
-                    throw new Error('mammoth库未加载，请检查网络连接');
+                    throw new Error('mammoth库未加载');
                 }
-                
-                const arrayBuffer = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        console.log(`[导入] FileReader完成: ${f.name}, 大小: ${ev.target.result.byteLength} bytes`);
-                        resolve(ev.target.result);
-                    };
-                    reader.onerror = () => reject(new Error('读取文件失败'));
-                    reader.readAsArrayBuffer(f);
-                });
-                
+                const arrayBuffer = await file.arrayBuffer();
                 const result = await mammoth.extractRawText({ arrayBuffer });
-                text = result.value;
-                console.log(`[导入] mammoth提取成功，文本长度: ${text.length}`);
-            } else if (f.name.toLowerCase().endsWith('.txt')) {
-                // 处理.txt文件
-                console.log(`[导入] 正在读取 .txt 文件: ${f.name}`);
-                text = await f.text();
-                console.log(`[导入] 读取成功，文本长度: ${text.length}`);
+                text = result.value || '';
+            } else if (ext === 'txt') {
+                text = await file.text();
             } else {
-                // 尝试作为文本文件读取
-                console.log(`[导入] 未知格式 ${f.name}，尝试作为文本读取`);
-                text = await f.text();
+                text = await file.text();
             }
             
             if (text && text.trim()) {
                 sampleLibrary.push({
-                    name: f.name,
+                    name: file.name,
                     text: text,
                     gene: ''
                 });
                 imported++;
-                console.log(`[导入] ✅ 成功: ${f.name}`);
             } else {
-                console.warn(`[导入] ⚠️ 文件内容为空: ${f.name}`);
                 failed++;
             }
         } catch (err) {
-            console.error(`[导入] ❌ 失败: ${f.name}`, err);
+            console.error(`导入失败: ${file.name}`, err);
             failed++;
-            showToast(`⚠️ ${f.name}: ${err.message}`);
         }
     }
     
@@ -2035,15 +1966,11 @@ async function handleFileImport(e) {
         saveJSON(SK.samples, sampleLibrary);
         renderSampleLibrary();
         showToast(`✅ 成功导入 ${imported} 个文件${failed > 0 ? `，${failed} 个失败` : ''}`);
-        console.log(`[导入] 完成: ${imported} 成功, ${failed} 失败`);
-    } else if (failed === files.length) {
-        showToast('❌ 所有文件导入失败，请检查文件格式和网络连接');
-        console.error('[导入] 全部失败');
+    } else {
+        showToast('❌ 导入失败，请检查文件格式');
     }
     
-    // 清空input，允许重复选择同一文件
     e.target.value = '';
-    console.log('[导入] input已清空');
 }
 
 function appendMsg(role, content) {
