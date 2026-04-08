@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>灵犀平台启动器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .version {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        .features {
+            margin-top: 30px;
+            text-align: left;
+            color: #666;
+        }
+        .feature-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-item:before {
+            content: "✅ ";
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 灵犀智能创作平台</h1>
+        <div class="version">✨ v2.0 优化版 ✨</div>
+        
+        <a href="#" class="btn" onclick="openLingxi()">🚀 启动灵犀平台</a>
+        
+        <div class="features">
+            <div class="feature-item">历史支持Ctrl多选批量删除</div>
+            <div class="feature-item">书稿管理标题字体加大至13px</div>
+            <div class="feature-item">用户消息气泡添加复制按钮</div>
+            <div class="feature-item">AI输出精简为4个核心功能</div>
+            <div class="feature-item">历史记录倒序显示（最新在上）</div>
+        </div>
+    </div>
+    
+    <script>
+        function openLingxi() {
+            const timestamp = new Date().getTime();
+            window.location.href = `file:///d:/桌面/my-lingxi/index.html?t=${timestamp}`;
+        }
+        
+        // 自动打开
+        setTimeout(openLingxi, 500);
+    </script>
+</body>
+</html>

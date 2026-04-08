@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>灵犀 - 智能创作平台</title>
+    <title>灵犀 - 智能创作平台 [已优化v2.0]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
@@ -200,7 +200,7 @@
         </section>
         <section>
             <div class="flex justify-between items-center mb-2 px-0.5">
-                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
+                <span class="text-[13px] font-black text-gray-500 uppercase tracking-widest">📖 书稿管理</span>
                 <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
             <div id="bookLibrary" class="space-y-1.5 max-h-44 overflow-y-auto custom-scroll"></div>
@@ -228,6 +228,7 @@
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-200">✅ v2.0已优化</span>
             <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
@@ -304,10 +305,10 @@
                         </div>
                         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
                             <span class="font-black" style="color:var(--text-secondary)">📜 历史:</span>
-                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)">
+                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)" multiple size="1">
                                 <option value="">-- 选择历史 --</option>
                             </select>
-                            <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
+                            <button id="deleteHistoryBtn" title="批量删除选中历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
                     <div class="flex gap-2 mb-2.5 flex-wrap">
@@ -362,16 +363,19 @@
         <div class="grid grid-cols-2 gap-6 mb-5">
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
-                <input id="ds_key"   type="password" placeholder="DeepSeek API Key"    class="modal-input text-sm">
-                <input id="qw_key"   type="password" placeholder="通义千问 Qwen Key"   class="modal-input text-sm">
-                <input id="db_key"   type="password" placeholder="豆包 Doubao Key"     class="modal-input text-sm">
-                <input id="db_model" type="text"     placeholder="豆包模型ID (ep-xxx)" class="modal-input text-sm">
+                <input id="ds_key"      type="password" placeholder="DeepSeek API Key"         class="modal-input text-sm">
+                <input id="qw_key"      type="password" placeholder="通义千问 Qwen Key"        class="modal-input text-sm">
+                <input id="db_key"      type="password" placeholder="豆包 Doubao Key"          class="modal-input text-sm">
+                <input id="db_model"    type="text"     placeholder="豆包模型ID (ep-xxx)"      class="modal-input text-sm">
+                <input id="claude_key"  type="password" placeholder="Claude API Key (sk-ant-)" class="modal-input text-sm">
+                <input id="gemini_key"  type="password" placeholder="Google Gemini API Key"    class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
-                <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
-                <input id="proxy_url" type="text" placeholder="Base URL（无需填写，已由Worker代理）" class="modal-input text-sm">
-                <input id="proxy_key" type="password" placeholder="中转 Key（填你的API Key）" class="modal-input text-sm">
-                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: claude-haiku-4-5-20251001" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
+                <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">本地 / 中转</h4>
+                <input id="ollama_url" type="text" placeholder="Ollama地址 (http://localhost:11434)" class="modal-input text-sm">
+                <input id="proxy_url"  type="text" placeholder="中转 Base URL" class="modal-input text-sm">
+                <input id="proxy_key"  type="password" placeholder="中转 Key" class="modal-input text-sm">
+                <textarea id="proxy_models" placeholder="自定义模型名，逗号分隔&#10;如: llama3,gemma2,qwen2.5" class="modal-input text-xs resize-none custom-scroll" style="height:80px"></textarea>
             </div>
         </div>
         <div class="flex gap-2.5 mb-5">
@@ -462,7 +466,7 @@ async function exportToWord() {
     }
 }
 
-let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', db_key:'', db_model:'', claude_key:'', gemini_key:'', ollama_url:'', proxy_url:'', proxy_key:'', proxy_models:'' };
 let prompts             = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
 let history             = loadJSON(SK.history) || [];
 let sampleLibrary       = loadJSON(SK.samples) || [];
@@ -713,13 +717,13 @@ function renderSelect() {
 }
 
 function initConfigInputs() {
-    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','db_key','db_model','claude_key','gemini_key','ollama_url','proxy_url','proxy_key','proxy_models'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
 }
 function saveConfig() {
     flowConfig = {};
-    ['ds_key','qw_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','db_key','db_model','claude_key','gemini_key','ollama_url','proxy_url','proxy_key','proxy_models'].forEach(id => {
         flowConfig[id] = document.getElementById(id).value.trim();
     });
     saveJSON(SK.flow, flowConfig);
@@ -729,20 +733,49 @@ function saveConfig() {
 }
 function updateModelDropdowns() {
     const official = [];
+    
+    // DeepSeek
     if (flowConfig.ds_key) {
-        official.push({value:'deepseek-chat',label:'DeepSeek Chat'});
-        official.push({value:'deepseek-reasoner',label:'DeepSeek R1'});
+        official.push({value:'deepseek-chat',label:'🔥 DeepSeek Chat'});
+        official.push({value:'deepseek-reasoner',label:'🧠 DeepSeek R1'});
     }
+    
+    // Qwen
     if (flowConfig.qw_key) {
-        official.push({value:'qwen3.5-max-preview',label:'Qwen3.5 Max Preview'});
-        official.push({value:'qwen3.5-plus',label:'Qwen3.5 Plus'});
+        official.push({value:'qwen3.5-max-preview',label:'⭐ Qwen3.5 Max'});
+        official.push({value:'qwen3.5-plus',label:'✨ Qwen3.5 Plus'});
     }
+    
+    // Doubao
     if (flowConfig.db_key && flowConfig.db_model) {
-        official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
+        official.push({value:flowConfig.db_model, label:`🎯 豆包(${flowConfig.db_model.slice(0,10)}...)`});
     }
+    
+    // Claude
+    if (flowConfig.claude_key) {
+        official.push({value:'claude-3-5-sonnet-20241022',label:'👑 Claude 3.5 Sonnet'});
+        official.push({value:'claude-3-5-haiku-20241022',label:'⚡ Claude 3.5 Haiku'});
+        official.push({value:'claude-3-opus-20240229',label:'💎 Claude 3 Opus'});
+    }
+    
+    // Gemini
+    if (flowConfig.gemini_key) {
+        official.push({value:'gemini-2.0-flash-exp',label:'🚀 Gemini 2.0 Flash'});
+        official.push({value:'gemini-1.5-pro',label:'🌟 Gemini 1.5 Pro'});
+    }
+    
+    // Ollama本地模型
+    if (flowConfig.ollama_url) {
+        official.push({value:'ollama-llama3',label:'🏠 Ollama Llama3'});
+        official.push({value:'ollama-gemma2',label:'🏠 Ollama Gemma2'});
+        official.push({value:'ollama-qwen2.5',label:'🏠 Ollama Qwen2.5'});
+    }
+    
+    // 中转/自定义模型
     const proxy = flowConfig.proxy_models
-        ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:m}))
+        ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:`🔧 ${m}`}))
         : [];
+    
     const all = [...official, ...proxy];
     if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
 
@@ -1209,6 +1242,20 @@ function appendMsg(role, content) {
     if (role === 'user') body.textContent = content;
     else body.innerHTML = content ? marked.parse(content) : '';
     msg.appendChild(body);
+    
+    // 为用户消息添加复制按钮
+    if (role === 'user') {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'absolute top-2 right-2 text-white/60 hover:text-white text-xs opacity-0 hover:opacity-100 transition-opacity';
+        copyBtn.innerHTML = '📋';
+        copyBtn.title = '复制';
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(content).then(() => showToast('✅ 已复制'));
+        };
+        msg.style.position = 'relative';
+        msg.appendChild(copyBtn);
+    }
+    
     wrap.appendChild(msg);
     dom.displayArea.appendChild(wrap);
     checkEmptyState();
@@ -1225,10 +1272,10 @@ function addMsgActions(container, rawText) {
     const footer = document.createElement('div');
     footer.className = 'flex gap-2 mt-4 pt-3 border-t flex-wrap';
     footer.style.borderColor = 'var(--border-color)';
+    
+    // 只保留4个核心功能：复制、存稿、重新生成、导出Word
     const btnCopy    = makeActionBtn('📋 复制','text-green-500',   () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
     const btnBook    = makeActionBtn('📖 存稿','text-blue-500',    () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
-    const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
-    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500',   () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
     const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
         if (isGenerating) return;
         if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
@@ -1250,11 +1297,12 @@ function addMsgActions(container, rawText) {
             showToast('🔄 已重新生成');
         } finally { isGenerating=false; abortController=null; resetSendButton(); }
     });
-    const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
+    const btnWord = makeActionBtn('📄 导语WORD','text-gray-400', () => {
         const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
         docx.Packer.toBlob(doc).then(blob=>{ saveAs(blob,`灵犀_${new Date().toLocaleTimeString()}.docx`); showToast('✅ Word导出成功'); });
     });
-    footer.append(btnCopy, btnBook, btnAppend, btnContinue, btnRegen, btnWord);
+    
+    footer.append(btnCopy, btnBook, btnRegen, btnWord);
     container.appendChild(footer);
 }
 function makeActionBtn(text, cls, onClick) {
@@ -1276,10 +1324,13 @@ function saveHistory() {
 }
 function renderHistorySelect() {
     const sel = document.getElementById('historySelect');
-    sel.innerHTML = '<option value="">-- 选择历史 --</option>';
-    history.forEach((h,i) => {
+    sel.innerHTML = '';
+    
+    // 倒序显示，最新的在最上面
+    [...history].reverse().forEach((h, reversedIdx) => {
+        const originalIdx = history.length - 1 - reversedIdx;
         const o = document.createElement('option');
-        o.value = i;
+        o.value = originalIdx;
         o.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
         sel.appendChild(o);
     });
@@ -1484,9 +1535,25 @@ function bindEvents() {
     document.getElementById('importSystemInput').onchange = importSystemData;
     document.getElementById('historySelect').onchange     = loadHistory;
     document.getElementById('deleteHistoryBtn').onclick   = () => {
-        const idx = document.getElementById('historySelect').value;
-        if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
-        deleteHistory(parseInt(idx));
+        const sel = document.getElementById('historySelect');
+        const selectedOptions = Array.from(sel.selectedOptions);
+        
+        if (selectedOptions.length === 0) {
+            showToast('⚠️ 请先选择要删除的历史记录（可按住Ctrl多选）');
+            return;
+        }
+        
+        if (!confirm(`确认删除选中的 ${selectedOptions.length} 条历史记录？`)) return;
+        
+        // 从后往前删除，避免索引变化
+        const indicesToDelete = selectedOptions.map(opt => parseInt(opt.value)).sort((a,b) => b-a);
+        indicesToDelete.forEach(idx => {
+            history.splice(idx, 1);
+        });
+        
+        saveJSON(SK.history, history);
+        renderHistorySelect();
+        showToast(`🗑️ 已删除 ${indicesToDelete.length} 条历史记录`);
     };
 }
 
