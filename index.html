@@ -267,7 +267,7 @@
         <section class="flex-1 flex flex-col min-h-0">
             <div class="flex justify-between items-center mb-2 px-0.5 flex-shrink-0">
                 <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">📖 稿件中心</span>
-                <button onclick="showBookManager()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">展开管理</button>
+                <button onclick="addNewBook()" class="text-blue-400 text-[10px] font-bold hover:text-blue-300 px-2 py-1 bg-blue-500/10 rounded-lg hover:bg-blue-500/20 transition">+ 新建</button>
             </div>
             <div id="bookLibrary" class="space-y-1.5 overflow-y-auto custom-scroll flex-1"></div>
         </section>
@@ -652,7 +652,7 @@ function renderBookLibrary() {
         const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
         
         item.innerHTML = `
-            <div class="piano-key-title">${book.name}</div>
+            <div class="piano-key-title" style="font-size: 14px;">${book.name}</div>
             <div class="piano-key-meta">
                 <span>${dateStr}</span>
                 <span class="piano-key-wordcount">${wordCount}字</span>
@@ -927,6 +927,19 @@ window.addNewTool = function() {
 window.saveToolConfig = function() {
     saveJSON('lingxi_tool_config', toolConfig);
     renderToolButtons();
+    
+    // 如果当前选中的工具被禁用了，切换到第一个启用的工具
+    const currentTool = toolConfig.find(t => t.id === currentToolMode);
+    if (!currentTool || !currentTool.enabled) {
+        const firstEnabled = toolConfig.find(t => t.enabled);
+        if (firstEnabled) {
+            setToolMode(firstEnabled.id);
+        }
+    } else {
+        // 否则重新应用当前工具以更新显示
+        setToolMode(currentToolMode);
+    }
+    
     closeToolConfig();
     showToast('✅ 工具配置已保存');
 };
