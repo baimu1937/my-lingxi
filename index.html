@@ -432,9 +432,13 @@
 </div>
 
 <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl">
-        <h3 class="text-lg font-black mb-5 text-center pb-4 border-b" style="border-color:var(--border-color)">⚙️ 配置中心</h3>
-        <div class="grid grid-cols-2 gap-6 mb-5">
+    <div class="modal-box rounded-[28px] p-7 w-full max-w-xl shadow-2xl flex flex-col" style="max-height: 85vh;">
+        <div class="flex justify-between items-center mb-5 pb-4 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black">⚙️ 配置中心</h3>
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scroll pr-2">
+            <div class="grid grid-cols-2 gap-6 mb-5">
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-green-600 border-l-4 border-green-500 pl-2 uppercase">官方直连</h4>
                 <input id="ds_key"      type="password" placeholder="DeepSeek API Key"         class="modal-input text-sm">
@@ -480,10 +484,12 @@
             <button onclick="exportSystemData()" class="flex-1 font-bold py-2.5 rounded-xl transition text-sm hover:opacity-80" style="background:var(--bg-main);color:var(--text-secondary)">💾 导出备份</button>
             <input type="file" id="importSystemInput" class="hidden" accept=".json">
         </div>
-        <div class="flex gap-3">
-            <button id="saveSettings"  class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl shadow transition">保存并激活</button>
-            <button id="closeSettings" class="flex-1 font-bold py-3 rounded-xl transition" style="background:var(--bg-main);color:var(--text-secondary)">关闭</button>
-        </div>
+    </div>
+    
+    <div class="pt-4 mt-4 border-t flex justify-end gap-3" style="border-color:var(--border-color)">
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="px-5 py-2.5 rounded-xl font-bold transition hover:bg-gray-100" style="background:#f3f4f6; color:var(--text-primary)">取消</button>
+        <button onclick="saveSettings()" class="px-5 py-2.5 rounded-xl font-bold text-white shadow-lg transition transform active:scale-95" style="background:linear-gradient(135deg, var(--primary-color), #8b5cf6)">保存配置</button>
+    </div>
     </div>
 </div>
 
@@ -1463,26 +1469,28 @@ function renderSampleLibrary() {
         const isSelected = selectedSampleIndices.includes(i);
         const div = document.createElement('div');
         div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-blue-500/10 border-blue-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        div.dataset.index = i; // 存储索引用于事件委托
         div.innerHTML = `
-            <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pointer-events-none">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0 pointer-events-auto" onclick="event.stopPropagation()">
                     <input type="checkbox" class="accent-blue-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleSample(${i})">
                     <span class="truncate font-bold">${s.name}</span>
                 </label>
-                <div class="flex gap-1.5 ml-2 flex-shrink-0">
+                <div class="flex gap-1.5 ml-2 flex-shrink-0 pointer-events-auto">
                     <button onclick="event.stopPropagation(); deleteSample(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>`;
-        // 点击整个卡片打开例文到编辑区
-        div.onclick = (e) => {
-            if (!e.target.closest('input') && !e.target.closest('button')) {
-                openSampleToEditor(i);
-            }
-        };
         frag.appendChild(div);
     });
     container.innerHTML = '';
     container.appendChild(frag);
+    
+    // 使用事件委托处理点击打开
+    container.onclick = (e) => {
+        const card = e.target.closest('[data-index]');
+        if (!card || e.target.closest('input') || e.target.closest('button')) return;
+        openSampleToEditor(parseInt(card.dataset.index));
+    };
 }
 
 // 折叠/展开功能
@@ -1563,27 +1571,29 @@ function renderAnalysisReports() {
         const isSelected = selectedReportIndices.includes(i);
         const div = document.createElement('div');
         div.className = `p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected ? 'bg-purple-500/10 border-purple-400' : 'bg-white/5 border-white/5 hover:bg-white/10'}`;
+        div.dataset.index = i; // 存储索引用于事件委托
         div.innerHTML = `
-            <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pointer-events-none">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-200 flex-1 min-w-0 pointer-events-auto" onclick="event.stopPropagation()">
                     <input type="checkbox" class="accent-purple-500 flex-shrink-0" ${isSelected?'checked':''} onchange="toggleReport(${i})">
                     <span class="truncate font-bold">${r.name}</span>
                 </label>
-                <div class="flex gap-1.5 ml-2 flex-shrink-0">
+                <div class="flex gap-1.5 ml-2 flex-shrink-0 pointer-events-auto">
                     <button onclick="event.stopPropagation(); deleteReport(${i})" class="text-red-400 hover:text-red-300 transition font-black text-sm">×</button>
                 </div>
             </div>
             <div class="mt-1 text-[9px] text-gray-400 truncate">来源: ${r.sourceSample || '手动创建'} · ${r.createTime}</div>`;
-        // 点击整个卡片打开报告到编辑区
-        div.onclick = (e) => {
-            if (!e.target.closest('input') && !e.target.closest('button')) {
-                openReportToEditor(i);
-            }
-        };
         frag.appendChild(div);
     });
     container.innerHTML = '';
     container.appendChild(frag);
+    
+    // 使用事件委托处理点击打开
+    container.onclick = (e) => {
+        const card = e.target.closest('[data-index]');
+        if (!card || e.target.closest('input') || e.target.closest('button')) return;
+        openReportToEditor(parseInt(card.dataset.index));
+    };
 }
 
 window.toggleReport = function(idx) {
