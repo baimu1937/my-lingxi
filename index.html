@@ -70,6 +70,13 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.2); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.4); }
+        /* 输出区滚动条样式 */
+        #displayArea::-webkit-scrollbar { width: 8px; }
+        #displayArea::-webkit-scrollbar-track { background: transparent; }
+        #displayArea::-webkit-scrollbar-thumb { background: rgba(156,163,175,0.4); border-radius: 4px; transition: background 0.3s; }
+        #displayArea::-webkit-scrollbar-thumb:hover { background: rgba(156,163,175,0.6); }
+        /* Firefox滚动条 */
+        #displayArea { scrollbar-width: thin; scrollbar-color: rgba(156,163,175,0.4) transparent; }
         .sidebar { width: 280px; min-width: 280px; background: var(--bg-sidebar); color: white; z-index: 50; transition: all 0.3s; height: 100vh; }
         @media (max-width: 768px) {
             .sidebar { position: fixed; width: 250px; height: 100vh; left: -250px; top: 0; transition: left 0.3s; z-index: 100; }
@@ -789,9 +796,13 @@ function updateModelDropdowns() {
         official.push({value:'ollama-qwen2.5',label:'🏠 Ollama Qwen2.5'});
     }
     
-    // 中转/自定义模型
+    // 中转/自定义模型 - 支持多种分隔符（逗号、中文逗号、空格、换行）
     const proxy = flowConfig.proxy_models
-        ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:`🔧 ${m}`}))
+        ? flowConfig.proxy_models
+            .split(/[,，\s\n]+/)  // 支持英文逗号、中文逗号、空格、换行
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(m => ({value: m, label: `🔧 ${m}`}))
         : [];
     
     const all = [...official, ...proxy];
