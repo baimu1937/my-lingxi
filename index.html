@@ -324,7 +324,10 @@
             <!-- 动态生成的配置项 -->
         </div>
         <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
-            <button onclick="addNewTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
+            <div class="flex gap-2">
+                <button onclick="resetToDefaultTools()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-2 rounded-lg text-xs transition" title="恢复默认的7个工具">🔄 重置默认</button>
+                <button onclick="addNewTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
+            </div>
             <div class="flex gap-2">
                 <button onclick="closeToolConfig()" class="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">✕ 取消</button>
                 <button onclick="saveToolConfig()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存配置</button>
@@ -945,18 +948,29 @@ const DEFAULT_TOOLS = [
     { id: 'analyze', icon: '🔍', name: '分析', prompt: '请分析这段文本的写作特点、情感基调、叙事手法等，给出专业的文学点评。', enabled: true }
 ];
 
-// 从localStorage加载工具配置，确保包含config工具项
-let toolConfig = loadJSON('lingxi_tool_config') || [...DEFAULT_TOOLS];
+// 从localStorage加载工具配置
+let savedConfig = loadJSON('lingxi_tool_config');
 
-// 强制确保config工具项存在且启用（解决旧配置覆盖问题）
-const configToolIndex = toolConfig.findIndex(t => t.id === 'config');
-if (configToolIndex === -1) {
-    // 不存在则添加到最前面
-    toolConfig.unshift({ id: 'config', icon: '🛠️', name: '工具', prompt: '', enabled: true });
-} else if (!toolConfig[configToolIndex].enabled) {
-    // 存在但被禁用，强制启用
-    toolConfig[configToolIndex].enabled = true;
+// 验证配置有效性：必须有至少5个工具，且包含必要的默认工具
+let isValidConfig = savedConfig && Array.isArray(savedConfig) && savedConfig.length >= 5;
+if (isValidConfig) {
+    // 检查是否包含必要的默认工具ID
+    const requiredIds = ['continue', 'polish', 'expand'];
+    const hasRequiredTools = requiredIds.every(id => savedConfig.some(t => t.id === id));
+    if (!hasRequiredTools) {
+        console.warn('⚠️ 检测到配置不完整，使用默认配置');
+        isValidConfig = false;
+    }
 }
+
+// 如果配置无效，使用默认配置
+let toolConfig = isValidConfig ? savedConfig : [...DEFAULT_TOOLS];
+
+console.log('🔧 工具配置初始化:', {
+    来源: isValidConfig ? 'localStorage' : '默认配置',
+    工具数量: toolConfig.length,
+    工具列表: toolConfig.map(t => `${t.icon} ${t.name}(${t.id})`)
+});
 
 // 保存到localStorage确保生效
 saveJSON('lingxi_tool_config', toolConfig);
@@ -1234,6 +1248,20 @@ window.addNewTool = function() {
     renderToolConfigList();
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+};
+
+// 重置为默认工具配置
+window.resetToDefaultTools = function() {
+    if (!confirm('确认重置为默认的7个工具？这将删除所有自定义工具。')) return;
+    
+    toolConfig = [...DEFAULT_TOOLS];
+    saveJSON('lingxi_tool_config', toolConfig);
+    renderToolConfigList();
+    renderToolButtons();
+    renderBottomToolButtons();
+    
+    showToast('✅ 已恢复默认工具配置');
+    console.log('🔄 已重置为默认工具:', toolConfig.map(t => `${t.icon} ${t.name}`));
 };
 
 window.saveToolConfig = function() {
