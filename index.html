@@ -766,6 +766,36 @@ window.renderBookListInManager = function() {
 };
 
 window.loadBookIntoManager = function(idx) {
+    // 在加载新稿件前，先自动保存当前稿件
+    if (currentManagerBookId !== null && currentManagerBookId !== idx) {
+        const nameInput = document.getElementById('managerBookName');
+        const contentInput = document.getElementById('managerBookContent');
+        
+        if (nameInput && contentInput) {
+            const name = nameInput.value.trim() || '未命名稿件';
+            const content = contentInput.value;
+            
+            // 检查内容是否发生变化
+            const hasChanged = bookLibrary[currentManagerBookId].name !== name || 
+                              bookLibrary[currentManagerBookId].content !== content;
+            
+            if (hasChanged) {
+                try {
+                    bookLibrary[currentManagerBookId] = { name, content };
+                    saveJSON(SK.books, bookLibrary);
+                    renderBookLibrary();
+                    renderBookListInManager();
+                    console.log(`✅ 切换前自动保存：【${name}】 (${content.length}字)`);
+                    showToast(`✅ 【${name}】已自动保存`);
+                } catch (err) {
+                    console.error('❌ 自动保存失败:', err);
+                    showToast('❌ 自动保存失败');
+                }
+            }
+        }
+    }
+    
+    // 加载新稿件
     currentManagerBookId = idx;
     const book = bookLibrary[idx];
     document.getElementById('managerBookName').value = book.name;
@@ -984,8 +1014,8 @@ const DEFAULT_TOOLS = [
 // 从localStorage加载工具配置
 let savedConfig = loadJSON('lingxi_tool_config');
 
-// 验证配置有效性：必须包含config工具和必要的默认工具
-let isValidConfig = savedConfig && Array.isArray(savedConfig) && savedConfig.length >= 5;
+// 验证配置有效性：只需要包含config工具即可
+let isValidConfig = savedConfig && Array.isArray(savedConfig) && savedConfig.length >= 1;
 if (isValidConfig) {
     // 检查是否包含config工具（最关键）
     const hasConfigTool = savedConfig.some(t => t.id === 'config');
@@ -1000,13 +1030,8 @@ if (isValidConfig) {
             configTool.enabled = true;
         }
         
-        // 检查是否包含必要的默认工具ID
-        const requiredIds = ['continue', 'polish', 'expand'];
-        const hasRequiredTools = requiredIds.every(id => savedConfig.some(t => t.id === id));
-        if (!hasRequiredTools) {
-            console.warn('⚠️ 检测到配置不完整，使用默认配置');
-            isValidConfig = false;
-        }
+        // 注意：不再强制要求其他工具存在，用户可以自由删除任何工具
+        console.log('✅ 配置有效，包含', savedConfig.length, '个工具');
     }
 }
 
@@ -1077,60 +1102,47 @@ function renderBottomToolButtons() {
     
     container.innerHTML = '';
     
-    console.log(' 开始渲染底部工具栏');
+    console.log('🎨 开始渲染底部工具栏');
     console.log('🎨 toolConfig总数:', toolConfig.length);
-    console.log('🎨 toolConfig详情:', JSON.stringify(toolConfig, null, 2));
     
-    // 1. 先添加工具配置按钮作为第一个按钮
+    // 获取所有启用的工具（排除config工具）
+    const enabledTools = toolConfig.filter(t => t.enabled && t.id !== 'config');
+    console.log('🎨 启用的工具数量:', enabledTools.length);
+    console.log('🎨 工具列表:', enabledTools.map(t => `${t.icon} ${t.name}(${t.id})`));
+    
+    // 添加工具配置按钮作为第一个按钮
     const configTool = toolConfig.find(t => t.id === 'config');
-    console.log('🔍 查找config工具结果:', configTool);
-    
-    if (configTool) {
-        console.log('✅ 找到config工具:', {
-            id: configTool.id,
-            name: configTool.name,
-            icon: configTool.icon,
-            enabled: configTool.enabled
-        });
-        
-        if (configTool.enabled) {
-            const btn = document.createElement('button');
-            btn.className = 'quick-tag';
-            btn.style.background = '#3b82f6';
-            btn.style.color = 'white';
-            btn.onclick = () => openToolConfig();
-            
-            btn.innerHTML = `${configTool.icon} ${configTool.name}`;
-            container.appendChild(btn);
-            console.log('✅ 工具配置按钮已成功添加到DOM');
-        } else {
-            console.warn('⚠️ config工具存在但被禁用，enabled=', configTool.enabled);
-        }
-    } else {
-        console.error('❌ 未找到id为"config"的工具！toolConfig中所有工具的ID:', toolConfig.map(t => t.id));
+    if (configTool && configTool.enabled) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag';
+        btn.style.background = '#3b82f6';
+        btn.style.color = 'white';
+        btn.onclick = () => openToolConfig();
+        btn.innerHTML = `${configTool.icon} ${configTool.name}`;
+        container.appendChild(btn);
+        console.log('✅ 已添加工具配置按钮');
     }
     
-    // 2. 添加原有的快捷标签按钮
-    const quickTags = [
-        { icon: '⚡', name: '续写', prompt: '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。' },
-        { icon: '✨', name: '润色', prompt: '请优化以上文字的语言表达，使其更加流畅优美' },
-        { icon: '📝', name: '扩写', prompt: '请扩写以上内容，增加细节描写和心理活动' },
-        { icon: '💬', name: '加对话', prompt: '请增加一段精彩的对话来推进情节发展' },
-        { icon: '🔍', name: '分析', prompt: '请帮我分析以上内容的优缺点并给出改进建议' }
-    ];
-    
-    quickTags.forEach(tag => {
+    // 添加其他启用的工具按钮
+    enabledTools.forEach(tool => {
         const btn = document.createElement('button');
         btn.className = 'quick-tag';
         btn.onclick = () => {
-            fillInput(tag.prompt);
-            showToast(`💡 ${tag.name}指令已填入`);
+            // 如果有prompt，则填充到输入框；否则切换到该工具模式
+            if (tool.prompt && tool.prompt.trim()) {
+                fillInput(tool.prompt);
+                showToast(`💡 ${tool.name}指令已填入`);
+            } else {
+                setToolMode(tool.id);
+                setTimeout(() => executeTool(), 100);
+            }
         };
-        btn.innerHTML = `${tag.icon} ${tag.name}`;
+        btn.innerHTML = `${tool.icon} ${tool.name}`;
         container.appendChild(btn);
+        console.log(`✅ 已添加按钮: ${tool.icon} ${tool.name}`);
     });
     
-    console.log('✅ 所有底部工具按钮已渲染完成');
+    console.log('✅ 底部工具栏渲染完成，共', container.children.length, '个按钮');
 }
 
 window.toggleToolPanel = function() {
@@ -1664,16 +1676,31 @@ function updateModelDropdowns() {
 
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
-    if (model === 'deepseek-chat' || model === 'deepseek-reasoner') {
+    
+    // 智能模型识别：支持自定义名称映射到正确的API
+    const modelLower = model.toLowerCase();
+    
+    // DeepSeek系列识别
+    if (model === 'deepseek-chat' || model === 'deepseek-reasoner' || 
+        modelLower.includes('deepseek') || modelLower.includes('深度求索') ||
+        modelLower.startsWith('the ai') || modelLower.includes('assistantsky')) {
         url = 'https://api.deepseek.com/chat/completions';
         key = flowConfig.ds_key;
-    } else if (model.startsWith('qwen')) {
+    } 
+    // 通义千问系列识别
+    else if (model.startsWith('qwen') || modelLower.includes('qwen') || 
+             modelLower.includes('千问') || modelLower.includes('通义')) {
         url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
         key = flowConfig.qw_key;
-    } else if (model.startsWith('ep-') || model.startsWith('doubao')) {
+    } 
+    // 豆包系列识别
+    else if (model.startsWith('ep-') || model.startsWith('doubao') || 
+             modelLower.includes('doubao') || modelLower.includes('豆包')) {
         url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
         key = flowConfig.db_key;
-    } else {
+    } 
+    // 其他模型使用代理URL
+    else {
         if (!flowConfig.proxy_url) {
             targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
             return;
@@ -1681,6 +1708,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
         url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
         key = flowConfig.proxy_key;
     }
+    
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
         return;
