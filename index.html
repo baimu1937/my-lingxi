@@ -1182,17 +1182,59 @@ function renderToolConfigList() {
             item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
             item.dataset.toolId = tool.id;
             item.style.borderColor = 'var(--border-color)';
-            item.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 flex-1">
-                        <input type="checkbox" ${tool.enabled ? 'checked' : ''} class="tool-enabled-checkbox accent-blue-500">
-                        <input type="text" value="${tool.icon || '🔧'}" class="tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
-                        <input type="text" value="${tool.name || '未命名'}" class="tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
-                    </div>
-                    <button onclick="deleteTool(${idx})" class="text-red-400 hover:text-red-300 transition text-sm ml-2">🗑️</button>
-                </div>
-                <textarea class="tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt || ''}</textarea>
-            `;
+            
+            // 创建DOM元素并绑定事件
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex items-center justify-between';
+            
+            const inputsDiv = document.createElement('div');
+            inputsDiv.className = 'flex items-center gap-2 flex-1';
+            
+            // Checkbox for enabled
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = tool.enabled;
+            checkbox.className = 'tool-enabled-checkbox accent-blue-500';
+            checkbox.onchange = () => toggleToolEnabled(idx);
+            
+            // Icon input
+            const iconInput = document.createElement('input');
+            iconInput.type = 'text';
+            iconInput.value = tool.icon || '🔧';
+            iconInput.className = 'tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm';
+            iconInput.onchange = (e) => updateToolIcon(idx, e.target.value);
+            
+            // Name input
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = tool.name || '未命名';
+            nameInput.className = 'tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold';
+            nameInput.onchange = (e) => updateToolName(idx, e.target.value);
+            
+            inputsDiv.appendChild(checkbox);
+            inputsDiv.appendChild(iconInput);
+            inputsDiv.appendChild(nameInput);
+            
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.onclick = () => deleteTool(idx);
+            deleteBtn.className = 'text-red-400 hover:text-red-300 transition text-sm ml-2';
+            deleteBtn.textContent = '🗑️';
+            
+            headerDiv.appendChild(inputsDiv);
+            headerDiv.appendChild(deleteBtn);
+            
+            // Prompt textarea
+            const promptTextarea = document.createElement('textarea');
+            promptTextarea.className = 'tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll';
+            promptTextarea.rows = 2;
+            promptTextarea.style.borderColor = 'var(--border-color)';
+            promptTextarea.style.color = 'var(--text-primary)';
+            promptTextarea.value = tool.prompt || '';
+            promptTextarea.onchange = (e) => updateToolPrompt(idx, e.target.value);
+            
+            item.appendChild(headerDiv);
+            item.appendChild(promptTextarea);
             container.appendChild(item);
         } catch (err) {
             console.error(`❌ 渲染工具[${idx}]失败:`, err, tool);
@@ -1230,24 +1272,44 @@ window.updateToolPrompt = function(idx, value) {
 
 window.deleteTool = function(idx) {
     if (!confirm('确认删除此工具？')) return;
+    
+    const deletedTool = toolConfig[idx];
+    console.log(`🗑️ 删除工具: ${deletedTool.icon} ${deletedTool.name} (${deletedTool.id})`);
+    
     toolConfig.splice(idx, 1);
+    
+    // 立即保存到localStorage
+    saveJSON('lingxi_tool_config', toolConfig);
+    console.log('💾 已保存删除后的配置');
+    
     renderToolConfigList();
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+    
+    showToast(`✅ 已删除工具: ${deletedTool.name}`);
 };
 
 window.addNewTool = function() {
     const newId = 'custom_' + Date.now();
-    toolConfig.push({
+    const newTool = {
         id: newId,
         icon: '🔧',
         name: '新工具',
         prompt: '请输入自定义提示词...',
         enabled: true
-    });
+    };
+    
+    toolConfig.push(newTool);
+    
+    // 立即保存到localStorage
+    saveJSON('lingxi_tool_config', toolConfig);
+    console.log('➕ 新增工具并已保存:', newTool);
+    
     renderToolConfigList();
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+    
+    showToast('✅ 已添加新工具');
 };
 
 // 重置为默认工具配置
