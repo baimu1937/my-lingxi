@@ -883,7 +883,8 @@ window.toggleLinkBook = function(index) {
         linkedBookId = index;
         showToast(`📎 已将《${bookLibrary[index].name}》设为AI参考范文`);
     }
-    renderBookLibrary(); // 重新渲染以更新图标样式
+    renderBookLibrary(); // 重新渲染以更新复选框状态
+    updateLinkedStatusDisplay(); // 立即同步更新底部状态显示
 };
 
 // 删除稿件（供钢琴键使用）
@@ -1481,12 +1482,22 @@ function renderToolConfigList() {
 }
 
 window.toggleToolEnabled = function(idx) {
-    console.log(`🔄 切换工具[${idx}]启用状态:`, toolConfig[idx].name, '->', !toolConfig[idx].enabled);
-    toolConfig[idx].enabled = !toolConfig[idx].enabled;
+    const tool = toolConfig[idx];
+    console.log(`🔄 切换工具[${idx}]启用状态:`, tool.name, '->', !tool.enabled);
+    
+    // 如果是“工具”配置按钮，强制保持启用
+    if (tool.id === 'config') {
+        tool.enabled = true;
+        showToast('⚠️ “工具箱配置”是核心组件，不可禁用');
+        renderToolConfigList(); // 重置复选框状态
+        return;
+    }
+
+    tool.enabled = !tool.enabled;
     saveJSON('lingxi_tool_config', toolConfig); // 立即保存
     console.log('💾 已保存到localStorage');
     renderToolButtons(); // 立即更新顶部按钮
-    renderBottomToolButtons(); // 立即更新底部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮（包含状态徽章）
     console.log('✅ UI已更新');
 };
 
