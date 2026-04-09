@@ -102,6 +102,18 @@
         header { background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
         .chat-footer { background: var(--footer-bg); border-top: 1px solid var(--border-color); }
         textarea, input[type="text"], input[type="password"], select { background-color: var(--card-bg) !important; color: var(--text-primary) !important; border-color: var(--border-color) !important; }
+        /* 模型选择器特殊样式 - 支持长文本显示 */
+        #singleModel, #modelA, #modelB { 
+            max-width: 200px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+        #singleModel option, #modelA option, #modelB option {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 300px;
+        }
         textarea::placeholder, input::placeholder { color: var(--text-secondary) !important; opacity: 0.7; }
         .pill-btn { padding: 0.45rem 1.1rem; border-radius: 9999px; font-size: 0.82rem; font-weight: 700; transition: all 0.25s; background-color: var(--bg-main); color: var(--text-secondary); border: 1px solid var(--border-color); cursor: pointer; }
         .pill-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.3); transform: translateY(-1px); }
@@ -1388,7 +1400,14 @@ function updateModelDropdowns() {
     if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek Chat'}); official.push({value:'deepseek-reasoner',label:'DeepSeek R1'}); }
     if (flowConfig.qw_key) { official.push({value:'qwen3.5-plus',label:'Qwen3.5 最新'}); official.push({value:'qwen3.5-flash',label:'Qwen3.5 Flash 极速'}); official.push({value:'qwen3-max-preview',label:'Qwen3-Max 旗舰推理'}); }
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
-    const proxy = flowConfig.proxy_models ? flowConfig.proxy_models.split(',').map(s=>s.trim()).filter(Boolean).map(m=>({value:m,label:m})) : [];
+    // 支持逗号和换行符作为分隔符，清理空值和多余空格
+    const proxy = flowConfig.proxy_models 
+        ? flowConfig.proxy_models
+            .split(/[,，\n]+/)  // 支持英文逗号、中文逗号、换行符
+            .map(s => s.trim())
+            .filter(Boolean)     // 过滤空字符串
+            .map(m => ({value: m, label: m}))
+        : [];
     const all = [...official, ...proxy];
     if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
     ['singleModel','modelA','modelB'].forEach(id => {
