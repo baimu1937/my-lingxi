@@ -368,7 +368,6 @@
             <div class="flex items-center gap-3 border-l pl-4" style="border-color:var(--border-color)">
                 <button id="themeToggle"  class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="更换主题">🎨</button>
                 <button id="openSettings" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="配置中心">⚙️</button>
-                <button id="clearChatBtn" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="清空对话">🧹</button>
             </div>
             <div id="themeMenu">
                 <span class="text-[10px] font-black" style="color:var(--text-secondary)">主题</span>
@@ -1217,23 +1216,33 @@ function renderBottomToolButtons() {
     console.log('🎨 启用的工具数量:', enabledTools.length);
     console.log('🎨 工具列表:', enabledTools.map(t => `${t.icon} ${t.name}(${t.id})`));
     
-    // 添加工具配置按钮作为第一个按钮
+    // 添加工具配置按钮作为第一个按钮（锁定不可删除）
     const configTool = toolConfig.find(t => t.id === 'config');
     if (configTool && configTool.enabled) {
         const btn = document.createElement('button');
-        btn.className = 'quick-tag';
+        btn.className = 'quick-tag locked-tool';
         btn.style.background = '#3b82f6';
         btn.style.color = 'white';
+        btn.style.cursor = 'default';
+        btn.title = '工具箱配置（锁定）';
         btn.onclick = () => openToolConfig();
         btn.innerHTML = `${configTool.icon} ${configTool.name}`;
+        
+        // 添加右键菜单以允许隐藏/显示其他工具
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu(e.clientX, e.clientY);
+        };
+        
         container.appendChild(btn);
-        console.log('✅ 已添加工具配置按钮');
+        console.log('✅ 已添加工具配置按钮（锁定）');
     }
     
-    // 添加其他启用的工具按钮
+    // 添加其他启用的工具按钮（支持自定义删减）
     enabledTools.forEach(tool => {
         const btn = document.createElement('button');
-        btn.className = 'quick-tag';
+        btn.className = 'quick-tag removable-tool';
+        btn.dataset.toolId = tool.id;
         
         // 检查该工具是否已被关联
         const isLinked = linkedToolIds.has(tool.id);
@@ -1243,8 +1252,8 @@ function renderBottomToolButtons() {
             btn.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.3)';
         }
         
+        // 左键点击：切换关联状态
         btn.onclick = () => {
-            // 切换关联状态
             if (linkedToolIds.has(tool.id)) {
                 linkedToolIds.delete(tool.id);
                 showToast(`🔗 已取消关联：${tool.name}`);
@@ -1252,14 +1261,17 @@ function renderBottomToolButtons() {
                 linkedToolIds.add(tool.id);
                 showToast(`🔗 已关联工具：${tool.name}`);
             }
-            
-            // 重新渲染底部工具栏以更新样式
             renderBottomToolButtons();
+        };
+        
+        // 右键点击：显示管理菜单（删除/隐藏等）
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu(e.clientX, e.clientY, tool.id);
         };
         
         btn.innerHTML = `${tool.icon} ${tool.name}${isLinked ? ' ✓' : ''}`;
         container.appendChild(btn);
-        console.log(`✅ 已添加按钮: ${tool.icon} ${tool.name}${isLinked ? ' (已关联)' : ''}`);
     });
     
     console.log('✅ 底部工具栏渲染完成，共', container.children.length, '个按钮');
@@ -1537,11 +1549,110 @@ window.addNewTool = function() {
     showToast('✅ 已添加新工具');
 };
 
+// 显示工具管理菜单（右键菜单）
+function showToolManagementMenu(x, y, toolId = null) {
+    // 移除旧菜单
+    const oldMenu = document.getElementById('toolManagementMenu');
+    if (oldMenu) oldMenu.remove();
+    
+    const menu = document.createElement('div');
+    menu.id = 'toolManagementMenu';
+    menu.style.cssText = `
+        position: fixed;
+        left: ${x}px;
+        top: ${y}px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 150px;
+        padding: 8px 0;
+    `;
+    
+    if (toolId && toolId !== 'config') {
+        // 普通工具的菜单选项
+        menu.innerHTML = `
+            <div class="menu-item" onclick="hideTool('${toolId}')" style="padding: 8px 16px; cursor: pointer; hover: background: #f5f5f5;">🙈 隐藏此工具</div>
+            <div class="menu-item" onclick="deleteTool('${toolId}')" style="padding: 8px 16px; cursor: pointer; color: red;">🗑️ 删除此工具</div>
+        `;
+    } else {
+        // 配置按钮的菜单选项（只显示全局操作）
+        menu.innerHTML = `
+            <div class="menu-item" onclick="showAllTools()" style="padding: 8px 16px; cursor: pointer;">👁️ 显示所有隐藏工具</div>
+            <div class="menu-item" onclick="resetToDefaultTools()" style="padding: 8px 16px; cursor: pointer; color: orange;">🔄 重置为默认</div>
+        `;
+    }
+    
+    document.body.appendChild(menu);
+    
+    // 点击其他地方关闭菜单
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        }, { once: true });
+    }, 100);
+}
+
+// 隐藏工具（从底部栏移除但保留配置）
+window.hideTool = function(toolId) {
+    const tool = toolConfig.find(t => t.id === toolId);
+    if (tool) {
+        tool.enabled = false;
+        saveJSON('lingxi_tool_config', toolConfig);
+        renderBottomToolButtons();
+        showToast(`🙈 已隐藏：${tool.name}`);
+    }
+};
+
+// 删除工具（从配置中彻底移除）
+window.deleteTool = function(toolId) {
+    if (toolId === 'config') {
+        showToast('⚠️ 配置工具不能删除');
+        return;
+    }
+    
+    if (!confirm('确认删除此工具？此操作不可恢复。')) return;
+    
+    const index = toolConfig.findIndex(t => t.id === toolId);
+    if (index > -1) {
+        const toolName = toolConfig[index].name;
+        toolConfig.splice(index, 1);
+        linkedToolIds.delete(toolId); // 同时取消关联
+        saveJSON('lingxi_tool_config', toolConfig);
+        renderBottomToolButtons();
+        showToast(`🗑️ 已删除：${toolName}`);
+    }
+};
+
+// 显示所有隐藏的工具
+window.showAllTools = function() {
+    let count = 0;
+    toolConfig.forEach(tool => {
+        if (!tool.enabled && tool.id !== 'config') {
+            tool.enabled = true;
+            count++;
+        }
+    });
+    
+    if (count > 0) {
+        saveJSON('lingxi_tool_config', toolConfig);
+        renderBottomToolButtons();
+        showToast(`👁️ 已显示 ${count} 个隐藏工具`);
+    } else {
+        showToast('ℹ️ 没有隐藏的工具');
+    }
+};
+
 // 重置为默认工具配置
 window.resetToDefaultTools = function() {
     if (!confirm('确认重置为默认的7个工具？这将删除所有自定义工具。')) return;
     
     toolConfig = [...DEFAULT_TOOLS];
+    linkedToolIds.clear(); // 清空关联状态
     saveJSON('lingxi_tool_config', toolConfig);
     renderToolConfigList();
     renderToolButtons();
@@ -1784,7 +1895,6 @@ function saveConfig() {
 function updateModelDropdowns() {
     const official = [];
     // 只添加已配置Key的厂商基础模型提示
-    if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek(需自定义模型名)'}); }
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
     // 所有模型都从自定义配置中读取
     const proxy = flowConfig.proxy_models 
