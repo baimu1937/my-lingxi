@@ -249,7 +249,7 @@
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
             <h1 class="text-2xl font-black text-blue-400 italic tracking-wider sidebar-title">灵犀</h1>
-            <p class="text-[10px] text-blue-300/60 mt-1 tracking-wide sidebar-sub" style="font-family: 'KaiTi', 'STKaiti', 'SimSun', serif; font-weight: bold;">每天必须写作，偷懒就是等死！</p>
+            <p class="text-base text-blue-300/80 mt-2 tracking-wide sidebar-sub" style="font-family: 'KaiTi', 'STKaiti', 'SimSun', serif; font-weight: bold;">每天必须写作，偷懒就是等死！</p>
         </div>
         <button id="sidebarDarkToggle" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="边栏日夜模式">🌞</button>
     </div>
@@ -558,6 +558,10 @@ let abortController = null;
 let autoBackupTimer = null;
 let dom = {};
 
+// 例文相关变量（已删除例文中心，但保留变量以防引用错误）
+let sampleLibrary = [];
+let selectedSampleIndices = new Set();
+
 function loadJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 function saveJSON(key, data) { try { localStorage.setItem(key, JSON.stringify(data)); } catch { showToast('⚠️ 存储空间不足，请导出备份后清理'); } }
 function debounce(fn, d) { let t; return function(...a) { clearTimeout(t); t = setTimeout(() => fn.apply(this,a), d); }; }
@@ -752,8 +756,6 @@ window.addNewBook = function() {
     bookLibrary.push(newBook);
     saveJSON(SK.books, bookLibrary);
     renderBookLibrary();
-    showBookManager();
-    loadBookIntoManager(bookLibrary.length - 1);
     showToast('✅ 新书稿已创建');
 };
 
