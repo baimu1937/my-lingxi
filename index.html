@@ -410,17 +410,9 @@
                             <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
                         </div>
                     </div>
-                    <!-- 动态工具按钮区域 -->
+                    <!-- 动态工具按钮区域（包含配置按钮和快捷标签） -->
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
-                        <!-- 由 renderBottomToolButtons() 动态生成 -->
-                    </div>
-                    <!-- 原有快捷指令标签（保留） -->
-                    <div class="flex gap-2 mb-2.5 flex-wrap">
-                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。')">⚡ 续写</button>
-                        <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
-                        <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
-                        <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
-                        <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
+                        <!-- 由 renderBottomToolButtons() 动态生成所有按钮 -->
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -991,7 +983,7 @@ function renderToolButtons() {
     });
 }
 
-// 渲染底部工具栏按钮（在最前面添加工具配置按钮）
+// 渲染底部工具栏按钮（在最前面添加工具配置按钮，后面跟随原有快捷标签）
 function renderBottomToolButtons() {
     const container = document.getElementById('bottomToolButtons');
     if (!container) {
@@ -1001,7 +993,7 @@ function renderBottomToolButtons() {
     
     container.innerHTML = '';
     
-    // 只添加工具配置按钮作为第一个按钮
+    // 1. 先添加工具配置按钮作为第一个按钮
     const configTool = toolConfig.find(t => t.id === 'config');
     console.log('🔧 toolConfig:', toolConfig);
     console.log('🔧 configTool:', configTool);
@@ -1019,6 +1011,28 @@ function renderBottomToolButtons() {
     } else {
         console.warn('⚠️ 工具配置按钮未启用或未找到');
     }
+    
+    // 2. 添加原有的快捷标签按钮
+    const quickTags = [
+        { icon: '⚡', name: '续写', prompt: '请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。' },
+        { icon: '✨', name: '润色', prompt: '请优化以上文字的语言表达，使其更加流畅优美' },
+        { icon: '📝', name: '扩写', prompt: '请扩写以上内容，增加细节描写和心理活动' },
+        { icon: '💬', name: '加对话', prompt: '请增加一段精彩的对话来推进情节发展' },
+        { icon: '🔍', name: '分析', prompt: '请帮我分析以上内容的优缺点并给出改进建议' }
+    ];
+    
+    quickTags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag';
+        btn.onclick = () => {
+            fillInput(tag.prompt);
+            showToast(`💡 ${tag.name}指令已填入`);
+        };
+        btn.innerHTML = `${tag.icon} ${tag.name}`;
+        container.appendChild(btn);
+    });
+    
+    console.log('✅ 所有底部工具按钮已渲染完成');
 }
 
 window.toggleToolPanel = function() {
@@ -1204,6 +1218,7 @@ window.saveToolConfig = function() {
     toolConfig = newConfig;
     saveJSON('lingxi_tool_config', toolConfig);
     renderToolButtons();
+    renderBottomToolButtons(); // 重新渲染底部按钮
     
     // 如果当前选中的工具被禁用了，切换到第一个启用的工具
     const currentTool = toolConfig.find(t => t.id === currentToolMode);
