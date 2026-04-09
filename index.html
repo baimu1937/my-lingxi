@@ -710,6 +710,22 @@ window.showBookManager = function() {
 };
 
 window.hideBookManager = function() {
+    // 自动保存当前编辑的稿件
+    if (currentManagerBookId !== null) {
+        const name = document.getElementById('managerBookName').value.trim() || '未命名稿件';
+        const content = document.getElementById('managerBookContent').value;
+        
+        // 只有当内容有变化时才保存
+        if (bookLibrary[currentManagerBookId].name !== name || bookLibrary[currentManagerBookId].content !== content) {
+            bookLibrary[currentManagerBookId] = { name, content };
+            saveJSON(SK.books, bookLibrary);
+            renderBookLibrary();
+            renderBookListInManager();
+            document.getElementById('managerWordCount').textContent = content.length;
+            showToast(`✅ 【${name}】已自动保存`);
+        }
+    }
+    
     document.getElementById('bookManagerOverlay').classList.add('hidden');
     currentManagerBookId = null;
 };
