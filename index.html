@@ -131,7 +131,13 @@
         .prompt-card.active-prompt { border-color: #3b82f6; background: rgba(59,130,246,0.08); }
         .book-item { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.6rem 0.8rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .book-item:hover { border-color: #3b82f6; background: rgba(59,130,246,0.05); }
-        .book-item.active { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+        .book-item.active { 
+            border-color: #3b82f6; 
+            border-width: 2px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.08) 100%);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2), 0 2px 8px rgba(59,130,246,0.15);
+            transform: scale(1.02);
+        }
         
         /* 🎹 钢琴键样式 */
         .piano-key { 
@@ -427,6 +433,12 @@
                         </div>
                     </div>
                     <!-- 动态工具按钮区域（包含配置按钮和快捷标签） -->
+                    <div class="flex items-center justify-between mb-2">
+                        <div id="linkedStatusDisplay" class="text-xs text-gray-500 flex items-center gap-2">
+                            <span id="linkedBookBadge" class="hidden bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">📎 稿件</span>
+                            <span id="linkedToolsBadge" class="hidden bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🔧 工具</span>
+                        </div>
+                    </div>
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
                         <!-- 由 renderBottomToolButtons() 动态生成所有按钮 -->
                     </div>
@@ -453,7 +465,10 @@
     <!-- 左侧章节列表 -->
     <div class="w-72 border-r flex flex-col" style="background:var(--bg-sidebar);border-color:var(--border-color)">
         <div class="p-4 border-b flex justify-between items-center" style="border-color:var(--border-color)">
-            <h3 class="text-sm font-black text-blue-500">📖 稿件列表</h3>
+            <div class="flex items-center gap-2">
+                <h3 class="text-sm font-black text-blue-500">📖 稿件列表</h3>
+                <span id="linkedBookIndicator" class="hidden text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">🔗 已关联</span>
+            </div>
             <button onclick="hideBookManager()" class="text-gray-400 hover:text-red-500 transition">✕</button>
         </div>
         <div class="p-3 border-b" style="border-color:var(--border-color)">
@@ -569,6 +584,10 @@ let isGenerating    = false;
 let abortController = null;
 let autoBackupTimer = null;
 let dom = {};
+
+// 关联状态管理
+let linkedBookId = null;      // 当前关联的稿件ID
+let linkedToolIds = new Set(); // 当前关联的工具ID集合
 
 // 例文相关变量（已删除例文中心，但保留变量以防引用错误）
 let sampleLibrary = [];
@@ -750,14 +769,30 @@ window.hideBookManager = function() {
 window.renderBookListInManager = function() {
     const container = document.getElementById('bookListContainer');
     container.innerHTML = '';
+    
+    // 更新关联状态指示器
+    const indicator = document.getElementById('linkedBookIndicator');
+    if (indicator) {
+        if (linkedBookId !== null && bookLibrary[linkedBookId]) {
+            indicator.classList.remove('hidden');
+            indicator.textContent = `🔗 已关联: ${bookLibrary[linkedBookId].name}`;
+        } else {
+            indicator.classList.add('hidden');
+        }
+    }
+    
     bookLibrary.forEach((book, idx) => {
         const div = document.createElement('div');
         div.className = `book-item ${idx === currentManagerBookId ? 'active' : ''}`;
         div.onclick = () => loadBookIntoManager(idx);
+        
+        // 如果是当前关联的稿件，添加特殊标记
+        const linkedMark = idx === linkedBookId ? '<span class="text-xs text-green-500 ml-1">✓</span>' : '';
+        
         const wordCount = (book.content || '').length;
         div.innerHTML = `
             <div class="flex-1 min-w-0">
-                <div class="text-xs font-bold truncate">${book.name}</div>
+                <div class="text-xs font-bold truncate">${book.name}${linkedMark}</div>
                 <div class="text-[10px] text-gray-500 mt-0.5">${wordCount}字</div>
             </div>
         `;
@@ -797,11 +832,15 @@ window.loadBookIntoManager = function(idx) {
     
     // 加载新稿件
     currentManagerBookId = idx;
+    linkedBookId = idx; // 自动关联当前选中的稿件
     const book = bookLibrary[idx];
     document.getElementById('managerBookName').value = book.name;
     document.getElementById('managerBookContent').value = book.content || '';
     document.getElementById('managerWordCount').textContent = (book.content || '').length;
     renderBookListInManager();
+    
+    // 显示关联状态提示
+    showToast(`📎 已关联稿件：【${book.name}】`);
     
     // 自动开启分屏并将内容加载到编辑器
     if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
@@ -1092,6 +1131,34 @@ function renderToolButtons() {
     });
 }
 
+// 更新关联状态显示
+function updateLinkedStatusDisplay() {
+    const bookBadge = document.getElementById('linkedBookBadge');
+    const toolsBadge = document.getElementById('linkedToolsBadge');
+    
+    if (bookBadge) {
+        if (linkedBookId !== null && bookLibrary[linkedBookId]) {
+            bookBadge.classList.remove('hidden');
+            bookBadge.textContent = `📎 ${bookLibrary[linkedBookId].name}`;
+        } else {
+            bookBadge.classList.add('hidden');
+        }
+    }
+    
+    if (toolsBadge) {
+        if (linkedToolIds.size > 0) {
+            toolsBadge.classList.remove('hidden');
+            const toolNames = Array.from(linkedToolIds).map(id => {
+                const tool = toolConfig.find(t => t.id === id);
+                return tool ? tool.name : id;
+            }).join(', ');
+            toolsBadge.textContent = `🔧 ${toolNames}`;
+        } else {
+            toolsBadge.classList.add('hidden');
+        }
+    }
+}
+
 // 渲染底部工具栏按钮（在最前面添加工具配置按钮，后面跟随原有快捷标签）
 function renderBottomToolButtons() {
     const container = document.getElementById('bottomToolButtons');
@@ -1099,6 +1166,9 @@ function renderBottomToolButtons() {
         console.error('❌ bottomToolButtons容器未找到');
         return;
     }
+    
+    // 更新关联状态显示
+    updateLinkedStatusDisplay();
     
     container.innerHTML = '';
     
@@ -1127,22 +1197,36 @@ function renderBottomToolButtons() {
     enabledTools.forEach(tool => {
         const btn = document.createElement('button');
         btn.className = 'quick-tag';
+        
+        // 检查该工具是否已被关联
+        const isLinked = linkedToolIds.has(tool.id);
+        if (isLinked) {
+            btn.style.background = '#10b981'; // 绿色表示已关联
+            btn.style.color = 'white';
+            btn.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.3)';
+        }
+        
         btn.onclick = () => {
-            // 如果有prompt，则填充到输入框；否则切换到该工具模式
-            if (tool.prompt && tool.prompt.trim()) {
-                fillInput(tool.prompt);
-                showToast(`💡 ${tool.name}指令已填入`);
+            // 切换关联状态
+            if (linkedToolIds.has(tool.id)) {
+                linkedToolIds.delete(tool.id);
+                showToast(`🔗 已取消关联：${tool.name}`);
             } else {
-                setToolMode(tool.id);
-                setTimeout(() => executeTool(), 100);
+                linkedToolIds.add(tool.id);
+                showToast(`🔗 已关联工具：${tool.name}`);
             }
+            
+            // 重新渲染底部工具栏以更新样式
+            renderBottomToolButtons();
         };
-        btn.innerHTML = `${tool.icon} ${tool.name}`;
+        
+        btn.innerHTML = `${tool.icon} ${tool.name}${isLinked ? ' ✓' : ''}`;
         container.appendChild(btn);
-        console.log(`✅ 已添加按钮: ${tool.icon} ${tool.name}`);
+        console.log(`✅ 已添加按钮: ${tool.icon} ${tool.name}${isLinked ? ' (已关联)' : ''}`);
     });
     
     console.log('✅ 底部工具栏渲染完成，共', container.children.length, '个按钮');
+    console.log('📎 当前关联的工具:', Array.from(linkedToolIds));
 }
 
 window.toggleToolPanel = function() {
@@ -1366,10 +1450,19 @@ window.updateToolPrompt = function(idx, value) {
 };
 
 window.deleteTool = function(idx) {
+    const toolToDelete = toolConfig[idx];
+    
+    // 检查是否是DEFAULT_TOOLS中的工具（通过ID判断）
+    const isDefaultTool = DEFAULT_TOOLS.some(dt => dt.id === toolToDelete.id);
+    
+    if (isDefaultTool) {
+        showToast(`⚠️ 【${toolToDelete.name}】是系统预设工具，不能删除`);
+        return;
+    }
+    
     if (!confirm('确认删除此工具？')) return;
     
-    const deletedTool = toolConfig[idx];
-    console.log(`🗑️ 删除工具: ${deletedTool.icon} ${deletedTool.name} (${deletedTool.id})`);
+    console.log(`🗑️ 删除工具: ${toolToDelete.icon} ${toolToDelete.name} (${toolToDelete.id})`);
     
     toolConfig.splice(idx, 1);
     
@@ -1381,7 +1474,7 @@ window.deleteTool = function(idx) {
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
     
-    showToast(`✅ 已删除工具: ${deletedTool.name}`);
+    showToast(`✅ 已删除工具: ${toolToDelete.name}`);
 };
 
 window.addNewTool = function() {
@@ -1766,13 +1859,37 @@ async function handleSend() {
     if (isGenerating) { if (abortController) abortController.abort(); return; }
     const text = dom.userInput.value.trim();
     if (!text) { showToast('⚠️ 请先输入内容'); return; }
+    
+    // 构建上下文信息
+    let contextInfo = '';
+    
+    // 1. 添加关联的稿件内容
+    if (linkedBookId !== null && bookLibrary[linkedBookId]) {
+        const linkedBook = bookLibrary[linkedBookId];
+        contextInfo += `\n【📎 关联稿件：${linkedBook.name}】\n`;
+        contextInfo += `<context>\n${linkedBook.content}\n</context>\n\n`;
+    }
+    
+    // 2. 添加关联的工具提示词
+    if (linkedToolIds.size > 0) {
+        contextInfo += '\n【🔗 关联工具指令】\n';
+        linkedToolIds.forEach(toolId => {
+            const tool = toolConfig.find(t => t.id === toolId);
+            if (tool && tool.prompt && tool.prompt.trim()) {
+                contextInfo += `- ${tool.icon} ${tool.name}: ${tool.prompt}\n`;
+            }
+        });
+        contextInfo += '\n请结合以上工具指令执行任务。\n';
+    }
+    
     let ref = '';
     selectedSampleIndices.forEach(idx => {
         const s = sampleLibrary[idx];
         if (s) ref += `\n【参考《${s.name}》风格】\n${s.gene || s.text.slice(0,1000)}\n`;
     });
+    
     const sys        = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
-    const fullPrompt = ref ? `${ref}\n---\n### 任务指令\n${text}` : text;
+    const fullPrompt = contextInfo + (ref ? `${ref}\n---\n### 任务指令\n${text}` : text);
     const isPK       = !document.getElementById('pkSelectBox').classList.contains('hidden');
     isGenerating = true; abortController = new AbortController(); setSendButtonStop();
     try {
