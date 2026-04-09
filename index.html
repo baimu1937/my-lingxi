@@ -736,12 +736,50 @@ window.loadBookIntoManager = function(idx) {
 
 // 删除稿件（供钢琴键使用）
 window.deleteBook = function(index) {
-    if (!confirm(`确认删除【${bookLibrary[index].name}】？`)) return;
+    const bookName = bookLibrary[index].name;
+    
+    // 创建内联确认对话框
+    const pianoKey = document.querySelectorAll('.piano-key')[index];
+    if (!pianoKey) return;
+    
+    // 检查是否已有确认框
+    const existingConfirm = pianoKey.querySelector('.delete-confirm');
+    if (existingConfirm) {
+        // 如果点击取消，移除确认框
+        bookLibrary.splice(index, 1);
+        saveJSON(SK.books, bookLibrary);
+        renderBookLibrary();
+        
+        if (currentManagerBookId === index) {
+            hideBookManager();
+        } else if (currentManagerBookId > index) {
+            currentManagerBookId--;
+        }
+        
+        showToast('🗑️ 稿件已删除');
+        return;
+    }
+    
+    // 创建确认框
+    const confirmDiv = document.createElement('div');
+    confirmDiv.className = 'delete-confirm absolute bottom-0 left-0 right-0 bg-red-500/90 text-white text-[10px] py-1 px-2 flex justify-between items-center';
+    confirmDiv.innerHTML = `
+        <span>确认删除？</span>
+        <div class="flex gap-1">
+            <button class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[9px]" onclick="event.stopPropagation(); this.parentElement.parentElement.parentElement.remove();">取消</button>
+            <button class="bg-white hover:bg-gray-100 text-red-600 px-2 py-0.5 rounded text-[9px] font-bold" onclick="event.stopPropagation(); window.confirmDelete(${index});">确定</button>
+        </div>
+    `;
+    
+    pianoKey.style.position = 'relative';
+    pianoKey.appendChild(confirmDiv);
+};
+
+window.confirmDelete = function(index) {
     bookLibrary.splice(index, 1);
     saveJSON(SK.books, bookLibrary);
     renderBookLibrary();
     
-    // 如果正在编辑被删除的稿件，关闭管理器
     if (currentManagerBookId === index) {
         hideBookManager();
     } else if (currentManagerBookId > index) {
@@ -803,11 +841,8 @@ window.saveDraftToBook = function() {
     saveJSON(SK.books, bookLibrary);
     renderBookLibrary();
     
-    // 自动打开新书稿进行编辑
-    showBookManager();
-    loadBookIntoManager(bookLibrary.length - 1);
-    
-    showToast('✅ 已转为新书稿');
+    // 不自动打开，只显示提示
+    showToast('✅ 已转为新书稿，请在稿件中心查看');
 };
 
 window.appendToDraftFromManager = function() {
