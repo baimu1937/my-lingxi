@@ -325,7 +325,6 @@
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
         <div class="flex items-center gap-2">
-            <button id="toggleToolBtn" onclick="toggleToolPanel()" class="pill-btn">🛠️ 工具箱</button>
             <button id="toggleSpace" class="pill-btn">✍️ 分屏创作</button>
             <button id="newChatBtn"  class="pill-btn">✨ 新开篇</button>
             <button id="typesetBtn"  class="pill-btn">📝 一键排版</button>
@@ -857,8 +856,14 @@ const DEFAULT_TOOLS = [
     { id: 'analyze', icon: '🔍', name: '分析', prompt: '请分析这段文本的写作特点、情感基调、叙事手法等，给出专业的文学点评。', enabled: true }
 ];
 
-// 从localStorage加载工具配置
+// 从localStorage加载工具配置，确保包含config工具项
 let toolConfig = loadJSON('lingxi_tool_config') || [...DEFAULT_TOOLS];
+
+// 如果旧配置中没有config工具项，自动添加
+if (!toolConfig.find(t => t.id === 'config')) {
+    toolConfig.unshift({ id: 'config', icon: '🛠️', name: '工具', prompt: '', enabled: true });
+    saveJSON('lingxi_tool_config', toolConfig);
+}
 
 // 渲染工具按钮
 function renderToolButtons() {
