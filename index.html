@@ -1602,6 +1602,21 @@ function playSwordClash() {
     });
 }
 
+// 处理文件导入
+async function handleFileImport(e) {
+    const files = e.target.files; if (!files||!files.length) return;
+    let imported = 0;
+    for (const f of files) {
+        try {
+            let text = f.name.endsWith('.docx')
+                ? await new Promise((res,rej) => { const r=new FileReader(); r.onload=ev=>mammoth.extractRawText({arrayBuffer:ev.target.result}).then(x=>res(x.value)).catch(rej); r.readAsArrayBuffer(f); })
+                : await f.text();
+            if (text.trim()) { sampleLibrary.push({name:f.name,text,gene:''}); imported++; }
+        } catch { showToast(`⚠️ 导入 ${f.name} 失败`); }
+    }
+    if (imported) { saveJSON(SK.samples,sampleLibrary); renderSampleLibrary(); showToast(`✅ 成功导入 ${imported} 个文件`); }
+    e.target.value = '';
+}
 
 function appendMsg(role, content) {
     const wrap = document.createElement('div'); wrap.className = 'msg-wrapper';
