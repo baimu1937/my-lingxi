@@ -248,8 +248,9 @@
 <div class="sidebar flex flex-col shadow-2xl">
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-black text-blue-400 italic tracking-wider sidebar-title">灵犀</h1>
-            <p class="text-base text-blue-300/80 mt-2 tracking-wide sidebar-sub" style="font-family: 'KaiTi', 'STKaiti', 'SimSun', serif; font-weight: bold;">每天必须写作，偷懒就是等死！</p>
+            <h1 class="text-3xl font-black text-blue-400 italic tracking-wider sidebar-title" style="font-weight: 900;">灵犀</h1>
+            <p class="text-sm text-blue-300/70 mt-1 tracking-wide sidebar-sub">心有千般意</p>
+            <p class="text-sm text-blue-300/70 tracking-wide sidebar-sub">灵犀一点通</p>
         </div>
         <button id="sidebarDarkToggle" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="边栏日夜模式">🌞</button>
     </div>
@@ -848,6 +849,7 @@ let currentToolMode = 'continue';
 
 // 默认工具配置
 const DEFAULT_TOOLS = [
+    { id: 'config', icon: '🛠️', name: '工具', prompt: '', enabled: true },
     { id: 'continue', icon: '✍️', name: '续写', prompt: '请根据上文内容继续创作，保持原有风格和情节发展。', enabled: true },
     { id: 'polish', icon: '✨', name: '润色', prompt: '请对以下文本进行润色优化，提升文笔质量，使表达更加生动流畅，但不要改变原意。', enabled: true },
     { id: 'expand', icon: '📈', name: '扩写', prompt: '请在原文基础上进行扩写，增加细节描写、心理活动或环境渲染，使内容更加丰富饱满。', enabled: true },
@@ -863,31 +865,27 @@ function renderToolButtons() {
     const container = document.getElementById('toolButtonsContainer');
     container.innerHTML = '';
     
-    // 添加配置按钮作为第一个按钮
-    const configBtn = document.createElement('button');
-    configBtn.className = 'tool-btn';
-    configBtn.dataset.mode = 'config';
-    configBtn.onclick = () => openToolConfig();
-    configBtn.innerHTML = `
-        <span class="text-lg">⚙️</span>
-        <span class="text-[10px] font-bold">配置</span>
-    `;
-    container.appendChild(configBtn);
-    
+    // 渲染所有启用的工具（包括配置工具）
     const enabledTools = toolConfig.filter(t => t.enabled);
-    const totalButtons = enabledTools.length + 1; // +1 for config button
-    const cols = Math.min(totalButtons, 6);
+    const cols = Math.min(enabledTools.length, 6);
     container.className = `grid grid-cols-${cols} gap-2`;
     
     enabledTools.forEach(tool => {
         const btn = document.createElement('button');
         btn.className = `tool-btn ${currentToolMode === tool.id ? 'active' : ''}`;
         btn.dataset.mode = tool.id;
-        btn.onclick = () => {
-            setToolMode(tool.id);
-            // 自动执行工具功能
-            setTimeout(() => executeTool(), 100);
-        };
+        
+        // 如果是配置工具，打开配置面板；否则执行工具功能
+        if (tool.id === 'config') {
+            btn.onclick = () => openToolConfig();
+        } else {
+            btn.onclick = () => {
+                setToolMode(tool.id);
+                // 自动执行工具功能
+                setTimeout(() => executeTool(), 100);
+            };
+        }
+        
         btn.innerHTML = `
             <span class="text-lg">${tool.icon}</span>
             <span class="text-[10px] font-bold">${tool.name}</span>
@@ -1498,35 +1496,47 @@ function addMsgActions(container, rawText) {
     const footer = document.createElement('div');
     footer.className = 'flex gap-2 mt-4 pt-3 border-t flex-wrap';
     footer.style.borderColor = 'var(--border-color)';
-    const btnCopy    = makeActionBtn('📋 复制','text-green-500',   () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
-    const btnBook    = makeActionBtn('📖 存稿','text-blue-500',    () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
-    const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
-    const btnContinue= makeActionBtn('➡️ 续写','text-teal-500',   () => { fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。'); showToast('💡 续写指令已填入'); });
-    const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
-        if (isGenerating) return;
-        if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
-        const lastUser = conversationHistory.filter(m=>m.role==='user').slice(-1)[0];
-        if (!lastUser) return;
-        if (conversationHistory[conversationHistory.length-1].role === 'assistant') conversationHistory.pop();
-        const allW = dom.displayArea.querySelectorAll('.msg-wrapper');
-        if (allW.length) allW[allW.length-1].remove();
-        isGenerating=true; abortController=new AbortController(); setSendButtonStop();
-        try {
-            const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
-            conversationHistory.push({role:'user', content:lastUser.content});
-            const wrapper=appendMsg('ai',''); const targetEl=wrapper.querySelector('.msg-body');
-            await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
-            const aiReply=targetEl.innerText;
-            conversationHistory.push({role:'assistant', content:aiReply});
-            addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
-            showToast('🔄 已重新生成');
-        } finally { isGenerating=false; abortController=null; resetSendButton(); }
-    });
-    const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
-        const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
-        docx.Packer.toBlob(doc).then(blob=>{ saveAs(blob,`灵犀_${new Date().toLocaleTimeString()}.docx`); showToast('✅ Word导出成功'); });
-    });
-    footer.append(btnCopy, btnBook, btnAppend, btnContinue, btnRegen, btnWord);
+    
+    // 判断是用户消息还是AI消息
+    const isUserMessage = container.classList.contains('user-msg');
+    
+    if (isUserMessage) {
+        // 用户消息：只显示复制按钮
+        const btnCopy = makeActionBtn('📋 复制', 'text-green-500', () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
+        footer.append(btnCopy);
+    } else {
+        // AI消息：显示除续写外的所有按钮
+        const btnCopy    = makeActionBtn('📋 复制','text-green-500',   () => navigator.clipboard.writeText(rawText).then(()=>showToast('✅ 已复制')));
+        const btnBook    = makeActionBtn('📖 存稿','text-blue-500',    () => { const n=`书稿_${new Date().toLocaleString()}`; bookLibrary.push({name:n,content:rawText}); saveJSON(SK.books,bookLibrary); renderBookLibrary(); showToast(`✅ 已保存：${n}`); });
+        const btnAppend  = makeActionBtn('✍️ 追加草稿','text-purple-500', () => { dom.workspace.value+=(dom.workspace.value?'\n\n':'')+rawText; debouncedSaveWorkspace(dom.workspace.value); if(!document.getElementById('mainEditor').classList.contains('editor-active')) document.getElementById('mainEditor').classList.add('editor-active'); showToast('📝 已追加到草稿区'); });
+        // 删除了 btnContinue（续写）按钮
+        const btnRegen   = makeActionBtn('🔄 重新生成','text-orange-500', async () => {
+            if (isGenerating) return;
+            if (!conversationHistory.length) { showToast('⚠️ 没有可重新生成的内容'); return; }
+            const lastUser = conversationHistory.filter(m=>m.role==='user').slice(-1)[0];
+            if (!lastUser) return;
+            if (conversationHistory[conversationHistory.length-1].role === 'assistant') conversationHistory.pop();
+            const allW = dom.displayArea.querySelectorAll('.msg-wrapper');
+            if (allW.length) allW[allW.length-1].remove();
+            isGenerating=true; abortController=new AbortController(); setSendButtonStop();
+            try {
+                const sys = prompts[dom.promptSelect.value] || '你是一个智慧的创作助手。';
+                conversationHistory.push({role:'user', content:lastUser.content});
+                const wrapper=appendMsg('ai',''); const targetEl=wrapper.querySelector('.msg-body');
+                await streamCallAI(document.getElementById('singleModel').value, sys, conversationHistory, targetEl, parseFloat(dom.tempSlider.value));
+                const aiReply=targetEl.innerText;
+                conversationHistory.push({role:'assistant', content:aiReply});
+                addMsgActions(wrapper.querySelector('.ai-msg'), aiReply);
+                showToast('🔄 已重新生成');
+            } finally { isGenerating=false; abortController=null; resetSendButton(); }
+        });
+        const btnWord = makeActionBtn('📄 导出Word','text-gray-400', () => {
+            const doc = new docx.Document({sections:[{properties:{},children:[new docx.Paragraph({text:rawText})]}]});
+            docx.Packer.toBlob(doc).then(blob=>{ saveAs(blob,`灵犀_${new Date().toLocaleTimeString()}.docx`); showToast('✅ Word导出成功'); });
+        });
+        footer.append(btnCopy, btnBook, btnAppend, btnRegen, btnWord);
+    }
+    
     container.appendChild(footer);
 }
 function makeActionBtn(text, cls, onClick) {
