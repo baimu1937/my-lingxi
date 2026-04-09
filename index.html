@@ -249,7 +249,7 @@
     <div class="p-6 border-b border-white/5 flex justify-between items-center">
         <div>
             <h1 class="text-2xl font-black text-blue-400 italic tracking-wider sidebar-title">灵犀</h1>
-            <p class="text-[11px] text-blue-300/60 italic mt-1 tracking-widest sidebar-sub">妙笔千般意 灵犀一点通</p>
+            <p class="text-[10px] text-blue-300/60 mt-1 tracking-wide sidebar-sub" style="font-family: 'KaiTi', 'STKaiti', 'SimSun', serif; font-weight: bold;">每天必须写作，偷懒就是等死！</p>
         </div>
         <button id="sidebarDarkToggle" class="text-xl opacity-60 hover:opacity-100 hover:scale-110 transition cursor-pointer" title="边栏日夜模式">🌞</button>
     </div>
@@ -284,22 +284,19 @@
 </div>
 
 <!-- 多功能工具栏 -->
-<div id="toolPanel" class="hidden border-b px-4 py-3 flex-shrink-0" style="background:var(--bg-main);border-color:var(--border-color)">
-    <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-black text-blue-500 uppercase tracking-wider">🛠️ 创作工具箱</span>
-        <div class="flex gap-2">
-            <button onclick="openToolConfig()" class="text-[10px] text-blue-500 hover:text-blue-400 font-bold px-2 py-1 bg-blue-500/10 rounded-lg transition">⚙️ 配置</button>
-            <button onclick="toggleToolPanel()" class="text-gray-400 hover:text-red-500 transition text-sm">✕ 关闭</button>
-        </div>
+<div id="toolPanel" class="hidden border-b px-4 py-2 flex-shrink-0" style="background:var(--bg-main);border-color:var(--border-color)">
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black text-blue-500 uppercase tracking-wider">🛠️ 工具箱</span>
+        <button onclick="toggleToolPanel()" class="text-gray-400 hover:text-red-500 transition text-sm">✕ 收起</button>
     </div>
-    <div id="toolButtonsContainer" class="grid grid-cols-5 gap-2">
+    <div id="toolButtonsContainer" class="grid grid-cols-6 gap-2">
         <!-- 动态生成的工具按钮将在这里 -->
     </div>
-    <div class="mt-3 pt-3 border-t" style="border-color:var(--border-color)">
-        <div class="flex items-center justify-between mb-2">
+    <div class="mt-2 pt-2 border-t" style="border-color:var(--border-color)">
+        <div class="flex items-center justify-between mb-1">
             <span class="text-[10px] font-bold text-gray-500">当前提示词：</span>
         </div>
-        <div id="currentPromptDisplay" class="text-[11px] text-gray-600 bg-white/5 px-3 py-2 rounded-lg leading-relaxed max-h-20 overflow-y-auto custom-scroll"></div>
+        <div id="currentPromptDisplay" class="text-[11px] text-gray-600 bg-white/5 px-3 py-2 rounded-lg leading-relaxed max-h-16 overflow-y-auto custom-scroll"></div>
     </div>
 </div>
 
@@ -733,6 +730,23 @@ window.loadBookIntoManager = function(idx) {
     debouncedSaveWorkspace(dom.workspace.value);
 };
 
+// 删除稿件（供钢琴键使用）
+window.deleteBook = function(index) {
+    if (!confirm(`确认删除【${bookLibrary[index].name}】？`)) return;
+    bookLibrary.splice(index, 1);
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
+    
+    // 如果正在编辑被删除的稿件，关闭管理器
+    if (currentManagerBookId === index) {
+        hideBookManager();
+    } else if (currentManagerBookId > index) {
+        currentManagerBookId--;
+    }
+    
+    showToast('🗑️ 稿件已删除');
+};
+
 window.addNewBook = function() {
     const newBook = { name: `新书稿_${bookLibrary.length+1}`, content: '' };
     bookLibrary.push(newBook);
@@ -768,6 +782,30 @@ window.deleteManagerBook = function() {
         hideBookManager();
     }
     showToast('🗑️ 稿件已删除');
+};
+
+// 将草稿区内容保存为新书稿
+window.saveDraftToBook = function() {
+    const content = dom.workspace.value.trim();
+    if (!content) {
+        showToast('⚠️ 草稿区为空');
+        return;
+    }
+    
+    const newBook = {
+        name: `新书稿_${new Date().toLocaleDateString()}`,
+        content: content
+    };
+    
+    bookLibrary.push(newBook);
+    saveJSON(SK.books, bookLibrary);
+    renderBookLibrary();
+    
+    // 自动打开新书稿进行编辑
+    showBookManager();
+    loadBookIntoManager(bookLibrary.length - 1);
+    
+    showToast('✅ 已转为新书稿');
 };
 
 window.appendToDraftFromManager = function() {
@@ -823,8 +861,20 @@ function renderToolButtons() {
     const container = document.getElementById('toolButtonsContainer');
     container.innerHTML = '';
     
+    // 添加配置按钮作为第一个按钮
+    const configBtn = document.createElement('button');
+    configBtn.className = 'tool-btn';
+    configBtn.dataset.mode = 'config';
+    configBtn.onclick = () => openToolConfig();
+    configBtn.innerHTML = `
+        <span class="text-lg">⚙️</span>
+        <span class="text-[10px] font-bold">配置</span>
+    `;
+    container.appendChild(configBtn);
+    
     const enabledTools = toolConfig.filter(t => t.enabled);
-    const cols = Math.min(enabledTools.length, 5);
+    const totalButtons = enabledTools.length + 1; // +1 for config button
+    const cols = Math.min(totalButtons, 6);
     container.className = `grid grid-cols-${cols} gap-2`;
     
     enabledTools.forEach(tool => {
