@@ -656,12 +656,12 @@ function renderBookLibrary() {
         const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
         
         item.innerHTML = `
-            <div class="piano-key-title" style="font-size: 14px;">${book.name}</div>
+            <div class="piano-key-title" style="font-size: 14px; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
             <div class="piano-key-meta">
                 <span>${dateStr}</span>
                 <span class="piano-key-wordcount">${wordCount}字</span>
             </div>
-            <button onclick="event.stopPropagation(); deleteBook(${i})" class="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-opacity" title="删除稿件">×</button>
+            <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-opacity" title="删除稿件">×</button>
         `;
         
         item.style.position = 'relative';
@@ -735,58 +735,91 @@ window.loadBookIntoManager = function(idx) {
 };
 
 // 删除稿件（供钢琴键使用）
-window.deleteBook = function(index) {
-    const bookName = bookLibrary[index].name;
+window.deleteBook = function(event, index) {
+    event.stopPropagation(); // 阻止触发打开稿件
     
-    // 创建内联确认对话框
-    const pianoKey = document.querySelectorAll('.piano-key')[index];
+    const pianoKeys = document.querySelectorAll('.piano-key');
+    if (index >= pianoKeys.length) return;
+    
+    const pianoKey = pianoKeys[index];
     if (!pianoKey) return;
     
     // 检查是否已有确认框
-    const existingConfirm = pianoKey.querySelector('.delete-confirm');
+    const existingConfirm = pianoKey.querySelector('.delete-confirm-inline');
     if (existingConfirm) {
-        // 如果点击取消，移除确认框
-        bookLibrary.splice(index, 1);
-        saveJSON(SK.books, bookLibrary);
-        renderBookLibrary();
-        
-        if (currentManagerBookId === index) {
-            hideBookManager();
-        } else if (currentManagerBookId > index) {
-            currentManagerBookId--;
-        }
-        
-        showToast('🗑️ 稿件已删除');
+        // 已存在确认框，点击则取消
+        existingConfirm.remove();
         return;
     }
     
-    // 创建确认框
+    // 移除其他所有确认框
+    document.querySelectorAll('.delete-confirm-inline').forEach(el => el.remove());
+    
+    // 创建内联确认框
     const confirmDiv = document.createElement('div');
-    confirmDiv.className = 'delete-confirm absolute bottom-0 left-0 right-0 bg-red-500/90 text-white text-[10px] py-1 px-2 flex justify-between items-center';
+    confirmDiv.className = 'delete-confirm-inline absolute bottom-0 left-0 right-0 bg-red-500/95 text-white text-[10px] py-1.5 px-3 flex justify-between items-center z-20';
     confirmDiv.innerHTML = `
-        <span>确认删除？</span>
-        <div class="flex gap-1">
-            <button class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[9px]" onclick="event.stopPropagation(); this.parentElement.parentElement.parentElement.remove();">取消</button>
-            <button class="bg-white hover:bg-gray-100 text-red-600 px-2 py-0.5 rounded text-[9px] font-bold" onclick="event.stopPropagation(); window.confirmDelete(${index});">确定</button>
+        <span class="font-bold">确认删除「${bookLibrary[index].name}」？</span>
+        <div class="flex gap-1.5">
+            <button class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-[9px] transition" onclick="event.stopPropagation(); this.closest('.delete-confirm-inline').remove();">取消</button>
+            <button class="bg-white hover:bg-gray-100 text-red-600 px-3 py-1 rounded text-[9px] font-bold transition" onclick="event.stopPropagation(); window.executeDelete(${index});">确定删除</button>
         </div>
     `;
     
-    pianoKey.style.position = 'relative';
     pianoKey.appendChild(confirmDiv);
 };
 
-window.confirmDelete = function(index) {
+window.executeDelete = function(index) {
+    const bookName = bookLibrary[index]?.name || '未知稿件';
+    
     bookLibrary.splice(index, 1);
     saveJSON(SK.books, bookLibrary);
     renderBookLibrary();
     
+    // 如果正在编辑被删除的稿件，关闭管理器
     if (currentManagerBookId === index) {
         hideBookManager();
     } else if (currentManagerBookId > index) {
         currentManagerBookId--;
     }
     
-    showToast('🗑️ 稿件已删除');
+    showToast(`🗑️ 已删除「${bookName}」`);
+};
+
+// 双击编辑书名
+window.editBookName = function(index, element) {
+    const oldName = bookLibrary[index].name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = oldName;
+    input.className = 'w-full bg-white/90 text-gray-800 text-sm px-2 py-1 rounded border border-blue-400 outline-none';
+    input.style.fontSize = '14px';
+    
+    element.innerHTML = '';
+    element.appendChild(input);
+    input.focus();
+    input.select();
+    
+    const saveName = () => {
+        const newName = input.value.trim() || oldName;
+        if (newName !== oldName) {
+            bookLibrary[index].name = newName;
+            saveJSON(SK.books, bookLibrary);
+            renderBookLibrary();
+            showToast(`✅ 已重命名为「${newName}」`);
+        } else {
+            element.textContent = oldName;
+        }
+    };
+    
+    input.onblur = saveName;
+    input.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            input.blur();
+        } else if (e.key === 'Escape') {
+            element.textContent = oldName;
+        }
+    };
 };
 
 window.addNewBook = function() {
@@ -825,24 +858,33 @@ window.deleteManagerBook = function() {
 };
 
 // 将草稿区内容保存为新书稿
+// 防抖函数，防止重复保存
+let saveDraftDebounceTimer = null;
 window.saveDraftToBook = function() {
-    const content = dom.workspace.value.trim();
-    if (!content) {
-        showToast('⚠️ 草稿区为空');
-        return;
+    // 清除之前的定时器
+    if (saveDraftDebounceTimer) {
+        clearTimeout(saveDraftDebounceTimer);
     }
     
-    const newBook = {
-        name: `新书稿_${new Date().toLocaleDateString()}`,
-        content: content
-    };
-    
-    bookLibrary.push(newBook);
-    saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
-    
-    // 不自动打开，只显示提示
-    showToast('✅ 已转为新书稿，请在稿件中心查看');
+    // 延迟300ms执行，防止快速点击导致多次保存
+    saveDraftDebounceTimer = setTimeout(() => {
+        const content = dom.workspace.value.trim();
+        if (!content) {
+            showToast('⚠️ 草稿区为空');
+            return;
+        }
+        
+        const newBook = {
+            name: `新书稿_${new Date().toLocaleDateString()}_${Date.now().toString().slice(-4)}`,
+            content: content
+        };
+        
+        bookLibrary.push(newBook);
+        saveJSON(SK.books, bookLibrary);
+        renderBookLibrary();
+        
+        showToast('✅ 已转为新书稿，请在稿件中心查看');
+    }, 300);
 };
 
 window.appendToDraftFromManager = function() {
