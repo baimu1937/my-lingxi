@@ -685,7 +685,7 @@ function renderBookLibrary() {
     const fragment  = document.createDocumentFragment();
     bookLibrary.forEach((book, i) => {
         const item = document.createElement('div');
-        item.className = 'piano-key';
+        item.className = `piano-key ${i === currentSelectedBookId ? 'active' : ''}`;
         
         const wordCount = (book.content || '').length;
         const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
@@ -703,6 +703,20 @@ function renderBookLibrary() {
         
         // 简化点击行为：直接打开分屏并加载内容
         item.onclick = () => {
+            // 切换前先自动保存当前稿件
+            if (currentSelectedBookId !== null && currentSelectedBookId !== i) {
+                const currentBook = bookLibrary[currentSelectedBookId];
+                if (currentBook) {
+                    currentBook.content = dom.workspace.value;
+                    saveJSON(SK.books, bookLibrary);
+                    console.log(`✅ 切换前自动保存：【${currentBook.name}】 (${dom.workspace.value.length}字)`);
+                }
+            }
+
+            // 更新选中状态
+            currentSelectedBookId = i;
+            renderBookLibrary();
+
             // 确保分屏开启
             if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
                 document.getElementById('mainEditor').classList.add('editor-active');
@@ -832,6 +846,7 @@ window.loadBookIntoManager = function(idx) {
     
     // 加载新稿件
     currentManagerBookId = idx;
+    currentSelectedBookId = idx; // 同步更新外部选中状态
     linkedBookId = idx; // 自动关联当前选中的稿件
     const book = bookLibrary[idx];
     document.getElementById('managerBookName').value = book.name;
@@ -891,8 +906,14 @@ window.executeDelete = function(index) {
     
     bookLibrary.splice(index, 1);
     saveJSON(SK.books, bookLibrary);
-    renderBookLibrary();
-    
+
+    // 如果删除的是当前选中的稿件，重置选中状态
+    if (currentSelectedBookId === index) {
+        currentSelectedBookId = null;
+    } else if (currentSelectedBookId > index) {
+        currentSelectedBookId--;
+    }
+
     // 如果正在编辑被删除的稿件，关闭管理器
     if (currentManagerBookId === index) {
         hideBookManager();
@@ -900,6 +921,7 @@ window.executeDelete = function(index) {
         currentManagerBookId--;
     }
     
+    renderBookLibrary();
     showToast(`🗑️ 已删除「${bookName}」`);
 };
 
@@ -943,7 +965,11 @@ window.addNewBook = function() {
     const newBook = { name: `新书稿_${bookLibrary.length+1}`, content: '' };
     bookLibrary.push(newBook);
     saveJSON(SK.books, bookLibrary);
+
+    // 自动选中新创建的稿件
+    currentSelectedBookId = bookLibrary.length - 1;
     renderBookLibrary();
+    
     showToast('✅ 新书稿已创建');
 };
 
@@ -1746,15 +1772,16 @@ function saveConfig() {
 }
 function updateModelDropdowns() {
     const official = [];
-    if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek Chat'}); official.push({value:'deepseek-reasoner',label:'DeepSeek R1'}); }
-    if (flowConfig.qw_key) { official.push({value:'qwen3.5-plus',label:'Qwen3.5 最新'}); official.push({value:'qwen3.5-flash',label:'Qwen3.5 Flash 极速'}); official.push({value:'qwen3-max-preview',label:'Qwen3-Max 旗舰推理'}); }
-    if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model.slice(0,10)}...)`});
-    // 支持逗号和换行符作为分隔符，清理空值和多余空格
+    // 只添加已配置Key的厂商基础模型提示
+    if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek(需自定义模型名)'}); }
+    if (flowConfig.qw_key) { official.push({value:'qwen-plus',label:'通义千问(需自定义模型名)'}); }
+    if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
+    // 所有模型都从自定义配置中读取
     const proxy = flowConfig.proxy_models 
         ? flowConfig.proxy_models
-            .split(/[,，\n]+/)  // 支持英文逗号、中文逗号、换行符
+            .split(/[,，\n]+/)
             .map(s => s.trim())
-            .filter(Boolean)     // 过滤空字符串
+            .filter(Boolean)
             .map(m => ({value: m, label: m}))
         : [];
     const all = [...official, ...proxy];
