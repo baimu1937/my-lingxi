@@ -951,25 +951,50 @@ const DEFAULT_TOOLS = [
 // 从localStorage加载工具配置
 let savedConfig = loadJSON('lingxi_tool_config');
 
-// 验证配置有效性：必须有至少5个工具，且包含必要的默认工具
+// 验证配置有效性：必须包含config工具和必要的默认工具
 let isValidConfig = savedConfig && Array.isArray(savedConfig) && savedConfig.length >= 5;
 if (isValidConfig) {
-    // 检查是否包含必要的默认工具ID
-    const requiredIds = ['continue', 'polish', 'expand'];
-    const hasRequiredTools = requiredIds.every(id => savedConfig.some(t => t.id === id));
-    if (!hasRequiredTools) {
-        console.warn('⚠️ 检测到配置不完整，使用默认配置');
+    // 检查是否包含config工具（最关键）
+    const hasConfigTool = savedConfig.some(t => t.id === 'config');
+    if (!hasConfigTool) {
+        console.warn('⚠️ 缺少config工具，使用默认配置');
         isValidConfig = false;
+    } else {
+        // 检查config工具是否启用
+        const configTool = savedConfig.find(t => t.id === 'config');
+        if (!configTool.enabled) {
+            console.warn('⚠️ config工具被禁用，强制启用');
+            configTool.enabled = true;
+        }
+        
+        // 检查是否包含必要的默认工具ID
+        const requiredIds = ['continue', 'polish', 'expand'];
+        const hasRequiredTools = requiredIds.every(id => savedConfig.some(t => t.id === id));
+        if (!hasRequiredTools) {
+            console.warn('⚠️ 检测到配置不完整，使用默认配置');
+            isValidConfig = false;
+        }
     }
 }
 
 // 如果配置无效，使用默认配置
 let toolConfig = isValidConfig ? savedConfig : [...DEFAULT_TOOLS];
 
+// 双重保险：确保config工具存在且启用（即使通过了验证也要再检查一次）
+const configToolIndex = toolConfig.findIndex(t => t.id === 'config');
+if (configToolIndex === -1) {
+    console.warn('⚠️ 最终检查：config工具不存在，添加到最前面');
+    toolConfig.unshift({ id: 'config', icon: '🛠️', name: '工具', prompt: '', enabled: true });
+} else if (!toolConfig[configToolIndex].enabled) {
+    console.warn('⚠️ 最终检查：config工具被禁用，强制启用');
+    toolConfig[configToolIndex].enabled = true;
+}
+
 console.log('🔧 工具配置初始化:', {
-    来源: isValidConfig ? 'localStorage' : '默认配置',
+    来源: isValidConfig ? 'localStorage(已修复)' : '默认配置',
     工具数量: toolConfig.length,
-    工具列表: toolConfig.map(t => `${t.icon} ${t.name}(${t.id})`)
+    工具列表: toolConfig.map(t => `${t.icon} ${t.name}(${t.id}) [${t.enabled ? '启用' : '禁用'}]`),
+    config工具状态: toolConfig.find(t => t.id === 'config') || '未找到'
 });
 
 // 保存到localStorage确保生效
@@ -1019,23 +1044,37 @@ function renderBottomToolButtons() {
     
     container.innerHTML = '';
     
+    console.log(' 开始渲染底部工具栏');
+    console.log('🎨 toolConfig总数:', toolConfig.length);
+    console.log('🎨 toolConfig详情:', JSON.stringify(toolConfig, null, 2));
+    
     // 1. 先添加工具配置按钮作为第一个按钮
     const configTool = toolConfig.find(t => t.id === 'config');
-    console.log('🔧 toolConfig:', toolConfig);
-    console.log('🔧 configTool:', configTool);
+    console.log('🔍 查找config工具结果:', configTool);
     
-    if (configTool && configTool.enabled) {
-        const btn = document.createElement('button');
-        btn.className = 'quick-tag';
-        btn.style.background = '#3b82f6';
-        btn.style.color = 'white';
-        btn.onclick = () => openToolConfig();
+    if (configTool) {
+        console.log('✅ 找到config工具:', {
+            id: configTool.id,
+            name: configTool.name,
+            icon: configTool.icon,
+            enabled: configTool.enabled
+        });
         
-        btn.innerHTML = `${configTool.icon} ${configTool.name}`;
-        container.appendChild(btn);
-        console.log('✅ 工具配置按钮已添加');
+        if (configTool.enabled) {
+            const btn = document.createElement('button');
+            btn.className = 'quick-tag';
+            btn.style.background = '#3b82f6';
+            btn.style.color = 'white';
+            btn.onclick = () => openToolConfig();
+            
+            btn.innerHTML = `${configTool.icon} ${configTool.name}`;
+            container.appendChild(btn);
+            console.log('✅ 工具配置按钮已成功添加到DOM');
+        } else {
+            console.warn('⚠️ config工具存在但被禁用，enabled=', configTool.enabled);
+        }
     } else {
-        console.warn('⚠️ 工具配置按钮未启用或未找到');
+        console.error('❌ 未找到id为"config"的工具！toolConfig中所有工具的ID:', toolConfig.map(t => t.id));
     }
     
     // 2. 添加原有的快捷标签按钮
