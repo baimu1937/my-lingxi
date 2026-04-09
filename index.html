@@ -586,8 +586,9 @@ let autoBackupTimer = null;
 let dom = {};
 
 // 关联状态管理
-let linkedBookId = null;      // 当前关联的稿件ID
-let linkedToolIds = new Set(); // 当前关联的工具ID集合
+let linkedBookId = null;          // 当前关联的稿件ID
+let linkedToolIds = new Set();    // 当前关联的工具ID集合
+let currentSelectedBookId = null; // 当前选中的稿件ID（用于高亮显示）
 
 // 例文相关变量（已删除例文中心，但保留变量以防引用错误）
 let sampleLibrary = [];
@@ -701,22 +702,25 @@ function renderBookLibrary() {
         
         item.style.position = 'relative';
         
+        // 高亮处理
+        if (i === currentSelectedBookId) {
+            item.classList.add('active');
+        }
+        
         // 简化点击行为：直接打开分屏并加载内容
         item.onclick = () => {
-            // 切换前先自动保存当前稿件
-            if (currentSelectedBookId !== null && currentSelectedBookId !== i) {
-                const currentBook = bookLibrary[currentSelectedBookId];
-                if (currentBook) {
-                    currentBook.content = dom.workspace.value;
-                    saveJSON(SK.books, bookLibrary);
-                    console.log(`✅ 切换前自动保存：【${currentBook.name}】 (${dom.workspace.value.length}字)`);
-                }
+            // 切换前自动保存当前稿件
+            if (currentSelectedBookId !== null && bookLibrary[currentSelectedBookId]) {
+                bookLibrary[currentSelectedBookId].content = dom.workspace.value;
+                saveJSON(SK.books, bookLibrary);
             }
-
-            // 更新选中状态
+            
             currentSelectedBookId = i;
-            renderBookLibrary();
-
+            
+            // 更新高亮状态
+            Array.from(container.children).forEach(child => child.classList.remove('active'));
+            item.classList.add('active');
+            
             // 确保分屏开启
             if (!document.getElementById('mainEditor').classList.contains('editor-active')) {
                 document.getElementById('mainEditor').classList.add('editor-active');
@@ -815,6 +819,7 @@ window.renderBookListInManager = function() {
 };
 
 window.loadBookIntoManager = function(idx) {
+    currentSelectedBookId = idx;
     // 在加载新稿件前，先自动保存当前稿件
     if (currentManagerBookId !== null && currentManagerBookId !== idx) {
         const nameInput = document.getElementById('managerBookName');
@@ -905,6 +910,11 @@ window.executeDelete = function(index) {
     const bookName = bookLibrary[index]?.name || '未知稿件';
     
     bookLibrary.splice(index, 1);
+    if (currentSelectedBookId === index) {
+        currentSelectedBookId = null;
+    } else if (currentSelectedBookId > index) {
+        currentSelectedBookId--;
+    }
     saveJSON(SK.books, bookLibrary);
 
     // 如果删除的是当前选中的稿件，重置选中状态
@@ -964,6 +974,7 @@ window.editBookName = function(index, element) {
 window.addNewBook = function() {
     const newBook = { name: `新书稿_${bookLibrary.length+1}`, content: '' };
     bookLibrary.push(newBook);
+    currentSelectedBookId = bookLibrary.length - 1;
     saveJSON(SK.books, bookLibrary);
 
     // 自动选中新创建的稿件
