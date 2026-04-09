@@ -1432,14 +1432,17 @@ function renderToolConfigList() {
             inputsDiv.appendChild(iconInput);
             inputsDiv.appendChild(nameInput);
             
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.onclick = () => deleteTool(idx);
-            deleteBtn.className = 'text-red-400 hover:text-red-300 transition text-sm ml-2';
-            deleteBtn.textContent = '🗑️';
+            // 只有非 config 工具才显示删除按钮
+            if (tool.id !== 'config') {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.onclick = () => deleteTool(idx);
+                deleteBtn.className = 'text-red-400 hover:text-red-300 transition text-sm ml-2';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.title = '删除此工具';
+                headerDiv.appendChild(deleteBtn);
+            }
             
             headerDiv.appendChild(inputsDiv);
-            headerDiv.appendChild(deleteBtn);
             
             // Prompt textarea
             const promptTextarea = document.createElement('textarea');
@@ -1501,15 +1504,13 @@ window.updateToolPrompt = function(idx, value) {
 window.deleteTool = function(idx) {
     const toolToDelete = toolConfig[idx];
     
-    // 检查是否是DEFAULT_TOOLS中的工具（通过ID判断）
-    const isDefaultTool = DEFAULT_TOOLS.some(dt => dt.id === toolToDelete.id);
-    
-    if (isDefaultTool) {
-        showToast(`⚠️ 【${toolToDelete.name}】是系统预设工具，不能删除`);
+    // 锁定“工具”配置按钮，禁止删除
+    if (toolToDelete.id === 'config') {
+        showToast(`⚠️ 【${toolToDelete.name}】是核心组件，不可删除`);
         return;
     }
     
-    if (!confirm('确认删除此工具？')) return;
+    if (!confirm(`确认删除工具【${toolToDelete.name}】吗？`)) return;
     
     console.log(`🗑️ 删除工具: ${toolToDelete.icon} ${toolToDelete.name} (${toolToDelete.id})`);
     
