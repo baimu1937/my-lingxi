@@ -583,6 +583,9 @@ function init() {
     updateStorageBar();
     bindEvents();
     initResizer();
+    
+    // 初始化工具按钮（必须在toolConfig加载后调用）
+    renderToolButtons();
 }
 
 function cacheDom() {
