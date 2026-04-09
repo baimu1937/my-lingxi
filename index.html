@@ -1785,7 +1785,6 @@ function updateModelDropdowns() {
     const official = [];
     // 只添加已配置Key的厂商基础模型提示
     if (flowConfig.ds_key) { official.push({value:'deepseek-chat',label:'DeepSeek(需自定义模型名)'}); }
-    if (flowConfig.qw_key) { official.push({value:'qwen-plus',label:'通义千问(需自定义模型名)'}); }
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
     // 所有模型都从自定义配置中读取
     const proxy = flowConfig.proxy_models 
