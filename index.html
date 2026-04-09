@@ -1873,8 +1873,9 @@ function bindEvents() {
         showToast('📤 草稿已填入输入框，可直接执行');
     };
 
-    document.getElementById('fileImport').onchange        = handleFileImport;
-    document.getElementById('importSystemInput').onchange = importSystemData;
+    // 注意：fileImport和importSystemInput元素在当前版本中已移除
+    // document.getElementById('fileImport').onchange        = handleFileImport;
+    // document.getElementById('importSystemInput').onchange = importSystemData;
     document.getElementById('historySelect').onchange     = loadHistory;
     document.getElementById('deleteHistoryBtn').onclick   = () => {
         const idx = document.getElementById('historySelect').value;
