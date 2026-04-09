@@ -693,8 +693,8 @@ function renderBookLibrary() {
         const isLinked = linkedBookId === i;
         item.innerHTML = `
             <div class="flex items-center gap-2 w-full">
+                <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-4 h-4 accent-blue-500 cursor-pointer" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
                 <div class="piano-key-title flex-1" style="font-size: 14px; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
-                <button onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-6 h-6 flex items-center justify-center rounded-full transition-all ${isLinked ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:text-blue-400 hover:bg-blue-500/10'}" title="${isLinked ? '取消关联范文' : '关联为参考范文'}">📎</button>
             </div>
             <div class="piano-key-meta mt-1">
                 <span>${dateStr}</span>
@@ -1448,17 +1448,17 @@ function renderToolConfigList() {
             inputsDiv.appendChild(iconInput);
             inputsDiv.appendChild(nameInput);
             
-            // 只有非 config 工具才显示删除按钮
+            headerDiv.appendChild(inputsDiv);
+            
+            // 将删除按钮移到最末尾，并增加确认提示，防止误触
             if (tool.id !== 'config') {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.onclick = () => deleteTool(idx);
-                deleteBtn.className = 'text-red-400 hover:text-red-300 transition text-sm ml-2';
-                deleteBtn.textContent = '🗑️';
-                deleteBtn.title = '删除此工具';
+                deleteBtn.className = 'text-red-400/50 hover:text-red-400 transition text-xs ml-4 px-2 py-1 rounded hover:bg-red-500/10';
+                deleteBtn.textContent = '删除';
+                deleteBtn.title = '点击删除此工具（需二次确认）';
                 headerDiv.appendChild(deleteBtn);
             }
-            
-            headerDiv.appendChild(inputsDiv);
             
             // Prompt textarea
             const promptTextarea = document.createElement('textarea');
