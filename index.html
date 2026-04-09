@@ -585,9 +585,9 @@ let autoBackupTimer = null;
 let dom = {};
 
 // 关联状态管理
-let linkedBookId = null;          // 当前关联的稿件ID
-let linkedToolIds = new Set();    // 当前关联的工具ID集合
-let currentSelectedBookId = null; // 当前选中的稿件ID（用于高亮显示）
+let linkedBookId = null;          // 当前关联给AI参考的稿件ID
+let linkedToolIds = new Set();    // 当前关联给AI作为任务要求的工具ID集合
+let currentSelectedBookId = null; // 当前在编辑器中选中的稿件ID
 
 // 例文相关变量（已删除例文中心，但保留变量以防引用错误）
 let sampleLibrary = [];
@@ -690,9 +690,13 @@ function renderBookLibrary() {
         const wordCount = (book.content || '').length;
         const dateStr = new Date().toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
         
+        const isLinked = linkedBookId === i;
         item.innerHTML = `
-            <div class="piano-key-title" style="font-size: 14px; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
-            <div class="piano-key-meta">
+            <div class="flex items-center gap-2 w-full">
+                <div class="piano-key-title flex-1" style="font-size: 14px; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
+                <button onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-6 h-6 flex items-center justify-center rounded-full transition-all ${isLinked ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30' : 'text-gray-400 hover:text-blue-400 hover:bg-blue-500/10'}" title="${isLinked ? '取消关联范文' : '关联为参考范文'}">📎</button>
+            </div>
+            <div class="piano-key-meta mt-1">
                 <span>${dateStr}</span>
                 <span class="piano-key-wordcount">${wordCount}字</span>
             </div>
@@ -868,6 +872,18 @@ window.loadBookIntoManager = function(idx) {
     dom.workspace.value = book.content || '';
     dom.wsWordCount.textContent = (book.content || '').length + '字';
     debouncedSaveWorkspace(dom.workspace.value);
+};
+
+// 切换关联范文状态
+window.toggleLinkBook = function(index) {
+    if (linkedBookId === index) {
+        linkedBookId = null;
+        showToast('📎 已取消关联范文');
+    } else {
+        linkedBookId = index;
+        showToast(`📎 已将《${bookLibrary[index].name}》设为AI参考范文`);
+    }
+    renderBookLibrary(); // 重新渲染以更新图标样式
 };
 
 // 删除稿件（供钢琴键使用）
