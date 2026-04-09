@@ -414,6 +414,14 @@
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
                         <!-- 由 renderBottomToolButtons() 动态生成 -->
                     </div>
+                    <!-- 原有快捷指令标签（保留） -->
+                    <div class="flex gap-2 mb-2.5 flex-wrap">
+                        <button class="quick-tag" onclick="fillInput('请继续往下写，保持完全相同的风格、人物设定和情节走向，不要重复已写内容。')">⚡ 续写</button>
+                        <button class="quick-tag" onclick="fillInput('请优化以上文字的语言表达，使其更加流畅优美')">✨ 润色</button>
+                        <button class="quick-tag" onclick="fillInput('请扩写以上内容，增加细节描写和心理活动')">📝 扩写</button>
+                        <button class="quick-tag" onclick="fillInput('请增加一段精彩的对话来推进情节发展')">💬 加对话</button>
+                        <button class="quick-tag" onclick="fillInput('请帮我分析以上内容的优缺点并给出改进建议')">🔍 分析</button>
+                    </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
                             class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
@@ -983,27 +991,25 @@ function renderToolButtons() {
     });
 }
 
-// 渲染底部工具栏按钮（替代硬编码的快捷标签）
+// 渲染底部工具栏按钮（在最前面添加工具配置按钮）
 function renderBottomToolButtons() {
     const container = document.getElementById('bottomToolButtons');
     if (!container) return;
     
     container.innerHTML = '';
     
-    // 只渲染非配置类的工具按钮（排除config工具）
-    const functionalTools = toolConfig.filter(t => t.enabled && t.id !== 'config');
-    
-    functionalTools.forEach(tool => {
+    // 只添加工具配置按钮作为第一个按钮
+    const configTool = toolConfig.find(t => t.id === 'config');
+    if (configTool && configTool.enabled) {
         const btn = document.createElement('button');
         btn.className = 'quick-tag';
-        btn.onclick = () => {
-            fillInput(tool.prompt);
-            showToast(`💡 ${tool.name}指令已填入`);
-        };
+        btn.style.background = '#3b82f6';
+        btn.style.color = 'white';
+        btn.onclick = () => openToolConfig();
         
-        btn.innerHTML = `${tool.icon} ${tool.name}`;
+        btn.innerHTML = `${configTool.icon} ${configTool.name}`;
         container.appendChild(btn);
-    });
+    }
 }
 
 window.toggleToolPanel = function() {
