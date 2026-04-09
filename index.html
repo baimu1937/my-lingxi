@@ -2438,12 +2438,21 @@ function bindEvents() {
     document.getElementById('toggleSpace').onclick  = () => document.getElementById('mainEditor').classList.toggle('editor-active');
     document.getElementById('newChatBtn').onclick   = () => { clearChat(); dom.userInput.value=''; conversationHistory=[]; showToast('✨ 已开启新篇章，对话记忆已重置'); };
     document.getElementById('typesetBtn').onclick   = typesetContent;
-    document.getElementById('clearChatBtn').onclick = clearChat;
+    // document.getElementById('clearChatBtn').onclick = clearChat; // 扫把图标已移除
     document.getElementById('modeChat').onclick     = switchToChatMode;
     document.getElementById('modePK').onclick       = switchToPKMode;
     document.getElementById('sidebarDarkToggle').onclick = toggleSidebarDarkMode;
 
-    document.getElementById('openSettings').onclick  = () => document.getElementById('settingsModal').classList.remove('hidden');
+    const settingsBtn = document.getElementById('openSettings');
+    if (settingsBtn) {
+        settingsBtn.onclick = () => {
+            console.log('⚙️ 设置按钮被点击');
+            const modal = document.getElementById('settingsModal');
+            if (modal) modal.classList.remove('hidden');
+        };
+    } else {
+        console.error('❌ 找不到 openSettings 按钮元素');
+    }
     document.getElementById('closeSettings').onclick = () => document.getElementById('settingsModal').classList.add('hidden');
     document.getElementById('saveSettings').onclick  = saveConfig;
 
