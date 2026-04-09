@@ -936,11 +936,18 @@ const DEFAULT_TOOLS = [
 // 从localStorage加载工具配置，确保包含config工具项
 let toolConfig = loadJSON('lingxi_tool_config') || [...DEFAULT_TOOLS];
 
-// 如果旧配置中没有config工具项，自动添加
-if (!toolConfig.find(t => t.id === 'config')) {
+// 强制确保config工具项存在且启用（解决旧配置覆盖问题）
+const configToolIndex = toolConfig.findIndex(t => t.id === 'config');
+if (configToolIndex === -1) {
+    // 不存在则添加到最前面
     toolConfig.unshift({ id: 'config', icon: '🛠️', name: '工具', prompt: '', enabled: true });
-    saveJSON('lingxi_tool_config', toolConfig);
+} else if (!toolConfig[configToolIndex].enabled) {
+    // 存在但被禁用，强制启用
+    toolConfig[configToolIndex].enabled = true;
 }
+
+// 保存到localStorage确保生效
+saveJSON('lingxi_tool_config', toolConfig);
 
 // 渲染工具按钮
 function renderToolButtons() {
