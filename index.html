@@ -994,12 +994,18 @@ function renderToolButtons() {
 // 渲染底部工具栏按钮（在最前面添加工具配置按钮）
 function renderBottomToolButtons() {
     const container = document.getElementById('bottomToolButtons');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ bottomToolButtons容器未找到');
+        return;
+    }
     
     container.innerHTML = '';
     
     // 只添加工具配置按钮作为第一个按钮
     const configTool = toolConfig.find(t => t.id === 'config');
+    console.log('🔧 toolConfig:', toolConfig);
+    console.log('🔧 configTool:', configTool);
+    
     if (configTool && configTool.enabled) {
         const btn = document.createElement('button');
         btn.className = 'quick-tag';
@@ -1008,6 +1014,12 @@ function renderBottomToolButtons() {
         btn.onclick = () => openToolConfig();
         
         btn.innerHTML = `${configTool.icon} ${configTool.name}`;
+        container.appendChild(btn);
+        console.log('✅ 工具配置按钮已添加');
+    } else {
+        console.warn('⚠️ 工具配置按钮未启用或未找到');
+    }
+}
         container.appendChild(btn);
     }
 }
