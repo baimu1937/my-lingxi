@@ -1138,6 +1138,8 @@ window.executeTool = async function() {
 
 // 打开工具配置弹窗
 window.openToolConfig = function() {
+    console.log('🛠️ 打开工具配置面板');
+    console.log('🛠️ 当前toolConfig:', toolConfig);
     document.getElementById('toolConfigModal').classList.remove('hidden');
     renderToolConfigList();
 };
@@ -1151,24 +1153,39 @@ function renderToolConfigList() {
     const container = document.getElementById('toolConfigList');
     container.innerHTML = '';
     
+    console.log('🔧 渲染工具配置列表，toolConfig长度:', toolConfig.length);
+    console.log('🔧 toolConfig内容:', JSON.stringify(toolConfig));
+    
+    if (toolConfig.length === 0) {
+        console.warn('⚠️ toolConfig为空，使用默认配置');
+        toolConfig = [...DEFAULT_TOOLS];
+        saveJSON('lingxi_tool_config', toolConfig);
+    }
+    
     toolConfig.forEach((tool, idx) => {
-        const item = document.createElement('div');
-        item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
-        item.dataset.toolId = tool.id;
-        item.style.borderColor = 'var(--border-color)';
-        item.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 flex-1">
-                    <input type="checkbox" ${tool.enabled ? 'checked' : ''} class="tool-enabled-checkbox accent-blue-500">
-                    <input type="text" value="${tool.icon}" class="tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
-                    <input type="text" value="${tool.name}" class="tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
+        try {
+            const item = document.createElement('div');
+            item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
+            item.dataset.toolId = tool.id;
+            item.style.borderColor = 'var(--border-color)';
+            item.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 flex-1">
+                        <input type="checkbox" ${tool.enabled ? 'checked' : ''} class="tool-enabled-checkbox accent-blue-500">
+                        <input type="text" value="${tool.icon || '🔧'}" class="tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
+                        <input type="text" value="${tool.name || '未命名'}" class="tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
+                    </div>
+                    <button onclick="deleteTool(${idx})" class="text-red-400 hover:text-red-300 transition text-sm ml-2">🗑️</button>
                 </div>
-                <button onclick="deleteTool(${idx})" class="text-red-400 hover:text-red-300 transition text-sm ml-2">🗑️</button>
-            </div>
-            <textarea class="tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt}</textarea>
-        `;
-        container.appendChild(item);
+                <textarea class="tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt || ''}</textarea>
+            `;
+            container.appendChild(item);
+        } catch (err) {
+            console.error(`❌ 渲染工具[${idx}]失败:`, err, tool);
+        }
     });
+    
+    console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
 }
 
 window.toggleToolEnabled = function(idx) {
