@@ -308,7 +308,7 @@
     <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
             <h3 class="text-lg font-black text-blue-500 italic">⚙️ 工具箱配置</h3>
-            <button onclick="closeToolConfig()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500" style="color:var(--text-secondary)">&times;</button>
+            <button onclick="closeToolConfig()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500 relative" style="color:var(--text-secondary); cursor:pointer;">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="toolConfigList">
             <!-- 动态生成的配置项 -->
@@ -1002,6 +1002,29 @@ window.addNewTool = function() {
 };
 
 window.saveToolConfig = function() {
+    // 从表单中收集最新的配置
+    const inputs = document.querySelectorAll('#toolConfigList .tool-config-item');
+    const newConfig = [];
+    
+    inputs.forEach((item, idx) => {
+        const id = item.dataset.toolId;
+        const nameInput = item.querySelector('.tool-name-input');
+        const iconInput = item.querySelector('.tool-icon-input');
+        const promptInput = item.querySelector('.tool-prompt-input');
+        const enabledCheckbox = item.querySelector('.tool-enabled-checkbox');
+        
+        if (nameInput && promptInput) {
+            newConfig.push({
+                id: id,
+                name: nameInput.value || `工具${idx + 1}`,
+                icon: iconInput ? iconInput.value : '🔧',
+                prompt: promptInput.value || '',
+                enabled: enabledCheckbox ? enabledCheckbox.checked : true
+            });
+        }
+    });
+    
+    toolConfig = newConfig;
     saveJSON('lingxi_tool_config', toolConfig);
     renderToolButtons();
     
@@ -1018,10 +1041,17 @@ window.saveToolConfig = function() {
     }
     
     closeToolConfig();
-    showToast('✅ 工具配置已保存');
+    showToast('✅ 工具配置已保存并生效');
 };
 
 // 初始化时设置默认工具模式并渲染按钮
+setTimeout(() => {
+    renderToolButtons();
+    if (toolConfig.length > 0 && toolConfig[0].enabled) {
+        setToolMode(toolConfig[0].id);
+    }
+}, 100);
+
 if (typeof window.init === 'function') {
     const originalInit = window.init;
     window.init = function() {
