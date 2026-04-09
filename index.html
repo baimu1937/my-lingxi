@@ -325,6 +325,7 @@
         </div>
         <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
             <div class="flex gap-2">
+                <button onclick="diagnoseToolConfig()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-2 rounded-lg text-xs transition" title="查看当前配置状态">🔍 诊断</button>
                 <button onclick="resetToDefaultTools()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-2 rounded-lg text-xs transition" title="恢复默认的7个工具">🔄 重置默认</button>
                 <button onclick="addNewTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
             </div>
@@ -710,19 +711,35 @@ window.showBookManager = function() {
 };
 
 window.hideBookManager = function() {
-    // 自动保存当前编辑的稿件
+    // 自动保存当前编辑的稿件（无论何种方式关闭）
     if (currentManagerBookId !== null) {
-        const name = document.getElementById('managerBookName').value.trim() || '未命名稿件';
-        const content = document.getElementById('managerBookContent').value;
+        const nameInput = document.getElementById('managerBookName');
+        const contentInput = document.getElementById('managerBookContent');
         
-        // 只有当内容有变化时才保存
-        if (bookLibrary[currentManagerBookId].name !== name || bookLibrary[currentManagerBookId].content !== content) {
-            bookLibrary[currentManagerBookId] = { name, content };
-            saveJSON(SK.books, bookLibrary);
-            renderBookLibrary();
-            renderBookListInManager();
-            document.getElementById('managerWordCount').textContent = content.length;
-            showToast(`✅ 【${name}】已自动保存`);
+        if (nameInput && contentInput) {
+            const name = nameInput.value.trim() || '未命名稿件';
+            const content = contentInput.value;
+            
+            // 检查内容是否发生变化
+            const hasChanged = bookLibrary[currentManagerBookId].name !== name || 
+                              bookLibrary[currentManagerBookId].content !== content;
+            
+            if (hasChanged) {
+                try {
+                    bookLibrary[currentManagerBookId] = { name, content };
+                    saveJSON(SK.books, bookLibrary);
+                    renderBookLibrary();
+                    renderBookListInManager();
+                    document.getElementById('managerWordCount').textContent = content.length;
+                    console.log(`✅ 稿件【${name}】已自动保存 (${content.length}字)`);
+                    showToast(`✅ 【${name}】已自动保存`);
+                } catch (err) {
+                    console.error('❌ 自动保存失败:', err);
+                    showToast('❌ 自动保存失败，请手动保存');
+                }
+            } else {
+                console.log('ℹ️ 稿件内容未变化，跳过保存');
+            }
         }
     }
     
@@ -1300,29 +1317,40 @@ function renderToolConfigList() {
 }
 
 window.toggleToolEnabled = function(idx) {
+    console.log(`🔄 切换工具[${idx}]启用状态:`, toolConfig[idx].name, '->', !toolConfig[idx].enabled);
     toolConfig[idx].enabled = !toolConfig[idx].enabled;
     saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    console.log('💾 已保存到localStorage');
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+    console.log('✅ UI已更新');
 };
 
 window.updateToolIcon = function(idx, value) {
+    console.log(`✏️ 更新工具[${idx}]图标:`, toolConfig[idx].name, value);
     toolConfig[idx].icon = value;
     saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    console.log('💾 已保存到localStorage');
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+    console.log('✅ UI已更新');
 };
 
 window.updateToolName = function(idx, value) {
+    console.log(`✏️ 更新工具[${idx}]名称:`, toolConfig[idx].name, '->', value);
     toolConfig[idx].name = value;
     saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    console.log('💾 已保存到localStorage');
     renderToolButtons(); // 立即更新顶部按钮
     renderBottomToolButtons(); // 立即更新底部按钮
+    console.log('✅ UI已更新');
 };
 
 window.updateToolPrompt = function(idx, value) {
+    console.log(`✏️ 更新工具[${idx}]提示词长度:`, value.length, '字符');
     toolConfig[idx].prompt = value;
     saveJSON('lingxi_tool_config', toolConfig); // 立即保存（但不需要重新渲染，因为提示词不在按钮上显示）
+    console.log('💾 已保存到localStorage');
 };
 
 window.deleteTool = function(idx) {
@@ -1379,6 +1407,60 @@ window.resetToDefaultTools = function() {
     
     showToast('✅ 已恢复默认工具配置');
     console.log('🔄 已重置为默认工具:', toolConfig.map(t => `${t.icon} ${t.name}`));
+};
+
+// 诊断工具配置状态
+window.diagnoseToolConfig = function() {
+    console.group('🔍 工具配置诊断报告');
+    
+    // 检查localStorage
+    const rawStorage = localStorage.getItem('lingxi_tool_config');
+    console.log('1️⃣ localStorage原始数据:', rawStorage ? '存在' : '不存在');
+    
+    if (rawStorage) {
+        try {
+            const parsed = JSON.parse(rawStorage);
+            console.log('2️⃣ 解析后的配置:', parsed);
+            console.log('   - 工具数量:', parsed.length);
+            console.log('   - 工具列表:', parsed.map(t => ({ id: t.id, name: t.name, enabled: t.enabled })));
+            
+            const configTool = parsed.find(t => t.id === 'config');
+            console.log('3️⃣ config工具状态:', configTool || '❌ 未找到');
+            
+            if (configTool) {
+                console.log('   - 是否启用:', configTool.enabled);
+                console.log('   - 图标:', configTool.icon);
+                console.log('   - 名称:', configTool.name);
+            }
+        } catch (err) {
+            console.error('2️⃣ ❌ 解析失败:', err);
+        }
+    }
+    
+    // 检查当前内存中的配置
+    console.log('4️⃣ 当前内存中的toolConfig:', toolConfig);
+    console.log('   - 工具数量:', toolConfig.length);
+    console.log('   - 工具列表:', toolConfig.map(t => ({ id: t.id, name: t.name, enabled: t.enabled })));
+    
+    const memoryConfigTool = toolConfig.find(t => t.id === 'config');
+    console.log('5️⃣ 内存中config工具:', memoryConfigTool || '❌ 未找到');
+    
+    // 检查DOM
+    const bottomButtons = document.getElementById('bottomToolButtons');
+    if (bottomButtons) {
+        console.log('6️⃣ 底部按钮容器:', '存在');
+        console.log('   - 子元素数量:', bottomButtons.children.length);
+        console.log('   - 子元素:', Array.from(bottomButtons.children).map(el => ({
+            text: el.textContent.trim(),
+            onclick: el.onclick ? '有绑定' : '无绑定'
+        })));
+    } else {
+        console.error('6️⃣ ❌ 底部按钮容器不存在');
+    }
+    
+    console.groupEnd();
+    
+    showToast('🔍 诊断信息已输出到控制台，请按F12查看');
 };
 
 window.saveToolConfig = function() {
