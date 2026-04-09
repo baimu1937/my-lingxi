@@ -1141,18 +1141,19 @@ function renderToolConfigList() {
     
     toolConfig.forEach((tool, idx) => {
         const item = document.createElement('div');
-        item.className = 'bg-white/5 border rounded-lg p-3 space-y-2';
+        item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
+        item.dataset.toolId = tool.id;
         item.style.borderColor = 'var(--border-color)';
         item.innerHTML = `
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2 flex-1">
-                    <input type="checkbox" ${tool.enabled ? 'checked' : ''} onchange="toggleToolEnabled(${idx})" class="accent-blue-500">
-                    <input type="text" value="${tool.icon}" onchange="updateToolIcon(${idx}, this.value)" class="w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
-                    <input type="text" value="${tool.name}" onchange="updateToolName(${idx}, this.value)" class="flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
+                    <input type="checkbox" ${tool.enabled ? 'checked' : ''} class="tool-enabled-checkbox accent-blue-500">
+                    <input type="text" value="${tool.icon}" class="tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm">
+                    <input type="text" value="${tool.name}" class="tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none text-sm font-bold">
                 </div>
                 <button onclick="deleteTool(${idx})" class="text-red-400 hover:text-red-300 transition text-sm ml-2">🗑️</button>
             </div>
-            <textarea onchange="updateToolPrompt(${idx}, this.value)" class="w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt}</textarea>
+            <textarea class="tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll" rows="2" style="border-color:var(--border-color);color:var(--text-primary)">${tool.prompt}</textarea>
         `;
         container.appendChild(item);
     });
@@ -1160,24 +1161,36 @@ function renderToolConfigList() {
 
 window.toggleToolEnabled = function(idx) {
     toolConfig[idx].enabled = !toolConfig[idx].enabled;
+    saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    renderToolButtons(); // 立即更新顶部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮
 };
 
 window.updateToolIcon = function(idx, value) {
     toolConfig[idx].icon = value;
+    saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    renderToolButtons(); // 立即更新顶部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮
 };
 
 window.updateToolName = function(idx, value) {
     toolConfig[idx].name = value;
+    saveJSON('lingxi_tool_config', toolConfig); // 立即保存
+    renderToolButtons(); // 立即更新顶部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮
 };
 
 window.updateToolPrompt = function(idx, value) {
     toolConfig[idx].prompt = value;
+    saveJSON('lingxi_tool_config', toolConfig); // 立即保存（但不需要重新渲染，因为提示词不在按钮上显示）
 };
 
 window.deleteTool = function(idx) {
     if (!confirm('确认删除此工具？')) return;
     toolConfig.splice(idx, 1);
     renderToolConfigList();
+    renderToolButtons(); // 立即更新顶部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮
 };
 
 window.addNewTool = function() {
@@ -1190,14 +1203,16 @@ window.addNewTool = function() {
         enabled: true
     });
     renderToolConfigList();
+    renderToolButtons(); // 立即更新顶部按钮
+    renderBottomToolButtons(); // 立即更新底部按钮
 };
 
 window.saveToolConfig = function() {
-    // 从表单中收集最新的配置
-    const inputs = document.querySelectorAll('#toolConfigList .tool-config-item');
+    // 从表单中收集最新的配置（因为用户可能直接修改了输入框而没有触发onchange）
+    const items = document.querySelectorAll('#toolConfigList .tool-config-item');
     const newConfig = [];
     
-    inputs.forEach((item, idx) => {
+    items.forEach((item, idx) => {
         const id = item.dataset.toolId;
         const nameInput = item.querySelector('.tool-name-input');
         const iconInput = item.querySelector('.tool-icon-input');
@@ -1215,7 +1230,11 @@ window.saveToolConfig = function() {
         }
     });
     
-    toolConfig = newConfig;
+    // 只有在有新配置时才替换（防止空配置）
+    if (newConfig.length > 0) {
+        toolConfig = newConfig;
+    }
+    
     saveJSON('lingxi_tool_config', toolConfig);
     renderToolButtons();
     renderBottomToolButtons(); // 重新渲染底部按钮
