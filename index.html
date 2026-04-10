@@ -697,13 +697,14 @@ function renderBookLibrary() {
         const dateStr = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         
         const isLinked = linkedBookId === i;
+        item.classList.add('group'); // 添加 group 类以便使用 group-hover
         item.innerHTML = `
             <div class="flex items-center justify-between w-full mb-1">
                 <div class="flex items-center gap-2 flex-1">
                     <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-3.5 h-3.5 accent-blue-500 cursor-pointer" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
                     <div class="piano-key-title flex-1 truncate" style="font-size: 13px; font-weight: 600; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
                 </div>
-                <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="w-5 h-5 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] opacity-0 hover:opacity-100 transition-opacity ml-2" title="删除稿件">×</button>
+                <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-2 shadow-sm" title="删除稿件">×</button>
             </div>
             <div class="flex justify-between items-end w-full pt-1 border-t border-gray-100">
                 <span class="text-[10px] text-gray-400 font-mono">${dateStr}</span>
@@ -920,10 +921,10 @@ window.deleteBook = function(event, index) {
     const confirmDiv = document.createElement('div');
     confirmDiv.className = 'delete-confirm-inline absolute bottom-0 left-0 right-0 bg-red-500/95 text-white text-[10px] py-1.5 px-3 flex justify-between items-center z-20';
     confirmDiv.innerHTML = `
-        <span class="font-bold">确认删除「${bookLibrary[index].name}」？</span>
-        <div class="flex gap-1.5">
-            <button class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-[9px] transition" onclick="event.stopPropagation(); this.closest('.delete-confirm-inline').remove();">取消</button>
-            <button class="bg-white hover:bg-gray-100 text-red-600 px-3 py-1 rounded text-[9px] font-bold transition" onclick="event.stopPropagation(); window.executeDelete(${index});">确定删除</button>
+        <span class="font-bold truncate mr-2">确认删除「${bookLibrary[index].name}」？</span>
+        <div class="flex gap-1.5 flex-shrink-0">
+            <button class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded-full text-[9px] transition w-8 h-6 flex items-center justify-center" onclick="event.stopPropagation(); this.closest('.delete-confirm-inline').remove();">取消</button>
+            <button class="bg-white hover:bg-gray-100 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-bold transition w-8 h-6 flex items-center justify-center" onclick="event.stopPropagation(); window.executeDelete(${index});">确认</button>
         </div>
     `;
     
