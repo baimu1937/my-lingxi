@@ -430,12 +430,15 @@
                             <span class="font-black" style="color:var(--text-secondary)">兵器:</span>
                             <select id="promptSelect" class="bg-transparent font-black outline-none min-w-[100px] max-w-[180px] cursor-pointer text-blue-600 text-xs"></select>
                         </div>
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs" style="background:var(--bg-main);border-color:var(--border-color)">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs relative group" style="background:var(--bg-main);border-color:var(--border-color)">
                             <span class="font-black" style="color:var(--text-secondary)">📜 历史:</span>
-                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs" style="color:var(--text-primary)">
+                            <select id="historySelect" class="bg-transparent outline-none min-w-[140px] cursor-pointer text-xs appearance-none pr-6" style="color:var(--text-primary)">
                                 <option value="">-- 选择历史 --</option>
                             </select>
-                            <button id="deleteHistoryBtn" title="删除此条历史" class="text-red-400 hover:text-red-600 font-black text-sm transition ml-1">✕</button>
+                            <!-- 下拉框内的删除图标，悬停时显示 -->
+                            <div id="historyDeleteIcon" class="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-red-400 hover:text-white hover:bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10" title="删除当前选中记录">
+                                ✕
+                            </div>
                         </div>
                     </div>
                     <!-- 动态工具按钮区域（包含配置按钮和快捷标签） -->
@@ -2346,13 +2349,48 @@ function saveHistory() {
 }
 function renderHistorySelect() {
     const sel = document.getElementById('historySelect');
+    const currentVal = sel.value;
     sel.innerHTML = '<option value="">-- 选择历史 --</option>';
     history.forEach((h,i) => {
         const o = document.createElement('option'); o.value = i;
-        o.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${h.title}`;
+        // 限制标题长度，防止下拉框过宽
+        const title = h.title.length > 20 ? h.title.substring(0, 20) + '...' : h.title;
+        o.textContent = `${new Date(h.timestamp).toLocaleDateString()} ${title}`;
         sel.appendChild(o);
     });
+    if (currentVal && history[currentVal]) sel.value = currentVal;
 }
+
+// 处理历史记录下拉框内的删除图标点击
+document.addEventListener('DOMContentLoaded', () => {
+    const deleteIcon = document.getElementById('historyDeleteIcon');
+    const historySel = document.getElementById('historySelect');
+    
+    if (deleteIcon && historySel) {
+        deleteIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = historySel.value;
+            if (idx === '') {
+                showToast('⚠️ 请先选择一条历史记录');
+                return;
+            }
+            if (!confirm('确认删除这条历史记录？')) return;
+            
+            history.splice(idx, 1);
+            saveJSON(SK.history, history);
+            renderHistorySelect();
+            showToast('🗑️ 历史记录已删除');
+        });
+
+        // 当鼠标悬停在下拉框上时，让删除图标可点击
+        historySel.parentElement.addEventListener('mouseenter', () => {
+            deleteIcon.style.pointerEvents = 'auto';
+        });
+        historySel.parentElement.addEventListener('mouseleave', () => {
+            deleteIcon.style.pointerEvents = 'none';
+        });
+    }
+});
 function deleteHistory(idx) {
     if (!confirm('确认删除这条历史记录？')) return;
     history.splice(idx,1);
