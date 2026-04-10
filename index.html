@@ -2558,12 +2558,23 @@ function bindEvents() {
     // document.getElementById('fileImport').onchange        = handleFileImport;
     // document.getElementById('importSystemInput').onchange = importSystemData;
     document.getElementById('historySelect').onchange     = loadHistory;
-    document.getElementById('historyDeleteBtnInline').onclick = window.deleteSelectedHistory;
-    document.getElementById('deleteHistoryBtn').onclick   = () => {
-        const idx = document.getElementById('historySelect').value;
-        if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
-        deleteHistory(parseInt(idx));
-    };
+    
+    // 安全绑定历史记录删除按钮，防止因元素缺失导致后续代码中断
+    const histDelBtn = document.getElementById('historyDeleteBtnInline');
+    if (histDelBtn) {
+        histDelBtn.onclick = window.deleteSelectedHistory;
+    } else {
+        console.warn('⚠️ historyDeleteBtnInline 元素未找到，跳过绑定');
+    }
+
+    const oldDelBtn = document.getElementById('deleteHistoryBtn');
+    if (oldDelBtn) {
+        oldDelBtn.onclick   = () => {
+            const idx = document.getElementById('historySelect').value;
+            if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
+            deleteHistory(parseInt(idx));
+        };
+    }
 }
 
 window.onload = init;
