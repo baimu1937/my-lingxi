@@ -702,11 +702,11 @@ function renderBookLibrary() {
         const isLinked = linkedBookId === i;
         item.innerHTML = `
             <div class="flex items-center justify-between w-full mb-1 relative z-10">
-                <div class="flex items-center gap-2 flex-1">
-                    <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-3.5 h-3.5 accent-blue-500 cursor-pointer" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
+                <div class="flex items-center gap-2 flex-1 min-w-0 pr-2">
+                    <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-3.5 h-3.5 accent-blue-500 cursor-pointer flex-shrink-0" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
                     <div class="piano-key-title flex-1 truncate" style="font-size: 13px; font-weight: 600; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
                 </div>
-                <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="delete-btn w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-all duration-200 ml-2 shadow-md transform hover:scale-110" title="删除稿件">×</button>
+                <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="delete-btn w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-all duration-200 shadow-md transform hover:scale-110 flex-shrink-0" title="删除稿件">×</button>
             </div>
             <div class="flex justify-between items-end w-full mt-auto pt-0.5">
                 <span class="text-xs text-gray-500 font-mono leading-none">${dateStr}</span>
@@ -743,6 +743,10 @@ function renderBookLibrary() {
             dom.workspace.value = book.content || '';
             dom.wsWordCount.textContent = (book.content || '').length + '字';
             debouncedSaveWorkspace(dom.workspace.value);
+            
+            // 立即刷新稿件列表以更新字数统计
+            renderBookLibrary();
+            
             showToast(`📖 已打开【${book.name}】`);
         };
         fragment.appendChild(item);
@@ -883,6 +887,9 @@ window.loadBookIntoManager = function(idx) {
     dom.workspace.value = book.content || '';
     dom.wsWordCount.textContent = (book.content || '').length + '字';
     debouncedSaveWorkspace(dom.workspace.value);
+    
+    // 立即刷新稿件列表以更新字数统计
+    renderBookLibrary();
 };
 
 // 切换关联范文状态
