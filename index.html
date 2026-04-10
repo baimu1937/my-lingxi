@@ -143,14 +143,18 @@
         .piano-key { 
             background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%); 
             border: 1px solid #e0e0e0; 
-            border-radius: 0 0 8px 8px; 
-            margin-bottom: 2px; 
-            padding: 0.8rem 1rem; 
+            border-radius: 0 0 6px 6px; 
+            margin-bottom: 1px; 
+            padding: 0.5rem 0.8rem; 
             cursor: pointer; 
             transition: all 0.15s ease; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 60px;
         }
         .piano-key::before {
             content: '';
@@ -694,15 +698,17 @@ function renderBookLibrary() {
         
         const isLinked = linkedBookId === i;
         item.innerHTML = `
-            <div class="flex items-center gap-2 w-full">
-                <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-4 h-4 accent-blue-500 cursor-pointer" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
-                <div class="piano-key-title flex-1" style="font-size: 14px; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
+            <div class="flex items-center justify-between w-full mb-1">
+                <div class="flex items-center gap-2 flex-1">
+                    <input type="checkbox" onclick="event.stopPropagation(); window.toggleLinkBook(${i})" class="w-3.5 h-3.5 accent-blue-500 cursor-pointer" ${isLinked ? 'checked' : ''} title="勾选以关联为AI参考范文">
+                    <div class="piano-key-title flex-1 truncate" style="font-size: 13px; font-weight: 600; cursor: pointer;" ondblclick="event.stopPropagation(); window.editBookName(${i}, this)">${book.name}</div>
+                </div>
+                <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="w-5 h-5 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] opacity-0 hover:opacity-100 transition-opacity ml-2" title="删除稿件">×</button>
             </div>
-            <div class="piano-key-meta mt-1">
-                <span>${dateStr}</span>
-                <span class="piano-key-wordcount">${wordCount}字</span>
+            <div class="flex justify-between items-end w-full pt-1 border-t border-gray-100">
+                <span class="text-[10px] text-gray-400 font-mono">${dateStr}</span>
+                <span class="text-[10px] text-gray-500 font-medium">${wordCount}字</span>
             </div>
-            <button onclick="event.stopPropagation(); window.deleteBook(event, ${i})" class="absolute top-2 right-2 w-6 h-6 bg-red-500/80 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs opacity-0 hover:opacity-100 transition-opacity" title="删除稿件">×</button>
         `;
         
         item.style.position = 'relative';
