@@ -627,8 +627,10 @@ function init() {
     initResizer();
     
     // 初始化工具按钮（必须在toolConfig加载后调用）
+    console.log('🚀 初始化底部工具栏...');
     renderToolButtons();
     renderBottomToolButtons();
+    console.log('✅ 底部工具栏初始化完成，当前按钮数:', document.getElementById('bottomToolButtons').children.length);
 }
 
 function cacheDom() {
