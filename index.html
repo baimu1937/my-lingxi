@@ -436,9 +436,9 @@
                                 <option value="">-- 选择历史 --</option>
                             </select>
                             <!-- 下拉框内的删除图标，悬停时显示 -->
-                            <div id="historyDeleteIcon" class="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-red-400 hover:text-white hover:bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10" title="删除当前选中记录">
+                            <button id="historyDeleteBtnInline" class="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-red-400 hover:text-white hover:bg-red-500 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10" title="删除当前选中记录">
                                 ✕
-                            </div>
+                            </button>
                         </div>
                     </div>
                     <!-- 动态工具按钮区域（包含配置按钮和快捷标签） -->
@@ -2361,36 +2361,21 @@ function renderHistorySelect() {
     if (currentVal && history[currentVal]) sel.value = currentVal;
 }
 
-// 处理历史记录下拉框内的删除图标点击
-document.addEventListener('DOMContentLoaded', () => {
-    const deleteIcon = document.getElementById('historyDeleteIcon');
+// 处理历史记录下拉框内的删除按钮点击
+window.deleteSelectedHistory = function() {
     const historySel = document.getElementById('historySelect');
-    
-    if (deleteIcon && historySel) {
-        deleteIcon.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const idx = historySel.value;
-            if (idx === '') {
-                showToast('⚠️ 请先选择一条历史记录');
-                return;
-            }
-            if (!confirm('确认删除这条历史记录？')) return;
-            
-            history.splice(idx, 1);
-            saveJSON(SK.history, history);
-            renderHistorySelect();
-            showToast('🗑️ 历史记录已删除');
-        });
-
-        // 当鼠标悬停在下拉框上时，让删除图标可点击
-        historySel.parentElement.addEventListener('mouseenter', () => {
-            deleteIcon.style.pointerEvents = 'auto';
-        });
-        historySel.parentElement.addEventListener('mouseleave', () => {
-            deleteIcon.style.pointerEvents = 'none';
-        });
+    const idx = historySel.value;
+    if (idx === '') {
+        showToast('⚠️ 请先选择一条历史记录');
+        return;
     }
-});
+    if (!confirm('确认删除这条历史记录？')) return;
+    
+    history.splice(idx, 1);
+    saveJSON(SK.history, history);
+    renderHistorySelect();
+    showToast('🗑️ 历史记录已删除');
+};
 function deleteHistory(idx) {
     if (!confirm('确认删除这条历史记录？')) return;
     history.splice(idx,1);
@@ -2571,6 +2556,7 @@ function bindEvents() {
     // document.getElementById('fileImport').onchange        = handleFileImport;
     // document.getElementById('importSystemInput').onchange = importSystemData;
     document.getElementById('historySelect').onchange     = loadHistory;
+    document.getElementById('historyDeleteBtnInline').onclick = window.deleteSelectedHistory;
     document.getElementById('deleteHistoryBtn').onclick   = () => {
         const idx = document.getElementById('historySelect').value;
         if (idx === '') { showToast('⚠️ 请先选择要删除的历史记录'); return; }
