@@ -1988,7 +1988,13 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
         return;
     }
-    const safeTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1.5);
+    
+    // 特殊模型兼容性处理：部分 Kimi 模型强制要求 temperature 为 1
+    let finalTemp = Math.min(Math.max(parseFloat(temp)||0.7, 0), 1.5);
+    if (model.toLowerCase().includes('k2') || model.toLowerCase().includes('kimi-k2')) {
+        finalTemp = 1.0; 
+    }
+
     const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
     try {
         const res = await fetch(url, {
@@ -1998,7 +2004,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
                 model,
                 messages: [{ role:'system', content:sysPrompt }, ...msgArray],
                 stream: true,
-                temperature: safeTemp
+                temperature: finalTemp
             }),
             signal: abortController ? abortController.signal : undefined
         });
