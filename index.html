@@ -214,6 +214,8 @@
         .tool-btn.active { border-color: #3b82f6; background: rgba(59,130,246,0.1); color: #3b82f6; }
         .quick-tag { padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-secondary); transition: all 0.2s; white-space: nowrap; }
         .quick-tag:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .quick-fill-item { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        .quick-fill-item.quick-fill-pressing { opacity: 0.85; transform: scale(0.98); }
         #storageBar { height: 3px; border-radius: 9999px; transition: width 0.5s; }
 
         /* ⚔️ 竞技擂台动画 */
@@ -450,6 +452,9 @@
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
                         <!-- 由 renderBottomToolButtons() 动态生成所有按钮 -->
                     </div>
+                    <div id="quickFillToolbar" class="flex gap-2 mb-2.5 flex-wrap items-center">
+                        <!-- 由 renderQuickFillToolbar() 动态生成：一键填充下方输入框 -->
+                    </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
                             class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
@@ -568,6 +573,22 @@
     </div>
 </div>
 
+<!-- 快捷填充（输入框指令）弹窗 -->
+<div id="quickFillModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[310] p-4">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-lg shadow-2xl flex flex-col" style="background:var(--card-bg);border:1px solid var(--border-color)" onclick="event.stopPropagation()">
+        <h3 id="quickFillModalTitle" class="text-lg font-black mb-4 text-center pb-3 border-b" style="border-color:var(--border-color);color:var(--text-primary)">添加快捷填充</h3>
+        <label class="text-[11px] font-black mb-1.5 block" style="color:var(--text-secondary)">按钮名称</label>
+        <input id="quickFillModalName" type="text" class="modal-input text-sm mb-3" placeholder="显示在按钮上的名称">
+        <label class="text-[11px] font-black mb-1.5 block" style="color:var(--text-secondary)">指令内容（将填入输入框）</label>
+        <textarea id="quickFillModalContent" class="modal-input text-sm resize-none custom-scroll leading-relaxed mb-4" rows="10" placeholder="点击该按钮时，以上内容会写入下方输入框…"></textarea>
+        <div class="flex flex-wrap gap-2 items-center justify-end">
+            <button type="button" id="quickFillModalDelete" class="hidden mr-auto bg-red-600 hover:bg-red-500 text-white font-black py-2.5 px-4 rounded-xl text-sm transition">删除</button>
+            <button type="button" id="quickFillModalCancel" class="font-bold py-2.5 px-5 rounded-xl text-sm transition" style="background:var(--bg-main);color:var(--text-secondary)">取消</button>
+            <button type="button" id="quickFillModalSave" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-2.5 px-6 rounded-xl text-sm shadow transition">保存</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风格基因报告：
 1. 叙事结构与情节逻辑
@@ -631,6 +652,7 @@ function init() {
     renderToolButtons();
     renderBottomToolButtons();
     console.log('✅ 底部工具栏初始化完成，当前按钮数:', document.getElementById('bottomToolButtons').children.length);
+    initQuickFillUI();
 }
 
 function cacheDom() {
@@ -1316,6 +1338,273 @@ function renderBottomToolButtons() {
     
     console.log('✅ 底部工具栏渲染完成，共', container.children.length, '个按钮');
     console.log('📎 当前关联的工具:', Array.from(linkedToolIds));
+}
+
+// ========== 快捷填充（写入输入框 userInput）==========
+const QUICK_FILL_KEY = 'lingxi_quick_fills';
+const DEFAULT_QUICK_FILLS = [
+    { id: 'qf_link', name: '关联工具', content: '【关联工具】请在回答中结合我已关联的工具说明与输出要求，逐步完成任务。' },
+    { id: 'qf_channel', name: '频道人设', content: '【频道人设】请用符合本账号定位的口吻：信息清楚、节奏紧凑，少空话套话。' },
+    { id: 'qf_tomb', name: '盗墓人设', content: '【盗墓/探险人设】主角胆大心细、保命优先；叙述有临场感与民俗细节，避免过度血腥猎奇。' },
+    { id: 'qf_plot', name: '情节补充', content: '【情节补充】在不改动既有设定的前提下补全过渡：写清动机—冲突—后果，并给一两处可埋钩子的细节。' },
+    { id: 'qf_body', name: '正文指令', content: '【正文】直接输出可发表正文，不要逐条解释写作思路；适当分段；对话用中文弯引号。' },
+    { id: 'qf_title', name: '标题指令', content: '【标题】请生成 5 个标题备选（12–22 字、含关键词、有点击欲），并一句话说明首推哪一个。' }
+];
+let quickFillItems = [];
+let quickFillModalEditingId = null;
+
+function normalizeQuickFillList(raw) {
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+    const out = [];
+    for (let i = 0; i < raw.length; i++) {
+        const it = raw[i];
+        if (!it || typeof it.name !== 'string' || typeof it.content !== 'string') continue;
+        const id = typeof it.id === 'string' && it.id ? it.id : ('qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7));
+        out.push({ id, name: it.name.trim(), content: it.content });
+    }
+    return out.length ? out : null;
+}
+
+function loadQuickFillItemsFromStorage() {
+    const parsed = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
+    if (parsed) {
+        quickFillItems = parsed;
+        return;
+    }
+    quickFillItems = DEFAULT_QUICK_FILLS.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
+    saveJSON(QUICK_FILL_KEY, quickFillItems);
+}
+
+function persistQuickFillItems() {
+    saveJSON(QUICK_FILL_KEY, quickFillItems);
+}
+
+function attachQuickFillPressHandlers(el, onShortClick, onLongPress) {
+    const LONG_MS = 500;
+    const MOVE_THRESH = 14;
+    let timer = null;
+    let longDone = false;
+    let sx = 0, sy = 0;
+    let active = false;
+    let lastTouchTs = 0;
+
+    function clearTimer() {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    }
+    function onDown(clientX, clientY) {
+        longDone = false;
+        sx = clientX;
+        sy = clientY;
+        clearTimer();
+        el.classList.add('quick-fill-pressing');
+        timer = setTimeout(function () {
+            timer = null;
+            if (!active) return;
+            longDone = true;
+            onLongPress();
+        }, LONG_MS);
+    }
+    function onMove(clientX, clientY) {
+        if (timer && Math.hypot(clientX - sx, clientY - sy) > MOVE_THRESH) clearTimer();
+    }
+    function onUpFinish() {
+        el.classList.remove('quick-fill-pressing');
+        if (!active) return;
+        active = false;
+        if (timer) {
+            clearTimer();
+            if (!longDone) onShortClick();
+        }
+        longDone = false;
+    }
+    function onCancelPress() {
+        el.classList.remove('quick-fill-pressing');
+        active = false;
+        clearTimer();
+        longDone = false;
+    }
+
+    if (window.PointerEvent) {
+        el.addEventListener('pointerdown', function (e) {
+            if (!e.isPrimary) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            active = true;
+            onDown(e.clientX, e.clientY);
+        });
+        el.addEventListener('pointermove', function (e) {
+            if (!active) return;
+            onMove(e.clientX, e.clientY);
+        });
+        el.addEventListener('pointerup', function (e) {
+            if (!e.isPrimary) return;
+            onUpFinish();
+        });
+        el.addEventListener('pointercancel', onCancelPress);
+    } else {
+        el.addEventListener('touchstart', function (e) {
+            if (e.touches.length !== 1) return;
+            lastTouchTs = Date.now();
+            active = true;
+            const t = e.touches[0];
+            onDown(t.clientX, t.clientY);
+        }, { passive: true });
+        el.addEventListener('touchmove', function (e) {
+            if (!active || !e.touches.length) return;
+            const t = e.touches[0];
+            onMove(t.clientX, t.clientY);
+        }, { passive: true });
+        el.addEventListener('touchend', function () {
+            active = false;
+            lastTouchTs = Date.now();
+            if (timer) {
+                clearTimer();
+                if (!longDone) onShortClick();
+            }
+            longDone = false;
+            el.classList.remove('quick-fill-pressing');
+        });
+        el.addEventListener('touchcancel', onCancelPress);
+        el.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) return;
+            if (Date.now() - lastTouchTs < 600) return;
+            active = true;
+            onDown(e.clientX, e.clientY);
+            function mm(ev) { onMove(ev.clientX, ev.clientY); }
+            function mu() {
+                window.removeEventListener('mousemove', mm);
+                window.removeEventListener('mouseup', mu);
+                onUpFinish();
+            }
+            window.addEventListener('mousemove', mm);
+            window.addEventListener('mouseup', mu);
+        });
+    }
+}
+
+function applyQuickFillById(id) {
+    const item = quickFillItems.find(function (x) { return x.id === id; });
+    if (!item) return;
+    const ta = dom.userInput || document.getElementById('userInput');
+    if (!ta) return;
+    ta.value = item.content;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    const cc = document.getElementById('charCount');
+    if (cc) cc.textContent = ta.value.length + '字';
+    ta.focus();
+    showToast('📝 已填充「' + item.name + '」');
+}
+
+function openQuickFillModalAdd() {
+    quickFillModalEditingId = null;
+    document.getElementById('quickFillModalTitle').textContent = '添加快捷填充';
+    document.getElementById('quickFillModalName').value = '';
+    document.getElementById('quickFillModalContent').value = '';
+    document.getElementById('quickFillModalDelete').classList.add('hidden');
+    document.getElementById('quickFillModal').classList.remove('hidden');
+    setTimeout(function () { document.getElementById('quickFillModalName').focus(); }, 30);
+}
+
+function openQuickFillModalEdit(id) {
+    const item = quickFillItems.find(function (x) { return x.id === id; });
+    if (!item) return;
+    quickFillModalEditingId = id;
+    document.getElementById('quickFillModalTitle').textContent = '编辑快捷填充';
+    document.getElementById('quickFillModalName').value = item.name;
+    document.getElementById('quickFillModalContent').value = item.content;
+    document.getElementById('quickFillModalDelete').classList.remove('hidden');
+    document.getElementById('quickFillModal').classList.remove('hidden');
+    showToast('✏️ 编辑「' + item.name + '」');
+    setTimeout(function () { document.getElementById('quickFillModalName').focus(); }, 30);
+}
+
+function closeQuickFillModal() {
+    document.getElementById('quickFillModal').classList.add('hidden');
+    quickFillModalEditingId = null;
+}
+
+function saveQuickFillModal() {
+    const name = document.getElementById('quickFillModalName').value.trim();
+    const content = document.getElementById('quickFillModalContent').value;
+    if (!name) {
+        showToast('⚠️ 请填写按钮名称');
+        return;
+    }
+    if (quickFillModalEditingId) {
+        const idx = quickFillItems.findIndex(function (x) { return x.id === quickFillModalEditingId; });
+        if (idx === -1) {
+            showToast('⚠️ 未找到该项');
+            return;
+        }
+        quickFillItems[idx].name = name;
+        quickFillItems[idx].content = content;
+        persistQuickFillItems();
+        renderQuickFillToolbar();
+        closeQuickFillModal();
+        showToast('✅ 已保存修改');
+        return;
+    }
+    const nid = 'qf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    quickFillItems.push({ id: nid, name: name, content: content });
+    persistQuickFillItems();
+    renderQuickFillToolbar();
+    closeQuickFillModal();
+    showToast('✅ 已添加快捷填充');
+}
+
+function deleteQuickFillModalItem() {
+    if (!quickFillModalEditingId) return;
+    const idx = quickFillItems.findIndex(function (x) { return x.id === quickFillModalEditingId; });
+    if (idx === -1) return;
+    const removedName = quickFillItems[idx].name;
+    quickFillItems.splice(idx, 1);
+    persistQuickFillItems();
+    renderQuickFillToolbar();
+    closeQuickFillModal();
+    showToast('🗑️ 已删除「' + removedName + '」');
+}
+
+function renderQuickFillToolbar() {
+    const container = document.getElementById('quickFillToolbar');
+    if (!container) return;
+    container.innerHTML = '';
+    quickFillItems.forEach(function (item) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-tag quick-fill-item';
+        btn.dataset.id = item.id;
+        btn.textContent = item.name;
+        btn.title = '点按填入输入框 · 长按0.5秒编辑';
+        attachQuickFillPressHandlers(btn, function () { applyQuickFillById(item.id); }, function () { openQuickFillModalEdit(item.id); });
+        btn.oncontextmenu = function (e) { e.preventDefault(); };
+        container.appendChild(btn);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'quick-tag';
+    addBtn.textContent = '➕';
+    addBtn.title = '自定义添加快捷填充';
+    addBtn.onclick = function () { openQuickFillModalAdd(); };
+    container.appendChild(addBtn);
+}
+
+function initQuickFillUI() {
+    loadQuickFillItemsFromStorage();
+    renderQuickFillToolbar();
+    const modal = document.getElementById('quickFillModal');
+    const cancelBtn = document.getElementById('quickFillModalCancel');
+    const saveBtn = document.getElementById('quickFillModalSave');
+    const delBtn = document.getElementById('quickFillModalDelete');
+    if (modal) {
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeQuickFillModal();
+        });
+    }
+    if (cancelBtn) cancelBtn.onclick = function () { closeQuickFillModal(); showToast('已取消'); };
+    if (saveBtn) saveBtn.onclick = saveQuickFillModal;
+    if (delBtn) delBtn.onclick = deleteQuickFillModalItem;
 }
 
 window.toggleToolPanel = function() {
