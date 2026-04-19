@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!DOCTYPE html><html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -514,6 +513,7 @@
                 <input id="km_key"   type="password" placeholder="Kimi Moonshot Key"   class="modal-input text-sm">
                 <input id="db_key"   type="password" placeholder="豆包 Doubao Key"     class="modal-input text-sm">
                 <input id="db_model" type="text"     placeholder="豆包模型ID (ep-xxx)" class="modal-input text-sm">
+                <input id="gg_key"  type="password" placeholder="Google AI (Gemini) Key" class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
                 <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
@@ -583,7 +583,7 @@ const SK = {
     sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
 
-let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', km_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'' };
+let flowConfig          = loadJSON(SK.flow)    || { ds_key:'', qw_key:'', km_key:'', db_key:'', db_model:'', proxy_url:'', proxy_key:'', proxy_models:'', gg_key:'' };
 let prompts             = loadJSON(SK.prompts) || { "灵犀助手": "你是一位智慧的创作助手，擅长各类文体写作，风格灵活多变，请根据用户需求提供高质量的创作内容。" };
 let history             = loadJSON(SK.history) || [];
 let bookLibrary         = loadJSON(SK.books)   || [];
@@ -1929,13 +1929,13 @@ function renderSelect() {
 }
 
 function initConfigInputs() {
-    ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
 }
 function saveConfig() {
     flowConfig = {};
-    ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models'].forEach(id => {
+    ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
         flowConfig[id] = document.getElementById(id).value.trim();
     });
     saveJSON(SK.flow, flowConfig);
@@ -1944,7 +1944,8 @@ function saveConfig() {
     document.getElementById('settingsModal').classList.add('hidden');
 }
 function updateModelDropdowns() {
-    const official = [];
+    const official = [];node -v
+
     // 只添加已配置Key的厂商基础模型提示
     if (flowConfig.km_key) official.push({value:'moonshot-v1-8k', label:'Kimi (moonshot-v1-8k)'});
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
@@ -1995,6 +1996,11 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
              modelLower.includes('doubao') || modelLower.includes('豆包')) {
         url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
         key = flowConfig.db_key;
+    }
+    // Google Gemini 系列识别
+    else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+        url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
+        key = flowConfig.gg_key;
     } 
     // 其他模型使用代理URL
     else {
