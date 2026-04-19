@@ -1999,7 +1999,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     }
     // Google Gemini 系列识别
     else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-        url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
+        url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
         key = flowConfig.gg_key;
     } 
     // 其他模型使用代理URL
