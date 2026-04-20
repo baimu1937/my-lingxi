@@ -737,23 +737,30 @@ class DragSort {
 let globalSearch, batchManager, versionControl, enhancedShortcuts, dragSort;
 
 function initEnhancements() {
+    console.log('🚀 正在初始化增强功能...');
+    
     globalSearch = new GlobalSearch();
     batchManager = new BatchManager();
     versionControl = new VersionControl();
     enhancedShortcuts = new EnhancedShortcuts();
     dragSort = new DragSort();
     
+    // 导出供全局使用
+    window.globalSearch = globalSearch;
+    window.batchManager = batchManager;
+    window.versionControl = versionControl;
+    window.enhancedShortcuts = enhancedShortcuts;
+    window.dragSort = dragSort;
+    
     console.log('✨ 灵犀工作台增强功能已加载');
+    console.log('  - GlobalSearch:', typeof globalSearch);
+    console.log('  - BatchManager:', typeof batchManager);
+    console.log('  - VersionControl:', typeof versionControl);
+    console.log('  - EnhancedShortcuts:', typeof enhancedShortcuts);
+    console.log('  - DragSort:', typeof dragSort);
 }
 
-// 在原有init函数后调用
-const originalInit = window.init;
-window.init = function() {
-    originalInit();
-    initEnhancements();
-};
-
-// 导出供全局使用
-window.globalSearch = globalSearch;
-window.batchManager = batchManager;
-window.versionControl = versionControl;
+// 页面加载后自动初始化增强功能
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(initEnhancements, 500);
+});

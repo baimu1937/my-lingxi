@@ -452,6 +452,10 @@
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
                         <!-- 由 renderBottomToolButtons() 动态生成所有按钮 -->
                     </div>
+                    <div id="bottomToolButtons2" class="flex gap-2 mb-2.5 flex-wrap" style="background:rgba(139,92,246,0.08);padding:8px;border-radius:12px;border:1px dashed #8b5cf6;">
+                        <!-- 由 renderBottomToolButtons2() 动态生成：第二套独立工具栏 -->
+                        <span style="color:#8b5cf6;font-size:11px;font-weight:bold;">🎯 第二套工具栏加载中...</span>
+                    </div>
                     <div id="quickFillToolbar" class="flex gap-2 mb-2.5 flex-wrap items-center">
                         <!-- 由 renderQuickFillToolbar() 动态生成：一键填充下方输入框 -->
                     </div>
@@ -670,6 +674,7 @@ function init() {
     console.log('🚀 初始化底部工具栏...');
     renderToolButtons();
     renderBottomToolButtons();
+    renderBottomToolButtons2();
     console.log('✅ 底部工具栏初始化完成，当前按钮数:', document.getElementById('bottomToolButtons').children.length);
     initQuickFillUI();
 }
@@ -1359,6 +1364,178 @@ function renderBottomToolButtons() {
     console.log('📎 当前关联的工具:', Array.from(linkedToolIds));
 }
 
+// ========== 第二套底部工具栏（独立工具栏，不关联）==========
+const TOOL_CONFIG_KEY2 = 'lingxi_tool_config2';
+
+// 默认第二套工具配置
+const DEFAULT_TOOLS2 = [
+    { id: 't2_config', icon: '🎯', name: '工具2', prompt: '', enabled: true },
+    { id: 't2_rewrite', icon: '🔄', name: '改写', prompt: '请对以下内容进行改写，保持核心信息但换一种表达方式。', enabled: true },
+    { id: 't2_summary', icon: '📝', name: '摘要', prompt: '请对以下内容进行摘要提炼，保留关键信息，去除冗余。', enabled: true },
+    { id: 't2_sense', icon: '🌡️', name: '情感', prompt: '请分析以下内容的情感色彩和语气，给出专业的情感标签和点评。', enabled: true }
+];
+
+// 从localStorage加载第二套工具配置
+let savedConfig2 = loadJSON(TOOL_CONFIG_KEY2);
+let isValidConfig2 = savedConfig2 && Array.isArray(savedConfig2) && savedConfig2.length >= 1;
+if (isValidConfig2) {
+    const hasConfigTool2 = savedConfig2.some(t => t.id === 't2_config');
+    if (!hasConfigTool2) {
+        isValidConfig2 = false;
+    } else {
+        const configTool2 = savedConfig2.find(t => t.id === 't2_config');
+        if (!configTool2.enabled) {
+            configTool2.enabled = true;
+        }
+    }
+}
+let toolConfig2 = isValidConfig2 ? savedConfig2 : [...DEFAULT_TOOLS2];
+
+const configTool2Index = toolConfig2.findIndex(t => t.id === 't2_config');
+if (configTool2Index === -1) {
+    toolConfig2.unshift({ id: 't2_config', icon: '🎯', name: '工具2', prompt: '', enabled: true });
+} else if (!toolConfig2[configTool2Index].enabled) {
+    toolConfig2[configTool2Index].enabled = true;
+}
+saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+
+// 第二套工具栏：点击即填充，不参与关联状态
+
+// 打开第二套工具栏配置面板
+function openToolConfig2() {
+    openToolConfig(); // 暂时共用同一配置面板，提示用户到工具箱配置
+    showToast('🎯 请在工具箱中滚动到底部管理第二套工具栏');
+}
+
+// 渲染第二套底部工具栏（完全独立）
+function renderBottomToolButtons2() {
+    const container = document.getElementById('bottomToolButtons2');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const enabledTools2 = toolConfig2.filter(t => t.enabled && t.id !== 't2_config');
+    const configTool2 = toolConfig2.find(t => t.id === 't2_config');
+
+    // 添加工具箱2配置按钮（锁定）
+    if (configTool2 && configTool2.enabled) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag locked-tool';
+        btn.style.background = '#8b5cf6'; // 紫色区分第一套的蓝色
+        btn.style.color = 'white';
+        btn.style.cursor = 'default';
+        btn.title = '第二套工具栏配置（锁定）';
+        btn.onclick = () => openToolConfig2();
+        btn.innerHTML = `${configTool2.icon} ${configTool2.name}`;
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu2(e.clientX, e.clientY);
+        };
+        container.appendChild(btn);
+    }
+
+    // 添加其他启用的工具按钮（点击后直接填充输入框）
+    enabledTools2.forEach(tool => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag removable-tool';
+        btn.dataset.toolId = tool.id;
+        btn.dataset.toolset = '2'; // 标记属于第二套
+        btn.onclick = () => applyTool2PromptToInput(tool);
+
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu2(e.clientX, e.clientY, tool.id);
+        };
+
+        btn.innerHTML = `${tool.icon} ${tool.name}`;
+        container.appendChild(btn);
+    });
+}
+
+function applyTool2PromptToInput(tool) {
+    if (!tool || !tool.prompt) {
+        showToast('⚠️ 该工具未配置填充内容');
+        return;
+    }
+    const ta = dom.userInput || document.getElementById('userInput');
+    if (!ta) return;
+    ta.value = tool.prompt;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    const cc = document.getElementById('charCount');
+    if (cc) cc.textContent = ta.value.length + '字';
+    ta.focus();
+    showToast(`📝 已填充：${tool.name}`);
+}
+
+// 右键菜单（第二套工具栏独立管理）
+function showToolManagementMenu2(x, y, toolId) {
+    // 移除已存在的菜单
+    const existing = document.getElementById('toolMenu2');
+    if (existing) existing.remove();
+
+    const menu = document.createElement('div');
+    menu.id = 'toolMenu2';
+    menu.style.cssText = `position:fixed;left:${x}px;top:${y}px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:8px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.15);min-width:160px;`;
+
+    const tool = toolId ? toolConfig2.find(t => t.id === toolId) : null;
+
+    if (tool) {
+        menu.innerHTML = `
+            <div class="text-[11px] font-black text-gray-500 mb-2 px-2">${tool.icon} ${tool.name}</div>
+            <button onclick="deleteTool2('${tool.id}');removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-red-50 text-red-500 font-bold">🗑️ 删除工具</button>
+        `;
+    } else {
+        menu.innerHTML = `
+            <div class="text-[11px] font-black text-gray-500 mb-2 px-2">🎯 工具栏2 管理</div>
+            <button onclick="openToolConfig2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-purple-50 text-purple-500 font-bold">⚙️ 打开工具箱配置</button>
+            <button onclick="addNewTool2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-green-50 text-green-500 font-bold">+ 新增工具</button>
+        `;
+    }
+
+    document.body.appendChild(menu);
+
+    // 点击其他地方关闭菜单
+    const closeHandler = (e) => {
+        if (!menu.contains(e.target)) {
+            removeMenus2();
+            document.removeEventListener('click', closeHandler);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeHandler), 0);
+}
+
+function removeMenus2() {
+    const m = document.getElementById('toolMenu2');
+    if (m) m.remove();
+}
+
+// 删除第二套工具栏中的工具
+window.deleteTool2 = function(id) {
+    toolConfig2 = toolConfig2.filter(t => t.id !== id);
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+    showToast('🗑️ 已删除该工具');
+};
+
+// 新增第二套工具栏中的工具
+window.addNewTool2 = function() {
+    const name = prompt('请输入新工具名称：');
+    if (!name || !name.trim()) return;
+    const icon = prompt('请输入图标（emoji）：', '✨') || '✨';
+    const prompt_text = prompt('请输入提示词（可为空）：', '') || '';
+    const newTool = {
+        id: 't2_' + Date.now(),
+        icon: icon.trim(),
+        name: name.trim(),
+        prompt: prompt_text,
+        enabled: true
+    };
+    toolConfig2.push(newTool);
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+    showToast(`✅ 已添加【${newTool.name}】`);
+};
+
 // ========== 快捷填充（写入输入框 userInput）==========
 const QUICK_FILL_KEY = 'lingxi_quick_fills';
 const DEFAULT_QUICK_FILLS = [
@@ -1955,9 +2132,127 @@ function renderToolConfigList() {
             console.error(`❌ 渲染工具[${idx}]失败:`, err, tool);
         }
     });
+
+    // 第二套工具栏配置（可改名/删减/修改内容）
+    const divider = document.createElement('div');
+    divider.className = 'pt-2 mt-2 border-t';
+    divider.style.borderColor = 'var(--border-color)';
+    divider.innerHTML = '<div class="text-xs font-black text-purple-500 mb-2">🎯 第二套工具栏（点击填充输入框）</div>';
+    container.appendChild(divider);
+
+    toolConfig2.forEach((tool, idx) => {
+        try {
+            const item = document.createElement('div');
+            item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
+            item.dataset.toolId = tool.id;
+            item.dataset.toolset = '2';
+            item.style.borderColor = 'var(--border-color)';
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex items-center justify-between';
+
+            const inputsDiv = document.createElement('div');
+            inputsDiv.className = 'flex items-center gap-2 flex-1';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = tool.enabled;
+            checkbox.className = 'tool-enabled-checkbox accent-purple-500';
+            checkbox.onchange = () => toggleToolEnabled2(idx);
+
+            const iconInput = document.createElement('input');
+            iconInput.type = 'text';
+            iconInput.value = tool.icon || '🎯';
+            iconInput.className = 'tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm';
+            iconInput.onchange = (e) => updateToolIcon2(idx, e.target.value);
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.value = tool.name || '未命名';
+            nameInput.className = 'tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm font-bold';
+            nameInput.onchange = (e) => updateToolName2(idx, e.target.value);
+
+            inputsDiv.appendChild(checkbox);
+            inputsDiv.appendChild(iconInput);
+            inputsDiv.appendChild(nameInput);
+            headerDiv.appendChild(inputsDiv);
+
+            if (tool.id !== 't2_config') {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.onclick = () => deleteTool2ByIndex(idx);
+                deleteBtn.className = 'text-red-400/50 hover:text-red-400 transition text-xs ml-4 px-2 py-1 rounded hover:bg-red-500/10';
+                deleteBtn.textContent = '删除';
+                deleteBtn.title = '点击删除此工具（需二次确认）';
+                headerDiv.appendChild(deleteBtn);
+            }
+
+            const promptTextarea = document.createElement('textarea');
+            promptTextarea.className = 'tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll';
+            promptTextarea.rows = 2;
+            promptTextarea.style.borderColor = 'var(--border-color)';
+            promptTextarea.style.color = 'var(--text-primary)';
+            promptTextarea.value = tool.prompt || '';
+            promptTextarea.onchange = (e) => updateToolPrompt2(idx, e.target.value);
+
+            item.appendChild(headerDiv);
+            item.appendChild(promptTextarea);
+            container.appendChild(item);
+        } catch (err) {
+            console.error(`❌ 渲染第二套工具[${idx}]失败:`, err, tool);
+        }
+    });
     
     console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
 }
+
+window.toggleToolEnabled2 = function(idx) {
+    const tool = toolConfig2[idx];
+    if (!tool) return;
+    if (tool.id === 't2_config') {
+        tool.enabled = true;
+        showToast('⚠️ “工具2配置”是核心组件，不可禁用');
+        renderToolConfigList();
+        return;
+    }
+    tool.enabled = !tool.enabled;
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+};
+
+window.updateToolIcon2 = function(idx, value) {
+    if (!toolConfig2[idx]) return;
+    toolConfig2[idx].icon = value;
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+};
+
+window.updateToolName2 = function(idx, value) {
+    if (!toolConfig2[idx]) return;
+    toolConfig2[idx].name = value;
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+};
+
+window.updateToolPrompt2 = function(idx, value) {
+    if (!toolConfig2[idx]) return;
+    toolConfig2[idx].prompt = value;
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+};
+
+window.deleteTool2ByIndex = function(idx) {
+    const toolToDelete = toolConfig2[idx];
+    if (!toolToDelete) return;
+    if (toolToDelete.id === 't2_config') {
+        showToast('⚠️ “工具2配置”是核心组件，不可删除');
+        return;
+    }
+    if (!confirm(`确认删除第二套工具【${toolToDelete.name}】吗？`)) return;
+    toolConfig2.splice(idx, 1);
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderToolConfigList();
+    renderBottomToolButtons2();
+    showToast(`✅ 已删除第二套工具: ${toolToDelete.name}`);
+};
 
 window.toggleToolEnabled = function(idx) {
     const tool = toolConfig[idx];
@@ -2226,22 +2521,26 @@ window.saveToolConfig = function() {
     // 从表单中收集最新的配置（因为用户可能直接修改了输入框而没有触发onchange）
     const items = document.querySelectorAll('#toolConfigList .tool-config-item');
     const newConfig = [];
+    const newConfig2 = [];
     
     items.forEach((item, idx) => {
         const id = item.dataset.toolId;
+        const toolset = item.dataset.toolset || '1';
         const nameInput = item.querySelector('.tool-name-input');
         const iconInput = item.querySelector('.tool-icon-input');
         const promptInput = item.querySelector('.tool-prompt-input');
         const enabledCheckbox = item.querySelector('.tool-enabled-checkbox');
         
         if (nameInput && promptInput) {
-            newConfig.push({
+            const row = {
                 id: id,
                 name: nameInput.value || `工具${idx + 1}`,
                 icon: iconInput ? iconInput.value : '🔧',
                 prompt: promptInput.value || '',
                 enabled: enabledCheckbox ? enabledCheckbox.checked : true
-            });
+            };
+            if (toolset === '2') newConfig2.push(row);
+            else newConfig.push(row);
         }
     });
     
@@ -2249,10 +2548,21 @@ window.saveToolConfig = function() {
     if (newConfig.length > 0) {
         toolConfig = newConfig;
     }
+    if (newConfig2.length > 0) {
+        toolConfig2 = newConfig2;
+    }
+    if (!toolConfig2.some(t => t.id === 't2_config')) {
+        toolConfig2.unshift({ id: 't2_config', icon: '🎯', name: '工具2', prompt: '', enabled: true });
+    } else {
+        const config2 = toolConfig2.find(t => t.id === 't2_config');
+        config2.enabled = true;
+    }
     
     saveJSON('lingxi_tool_config', toolConfig);
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
     renderToolButtons();
     renderBottomToolButtons(); // 重新渲染底部按钮
+    renderBottomToolButtons2();
     
     // 如果当前选中的工具被禁用了，切换到第一个启用的工具
     const currentTool = toolConfig.find(t => t.id === currentToolMode);
