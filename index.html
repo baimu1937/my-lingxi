@@ -359,7 +359,7 @@
         </div>
     </div>
 </div>
-
+<script>
 // 切换显示第一套/第二套工具配置
 function showToolSet(n) {
     if (n === 1) {
@@ -371,6 +371,7 @@ function showToolSet(n) {
     }
 }
 
+</script>
 <!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
@@ -1583,7 +1584,21 @@ const DEFAULT_QUICK_FILLS2 = [
 let quickFillItems2 = [];
 let quickFillModalEditingId2 = null;
 
+// 规范化快速填充列表（第一套）- 修复：添加缺失函数
+function normalizeQuickFillList(raw) {
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+    const out = [];
+    for (let i = 0; i < raw.length; i++) {
+        const it = raw[i];
+        if (!it || typeof it.name !== 'string' || typeof it.content !== 'string') continue;
+        const id = typeof it.id === 'string' && it.id ? it.id : ('qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7));
+        out.push({ id, name: it.name.trim(), content: it.content });
+    }
+    return out.length ? out : null;
+}
+
 function normalizeQuickFillList2(raw) {
+    
     if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
     const out = [];
     for (let i = 0; i < raw.length; i++) {
