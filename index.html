@@ -1424,8 +1424,9 @@ saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
 // 打开第二套工具栏配置面板
 function openToolConfig2() {
     document.getElementById('toolConfigModal').classList.remove('hidden');
-    renderToolConfigList(); // 先渲染第一套
-    renderToolConfigList2(); // 再渲染第二套
+    showToolSet(2); // 默认显示第二套
+    renderToolConfigList();
+    renderToolConfigList2();
 }
 
 // 渲染第二套底部工具栏（完全独立）
@@ -2063,9 +2064,10 @@ window.executeTool = async function() {
 // 打开工具配置弹窗
 window.openToolConfig = function() {
     console.log('🛠️ 打开工具配置面板');
-    console.log('🛠️ 当前toolConfig:', toolConfig);
     document.getElementById('toolConfigModal').classList.remove('hidden');
+    showToolSet(1); // 默认显示第一套
     renderToolConfigList();
+    renderToolConfigList2();
 };
 
 window.closeToolConfig = function() {
