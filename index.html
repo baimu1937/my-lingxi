@@ -2607,29 +2607,47 @@ window.diagnoseToolConfig = function() {
 };
 
 window.saveToolConfig = function() {
-    // 从表单中收集最新的配置（因为用户可能直接修改了输入框而没有触发onchange）
+    // 从两个表单中收集配置
     const items = document.querySelectorAll('#toolConfigList .tool-config-item');
+    const items2 = document.querySelectorAll('#toolConfigList2 .tool-config-item');
     const newConfig = [];
     const newConfig2 = [];
     
+    // 从第一套容器收集
     items.forEach((item, idx) => {
         const id = item.dataset.toolId;
-        const toolset = item.dataset.toolset || '1';
         const nameInput = item.querySelector('.tool-name-input');
         const iconInput = item.querySelector('.tool-icon-input');
         const promptInput = item.querySelector('.tool-prompt-input');
         const enabledCheckbox = item.querySelector('.tool-enabled-checkbox');
         
         if (nameInput && promptInput) {
-            const row = {
+            newConfig.push({
                 id: id,
                 name: nameInput.value || `工具${idx + 1}`,
                 icon: iconInput ? iconInput.value : '🔧',
                 prompt: promptInput.value || '',
                 enabled: enabledCheckbox ? enabledCheckbox.checked : true
-            };
-            if (toolset === '2') newConfig2.push(row);
-            else newConfig.push(row);
+            });
+        }
+    });
+    
+    // 从第二套容器收集
+    items2.forEach((item, idx) => {
+        const id = item.dataset.toolId;
+        const nameInput = item.querySelector('.tool-name-input2');
+        const iconInput = item.querySelector('.tool-icon-input2');
+        const promptInput = item.querySelector('.tool-prompt-input2');
+        const enabledCheckbox = item.querySelector('.tool-enabled-checkbox2');
+        
+        if (nameInput && promptInput) {
+            newConfig2.push({
+                id: id,
+                name: nameInput.value || `工具${idx + 1}`,
+                icon: iconInput ? iconInput.value : '🎯',
+                prompt: promptInput.value || '',
+                enabled: enabledCheckbox ? enabledCheckbox.checked : true
+            });
         }
     });
     
