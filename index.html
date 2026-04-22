@@ -1480,7 +1480,7 @@ function applyTool2PromptToInput(tool) {
     showToast(`📝 已填充：${tool.name}`);
 }
 
-// 右键菜单（第二套工具栏独立管理）
+// 右键菜单（第二套工具栏管理 - 仅开放配置）
 function showToolManagementMenu2(x, y, toolId) {
     // 移除已存在的菜单
     const existing = document.getElementById('toolMenu2');
@@ -1490,20 +1490,12 @@ function showToolManagementMenu2(x, y, toolId) {
     menu.id = 'toolMenu2';
     menu.style.cssText = `position:fixed;left:${x}px;top:${y}px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:8px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.15);min-width:160px;`;
 
-    const tool = toolId ? toolConfig2.find(t => t.id === toolId) : null;
-
-    if (tool) {
-        menu.innerHTML = `
-            <div class="text-[11px] font-black text-gray-500 mb-2 px-2">${tool.icon} ${tool.name}</div>
-            <button onclick="deleteTool2('${tool.id}');removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-red-50 text-red-500 font-bold">🗑️ 删除工具</button>
-        `;
-    } else {
-        menu.innerHTML = `
-            <div class="text-[11px] font-black text-gray-500 mb-2 px-2">🎯 工具栏2 管理</div>
-            <button onclick="openToolConfig2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-purple-50 text-purple-500 font-bold">⚙️ 打开工具箱配置</button>
-            <button onclick="addNewTool2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-green-50 text-green-500 font-bold">+ 新增工具</button>
-        `;
-    }
+    // 只显示管理菜单，删除需在配置箱内完成
+    menu.innerHTML = `
+        <div class="text-[11px] font-black text-gray-500 mb-2 px-2">🎯 工具栏2 管理</div>
+        <button onclick="openToolConfig2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-purple-50 text-purple-500 font-bold">⚙️ 打开工具箱配置</button>
+        <button onclick="addNewTool2();removeMenus2();" class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-green-50 text-green-500 font-bold">+ 新增工具</button>
+    `;
 
     document.body.appendChild(menu);
 
