@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN">
+﻿<!DOCTYPE html><html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1601,9 +1601,13 @@ function normalizeQuickFillList2(raw) {
 }
 
 function loadQuickFillItemsFromStorage() {
-    const parsed = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
-    if (parsed) {
-        quickFillItems = parsed;
+    // 清除旧缓存数据（已删除的快捷填充按钮）
+    const oldIds = ['qf_link', 'qf_channel', 'qf_tomb', 'qf_plot', 'qf_body', 'qf_title'];
+    const cached = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
+    if (cached) {
+        quickFillItems = cached.filter(x => !oldIds.includes(x.id));
+        if (quickFillItems.length > 0) saveJSON(QUICK_FILL_KEY, quickFillItems);
+        else localStorage.removeItem(QUICK_FILL_KEY);
         return;
     }
     quickFillItems = DEFAULT_QUICK_FILLS.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
