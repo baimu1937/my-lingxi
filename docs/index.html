@@ -456,12 +456,8 @@
                         <!-- 由 renderBottomToolButtons2() 动态生成：第二套独立工具栏 -->
                         <span style="color:#8b5cf6;font-size:11px;font-weight:bold;">🎯 第二套工具栏加载中...</span>
                     </div>
-                    <div id="quickFillToolbar" class="flex gap-2 mb-2.5 flex-wrap items-center">
-                        <!-- 由 renderQuickFillToolbar() 动态生成：一键填充下方输入框 -->
-                    </div>
-                    <div id="quickFillToolbar2" class="flex gap-2 mb-2.5 flex-wrap items-center">
-                        <!-- 由 renderQuickFillToolbar2() 动态生成：一键填充下方输入框（直接点击） -->
-                    </div>
+                    <div id="quickFillToolbar" class="hidden"></div>
+                    <div id="quickFillToolbar2" class="hidden"></div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
                             class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
@@ -1904,13 +1900,17 @@ function renderQuickFillToolbar() {
         btn.oncontextmenu = function (e) { e.preventDefault(); };
         container.appendChild(btn);
     });
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'quick-tag';
-    addBtn.textContent = '➕';
-    addBtn.title = '自定义添加快捷填充';
-    addBtn.onclick = function () { openQuickFillModalAdd(); };
-    container.appendChild(addBtn);
+    if (quickFillItems.length === 0) {
+        container.classList.add('hidden');
+    } else {
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'quick-tag';
+        addBtn.textContent = '➕';
+        addBtn.title = '自定义添加快捷填充';
+        addBtn.onclick = function () { openQuickFillModalAdd(); };
+        container.appendChild(addBtn);
+    }
 }
 
 function renderQuickFillToolbar2() {
@@ -1928,13 +1928,17 @@ function renderQuickFillToolbar2() {
         btn.oncontextmenu = function (e) { e.preventDefault(); openQuickFillModalEdit2(item.id); };
         container.appendChild(btn);
     });
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'quick-tag';
-    addBtn.textContent = '➕';
-    addBtn.title = '自定义添加快捷填充';
-    addBtn.onclick = function () { openQuickFillModalAdd2(); };
-    container.appendChild(addBtn);
+    if (quickFillItems2.length === 0) {
+        container.classList.add('hidden');
+    } else {
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'quick-tag';
+        addBtn.textContent = '➕';
+        addBtn.title = '自定义添加快捷填充';
+        addBtn.onclick = function () { openQuickFillModalAdd2(); };
+        container.appendChild(addBtn);
+    }
 }
 
 function applyQuickFillById2(id) {
