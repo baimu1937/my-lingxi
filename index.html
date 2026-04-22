@@ -1561,6 +1561,19 @@ const DEFAULT_QUICK_FILLS2 = [
 let quickFillItems2 = [];
 let quickFillModalEditingId2 = null;
 
+function normalizeQuickFillList(raw) {
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+    const out = [];
+    for (let i = 0; i < raw.length; i++) {
+        const it = raw[i];
+        if (!it || typeof it.name !== 'string' || typeof it.content !== 'string') continue;
+        let id = typeof it.id === 'string' && it.id ? it.id : ('qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7));
+        if (!id.startsWith('qf_') || id.startsWith('qf2_')) id = 'qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
+        out.push({ id, name: it.name.trim(), content: it.content });
+    }
+    return out.length ? out : null;
+}
+
 function normalizeQuickFillList2(raw) {
     if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
     const out = [];
@@ -1576,7 +1589,7 @@ function normalizeQuickFillList2(raw) {
 function loadQuickFillItemsFromStorage() {
     const parsed = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
     if (parsed) {
-        quickFillItems = parsed;
+        quickFillItems = parsed.filter(function(x) { return x.id && x.id.startsWith("qf_") && !x.id.startsWith("qf2_"); });
         return;
     }
     quickFillItems = DEFAULT_QUICK_FILLS.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
@@ -1590,7 +1603,7 @@ function persistQuickFillItems() {
 function loadQuickFillItems2FromStorage() {
     const parsed = normalizeQuickFillList2(loadJSON(QUICK_FILL_KEY2));
     if (parsed) {
-        quickFillItems2 = parsed;
+        quickFillItems2 = parsed.filter(function(x) { return x.id && x.id.startsWith("qf2_"); });
         return;
     }
     quickFillItems2 = DEFAULT_QUICK_FILLS2.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
