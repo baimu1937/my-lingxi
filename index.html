@@ -664,6 +664,7 @@ function init() {
     console.log('🚀 初始化底部工具栏...');
     renderToolButtons();
     renderBottomToolButtons();
+    renderBottomToolButtons2();
     console.log('✅ 底部工具栏初始化完成，当前按钮数:', document.getElementById('bottomToolButtons').children.length);
     initQuickFillUI();
 }
@@ -1396,10 +1397,58 @@ function openToolConfig2() {
     showToast('🎯 请在工具箱中滚动到底部管理第二套工具栏');
 }
 
-// 渲染第二套底部工具栏（已禁用）
+// 渲染第二套底部工具栏（完全独立）
 function renderBottomToolButtons2() {
-    // 已停用，不再渲染
+    const container = document.getElementById('bottomToolButtons2');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const enabledTools2 = toolConfig2.filter(t => t.enabled && t.id !== 't2_config');
+    const configTool2 = toolConfig2.find(t => t.id === 't2_config');
+
+    // 添加工具箱2配置按钮（锁定）
+    if (configTool2 && configTool2.enabled) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag locked-tool';
+        btn.style.background = '#8b5cf6'; // 紫色区分第一套的蓝色
+        btn.style.color = 'white';
+        btn.style.cursor = 'default';
+        btn.title = '第二套工具栏配置（锁定）';
+        btn.onclick = () => openToolConfig2();
+        btn.innerHTML = `${configTool2.icon} ${configTool2.name}`;
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu2(e.clientX, e.clientY);
+        };
+        container.appendChild(btn);
+    }
+
+    // 添加其他启用的工具按钮（点击后直接填充输入框）
+    enabledTools2.forEach(tool => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag removable-tool';
+        btn.dataset.toolId = tool.id;
+        btn.dataset.toolset = '2'; // 标记属于第二套
+        btn.onclick = () => applyTool2PromptToInput(tool);
+
+        btn.oncontextmenu = (e) => {
+            e.preventDefault();
+            showToolManagementMenu2(e.clientX, e.clientY, tool.id);
+        };
+
+        btn.innerHTML = `${tool.icon} ${tool.name}`;
+        container.appendChild(btn);
+    });
 }
+
+function applyTool2PromptToInput(tool) {
+    if (!tool || !tool.prompt) {
+        showToast('⚠️ 该工具未配置填充内容');
+        return;
+    }
+    const ta = dom.userInput || document.getElementById('userInput');
+    if (!ta) return;
     ta.value = tool.prompt;
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     const cc = document.getElementById('charCount');
