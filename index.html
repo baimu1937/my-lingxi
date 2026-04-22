@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN">
+﻿<!DOCTYPE html><html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1561,29 +1561,14 @@ window.addNewTool2 = function() {
 
 // ========== 快捷填充（写入输入框 userInput）==========
 const QUICK_FILL_KEY = 'lingxi_quick_fills';
-const DEFAULT_QUICK_FILLS = [
-    { id: 'qf_link', name: '关联工具', content: '【关联工具】请在回答中结合我已关联的工具说明与输出要求，逐步完成任务。' },
-    { id: 'qf_channel', name: '频道人设', content: '【频道人设】请用符合本账号定位的口吻：信息清楚、节奏紧凑，少空话套话。' },
-    { id: 'qf_tomb', name: '盗墓人设', content: '【盗墓/探险人设】主角胆大心细、保命优先；叙述有临场感与民俗细节，避免过度血腥猎奇。' },
-    { id: 'qf_plot', name: '情节补充', content: '【情节补充】在不改动既有设定的前提下补全过渡：写清动机—冲突—后果，并给一两处可埋钩子的细节。' },
-    { id: 'qf_body', name: '正文指令', content: '【正文】直接输出可发表正文，不要逐条解释写作思路；适当分段；对话用中文弯引号。' },
-    { id: 'qf_title', name: '标题指令', content: '【标题】请生成 5 个标题备选（12–22 字、含关键词、有点击欲），并一句话说明首推哪一个。' }
-];
+const DEFAULT_QUICK_FILLS = [];
 let quickFillItems = [];
 let quickFillModalEditingId = null;
 
 // ========== 快捷填充2（写入输入框 userInput，直接点击）==========
 const QUICK_FILL_KEY2 = 'lingxi_quick_fills2';
-const DEFAULT_QUICK_FILLS2 = [
-    { id: 'qf2_wz', name: '完结撒花', content: '【本章完】本章节故事结束，主角暂时安全，期待下文。' },
-    { id: 'qf2_gd', name: '过度情节', content: '【过渡】时间流逝，数日之后...' },
-    { id: 'qf2_zj', name: '主角醒来', content: '【醒来】主角悠悠转醒，发现自己...' },
-    { id: 'qf2_jm', name: '惊讶发现', content: '【惊讶】就在这时，主角突然发现...' },
-    { id: 'qf2_jq', name: '紧张气氛', content: '【紧张】气氛突然变得诡异起来...' }
-];
-let quickFillItems2 = [];
-let quickFillModalEditingId2 = null;
 
+const DEFAULT_QUICK_FILLS2 = [];
 // 规范化快速填充列表（第一套）- 修复：添加缺失函数
 function normalizeQuickFillList(raw) {
     if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
@@ -3474,5 +3459,6 @@ window.onload = init;
 </script>
 <script src="enhancements.js"></script>
 </body>
+
 
 
