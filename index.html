@@ -1594,9 +1594,10 @@ function normalizeQuickFillList2(raw) {
 function loadQuickFillItemsFromStorage() {
     // 清除旧缓存数据（已删除的快捷填充按钮）
     const oldIds = ['qf_link', 'qf_channel', 'qf_tomb', 'qf_plot', 'qf_body', 'qf_title'];
+    // 同时排除第二套的ID，防止混入
     const cached = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
     if (cached) {
-        quickFillItems = cached.filter(x => !oldIds.includes(x.id));
+        quickFillItems = cached.filter(x => !oldIds.includes(x.id) && !x.id.startsWith('qf2_'));
         if (quickFillItems.length > 0) saveJSON(QUICK_FILL_KEY, quickFillItems);
         else localStorage.removeItem(QUICK_FILL_KEY);
         return;
@@ -1612,9 +1613,10 @@ function persistQuickFillItems() {
 function loadQuickFillItems2FromStorage() {
     // 清除旧缓存数据（已删除的快捷填充按钮）
     const oldIds = ['qf2_wz', 'qf2_gd', 'qf2_zj', 'qf2_jm', 'qf2_jq', 'qf2_kj'];
+    // 同时排除第一套的ID，防止混入
     const cached = normalizeQuickFillList2(loadJSON(QUICK_FILL_KEY2));
     if (cached) {
-        quickFillItems2 = cached.filter(x => !oldIds.includes(x.id));
+        quickFillItems2 = cached.filter(x => !oldIds.includes(x.id) && !x.id.startsWith('qf_'));
         if (quickFillItems2.length > 0) saveJSON(QUICK_FILL_KEY2, quickFillItems2);
         else localStorage.removeItem(QUICK_FILL_KEY2);
         return;
