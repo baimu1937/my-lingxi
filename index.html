@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html><html lang="zh-CN">
+<!DOCTYPE html><html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -332,19 +332,10 @@
     <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
             <h3 class="text-lg font-black text-blue-500 italic">⚙️ 工具箱配置</h3>
-            <div class="flex gap-2">
-                <button onclick="showToolSet(1)" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-600">第一套</button>
-                <button onclick="showToolSet(2)" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-600">第二套</button>
-            </div>
             <button onclick="closeToolConfig()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500 relative" style="color:var(--text-secondary); cursor:pointer;">&times;</button>
         </div>
-        <!-- 第一套工具配置列表 -->
-        <div id="toolConfigListPanel" class="flex-1 overflow-y-auto custom-scroll space-y-3">
-            <div id="toolConfigList"></div>
-        </div>
-        <!-- 第二套工具配置列表 -->
-        <div id="toolConfigList2Panel" class="flex-1 overflow-y-auto custom-scroll space-y-3 hidden">
-            <div id="toolConfigList2"></div>
+        <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="toolConfigList">
+            <!-- 动态生成的配置项 -->
         </div>
         <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
             <div class="flex gap-2">
@@ -359,19 +350,7 @@
         </div>
     </div>
 </div>
-<script>
-// 切换显示第一套/第二套工具配置
-function showToolSet(n) {
-    if (n === 1) {
-        document.getElementById('toolConfigListPanel').classList.remove('hidden');
-        document.getElementById('toolConfigList2Panel').classList.add('hidden');
-    } else {
-        document.getElementById('toolConfigListPanel').classList.add('hidden');
-        document.getElementById('toolConfigList2Panel').classList.remove('hidden');
-    }
-}
 
-</script>
 <!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
@@ -477,8 +456,12 @@ function showToolSet(n) {
                         <!-- 由 renderBottomToolButtons2() 动态生成：第二套独立工具栏 -->
                         <span style="color:#8b5cf6;font-size:11px;font-weight:bold;">🎯 第二套工具栏加载中...</span>
                     </div>
-                    <div id="quickFillToolbar" class="hidden"></div>
-                    <div id="quickFillToolbar2" class="hidden"></div>
+                    <div id="quickFillToolbar" class="flex gap-2 mb-2.5 flex-wrap items-center">
+                        <!-- 由 renderQuickFillToolbar() 动态生成：一键填充下方输入框 -->
+                    </div>
+                    <div id="quickFillToolbar2" class="flex gap-2 mb-2.5 flex-wrap items-center">
+                        <!-- 由 renderQuickFillToolbar2() 动态生成：一键填充下方输入框（直接点击） -->
+                    </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
                             class="w-full bg-transparent border-none pl-5 pr-5 pt-4 pb-14 text-[14px] outline-none min-h-[110px] custom-scroll resize-none"
@@ -1420,10 +1403,8 @@ saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
 
 // 打开第二套工具栏配置面板
 function openToolConfig2() {
-    document.getElementById('toolConfigModal').classList.remove('hidden');
-    showToolSet(2); // 默认显示第二套
-    renderToolConfigList();
-    renderToolConfigList2();
+    openToolConfig(); // 暂时共用同一配置面板，提示用户到工具箱配置
+    showToast('🎯 请在工具箱中滚动到底部管理第二套工具栏');
 }
 
 // 渲染第二套底部工具栏（完全独立）
@@ -1557,29 +1538,30 @@ window.addNewTool2 = function() {
 
 // ========== 快捷填充（写入输入框 userInput）==========
 const QUICK_FILL_KEY = 'lingxi_quick_fills';
-const DEFAULT_QUICK_FILLS = [];
+const DEFAULT_QUICK_FILLS = [
+    { id: 'qf_link', name: '关联工具', content: '【关联工具】请在回答中结合我已关联的工具说明与输出要求，逐步完成任务。' },
+    { id: 'qf_channel', name: '频道人设', content: '【频道人设】请用符合本账号定位的口吻：信息清楚、节奏紧凑，少空话套话。' },
+    { id: 'qf_tomb', name: '盗墓人设', content: '【盗墓/探险人设】主角胆大心细、保命优先；叙述有临场感与民俗细节，避免过度血腥猎奇。' },
+    { id: 'qf_plot', name: '情节补充', content: '【情节补充】在不改动既有设定的前提下补全过渡：写清动机—冲突—后果，并给一两处可埋钩子的细节。' },
+    { id: 'qf_body', name: '正文指令', content: '【正文】直接输出可发表正文，不要逐条解释写作思路；适当分段；对话用中文弯引号。' },
+    { id: 'qf_title', name: '标题指令', content: '【标题】请生成 5 个标题备选（12–22 字、含关键词、有点击欲），并一句话说明首推哪一个。' }
+];
 let quickFillItems = [];
 let quickFillModalEditingId = null;
 
 // ========== 快捷填充2（写入输入框 userInput，直接点击）==========
 const QUICK_FILL_KEY2 = 'lingxi_quick_fills2';
-
-const DEFAULT_QUICK_FILLS2 = [];
-// 规范化快速填充列表（第一套）- 修复：添加缺失函数
-function normalizeQuickFillList(raw) {
-    if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
-    const out = [];
-    for (let i = 0; i < raw.length; i++) {
-        const it = raw[i];
-        if (!it || typeof it.name !== 'string' || typeof it.content !== 'string') continue;
-        const id = typeof it.id === 'string' && it.id ? it.id : ('qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7));
-        out.push({ id, name: it.name.trim(), content: it.content });
-    }
-    return out.length ? out : null;
-}
+const DEFAULT_QUICK_FILLS2 = [
+    { id: 'qf2_wz', name: '完结撒花', content: '【本章完】本章节故事结束，主角暂时安全，期待下文。' },
+    { id: 'qf2_gd', name: '过度情节', content: '【过渡】时间流逝，数日之后...' },
+    { id: 'qf2_zj', name: '主角醒来', content: '【醒来】主角悠悠转醒，发现自己...' },
+    { id: 'qf2_jm', name: '惊讶发现', content: '【惊讶】就在这时，主角突然发现...' },
+    { id: 'qf2_jq', name: '紧张气氛', content: '【紧张】气氛突然变得诡异起来...' }
+];
+let quickFillItems2 = [];
+let quickFillModalEditingId2 = null;
 
 function normalizeQuickFillList2(raw) {
-    
     if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
     const out = [];
     for (let i = 0; i < raw.length; i++) {
@@ -1592,14 +1574,9 @@ function normalizeQuickFillList2(raw) {
 }
 
 function loadQuickFillItemsFromStorage() {
-    // 清除旧缓存数据（已删除的快捷填充按钮）
-    const oldIds = ['qf_link', 'qf_channel', 'qf_tomb', 'qf_plot', 'qf_body', 'qf_title'];
-    // 同时排除第二套的ID，防止混入
-    const cached = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
-    if (cached) {
-        quickFillItems = cached.filter(x => !oldIds.includes(x.id) && !x.id.startsWith('qf2_'));
-        if (quickFillItems.length > 0) saveJSON(QUICK_FILL_KEY, quickFillItems);
-        else localStorage.removeItem(QUICK_FILL_KEY);
+    const parsed = normalizeQuickFillList(loadJSON(QUICK_FILL_KEY));
+    if (parsed) {
+        quickFillItems = parsed;
         return;
     }
     quickFillItems = DEFAULT_QUICK_FILLS.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
@@ -1611,14 +1588,9 @@ function persistQuickFillItems() {
 }
 
 function loadQuickFillItems2FromStorage() {
-    // 清除旧缓存数据（已删除的快捷填充按钮）
-    const oldIds = ['qf2_wz', 'qf2_gd', 'qf2_zj', 'qf2_jm', 'qf2_jq', 'qf2_kj'];
-    // 同时排除第一套的ID，防止混入
-    const cached = normalizeQuickFillList2(loadJSON(QUICK_FILL_KEY2));
-    if (cached) {
-        quickFillItems2 = cached.filter(x => !oldIds.includes(x.id) && !x.id.startsWith('qf_'));
-        if (quickFillItems2.length > 0) saveJSON(QUICK_FILL_KEY2, quickFillItems2);
-        else localStorage.removeItem(QUICK_FILL_KEY2);
+    const parsed = normalizeQuickFillList2(loadJSON(QUICK_FILL_KEY2));
+    if (parsed) {
+        quickFillItems2 = parsed;
         return;
     }
     quickFillItems2 = DEFAULT_QUICK_FILLS2.map(function (x) { return { id: x.id, name: x.name, content: x.content }; });
@@ -1890,9 +1862,7 @@ function renderQuickFillToolbar() {
     const container = document.getElementById('quickFillToolbar');
     if (!container) return;
     container.innerHTML = '';
-    // 渲染时再次过滤：确保只显示第一套(qf_开头且非qf2_开头)
-    const filtered = quickFillItems.filter(x => x.id.startsWith('qf_') && !x.id.startsWith('qf2_'));
-    filtered.forEach(function (item) {
+    quickFillItems.forEach(function (item) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'quick-tag quick-fill-item';
@@ -1903,26 +1873,20 @@ function renderQuickFillToolbar() {
         btn.oncontextmenu = function (e) { e.preventDefault(); };
         container.appendChild(btn);
     });
-    if (filtered.length === 0) {
-        container.classList.add('hidden');
-    } else {
-        const addBtn = document.createElement('button');
-        addBtn.type = 'button';
-        addBtn.className = 'quick-tag';
-        addBtn.textContent = '➕';
-        addBtn.title = '自定义添加快捷填充';
-        addBtn.onclick = function () { openQuickFillModalAdd(); };
-        container.appendChild(addBtn);
-    }
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'quick-tag';
+    addBtn.textContent = '➕';
+    addBtn.title = '自定义添加快捷填充';
+    addBtn.onclick = function () { openQuickFillModalAdd(); };
+    container.appendChild(addBtn);
 }
 
 function renderQuickFillToolbar2() {
     const container = document.getElementById('quickFillToolbar2');
     if (!container) return;
     container.innerHTML = '';
-    // 渲染时再次过滤：确保只显示第二套(qf2_开头)
-    const filtered = quickFillItems2.filter(x => x.id.startsWith('qf2_'));
-    filtered.forEach(function (item) {
+    quickFillItems2.forEach(function (item) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'quick-tag quick-fill-item2';
@@ -1933,17 +1897,13 @@ function renderQuickFillToolbar2() {
         btn.oncontextmenu = function (e) { e.preventDefault(); openQuickFillModalEdit2(item.id); };
         container.appendChild(btn);
     });
-    if (filtered.length === 0) {
-        container.classList.add('hidden');
-    } else {
-        const addBtn = document.createElement('button');
-        addBtn.type = 'button';
-        addBtn.className = 'quick-tag';
-        addBtn.textContent = '➕';
-        addBtn.title = '自定义添加快捷填充';
-        addBtn.onclick = function () { openQuickFillModalAdd2(); };
-        container.appendChild(addBtn);
-    }
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'quick-tag';
+    addBtn.textContent = '➕';
+    addBtn.title = '自定义添加快捷填充';
+    addBtn.onclick = function () { openQuickFillModalAdd2(); };
+    container.appendChild(addBtn);
 }
 
 function applyQuickFillById2(id) {
@@ -2082,10 +2042,9 @@ window.executeTool = async function() {
 // 打开工具配置弹窗
 window.openToolConfig = function() {
     console.log('🛠️ 打开工具配置面板');
+    console.log('🛠️ 当前toolConfig:', toolConfig);
     document.getElementById('toolConfigModal').classList.remove('hidden');
-    showToolSet(1); // 默认显示第一套
     renderToolConfigList();
-    renderToolConfigList2();
 };
 
 window.closeToolConfig = function() {
@@ -2244,72 +2203,6 @@ function renderToolConfigList() {
     });
     
     console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
-}
-
-// 渲染第二套工具配置列表（完全独立）
-function renderToolConfigList2() {
-    const container = document.getElementById('toolConfigList2');
-    if (!container) {
-        // 如果容器不存在，创建它
-        createToolConfigModal2();
-        return;
-    }
-    container.innerHTML = '';
-    
-    console.log('🔧 渲染第二套工具配置列表，toolConfig2长度:', toolConfig2.length);
-    
-    toolConfig2.forEach((tool, idx) => {
-        const item = document.createElement('div');
-        item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
-        item.dataset.toolId = tool.id;
-        item.style.borderColor = '#8b5cf6';
-        
-        const headerDiv = document.createElement('div');
-        headerDiv.className = 'flex items-center justify-between';
-        
-        const inputsDiv = document.createElement('div');
-        inputsDiv.className = 'flex items-center gap-2 flex-1';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = tool.enabled;
-        checkbox.className = 'tool-enabled-checkbox2 accent-purple-500';
-        checkbox.onchange = () => toggleToolEnabled2(idx);
-        
-        const iconInput = document.createElement('input');
-        iconInput.type = 'text';
-        iconInput.value = tool.icon || '🎯';
-        iconInput.className = 'tool-icon-input2 w-12 text-center bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm';
-        iconInput.onchange = (e) => updateToolIcon2(idx, e.target.value);
-        
-        const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.value = tool.name || '未命名';
-        nameInput.className = 'tool-name-input2 flex-1 bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm font-bold';
-        nameInput.style.color = '#8b5cf6';
-        nameInput.onchange = (e) => updateToolName2(idx, e.target.value);
-        
-        inputsDiv.appendChild(checkbox);
-        inputsDiv.appendChild(iconInput);
-        inputsDiv.appendChild(nameInput);
-        headerDiv.appendChild(inputsDiv);
-        
-        const promptTextarea = document.createElement('textarea');
-        promptTextarea.value = tool.prompt || '';
-        promptTextarea.className = 'tool-prompt-input2 w-full bg-transparent border rounded p-2 text-xs';
-        promptTextarea.style.borderColor = '#8b5cf6';
-        promptTextarea.onchange = (e) => updateToolPrompt2(idx, e.target.value);
-        
-        item.appendChild(headerDiv);
-        item.appendChild(promptTextarea);
-        container.appendChild(item);
-    });
-    
-    console.log('✅ 第二套工具配置列表渲染完成，共', toolConfig2.length, '个工具');
-}
-
-function createToolConfigModal2() {
-    // 创建第二套配���弹窗
 }
 
 window.toggleToolEnabled2 = function(idx) {
@@ -2625,47 +2518,29 @@ window.diagnoseToolConfig = function() {
 };
 
 window.saveToolConfig = function() {
-    // 从两个表单中收集配置
+    // 从表单中收集最新的配置（因为用户可能直接修改了输入框而没有触发onchange）
     const items = document.querySelectorAll('#toolConfigList .tool-config-item');
-    const items2 = document.querySelectorAll('#toolConfigList2 .tool-config-item');
     const newConfig = [];
     const newConfig2 = [];
     
-    // 从第一套容器收集
     items.forEach((item, idx) => {
         const id = item.dataset.toolId;
+        const toolset = item.dataset.toolset || '1';
         const nameInput = item.querySelector('.tool-name-input');
         const iconInput = item.querySelector('.tool-icon-input');
         const promptInput = item.querySelector('.tool-prompt-input');
         const enabledCheckbox = item.querySelector('.tool-enabled-checkbox');
         
         if (nameInput && promptInput) {
-            newConfig.push({
+            const row = {
                 id: id,
                 name: nameInput.value || `工具${idx + 1}`,
                 icon: iconInput ? iconInput.value : '🔧',
                 prompt: promptInput.value || '',
                 enabled: enabledCheckbox ? enabledCheckbox.checked : true
-            });
-        }
-    });
-    
-    // 从第二套容器收集
-    items2.forEach((item, idx) => {
-        const id = item.dataset.toolId;
-        const nameInput = item.querySelector('.tool-name-input2');
-        const iconInput = item.querySelector('.tool-icon-input2');
-        const promptInput = item.querySelector('.tool-prompt-input2');
-        const enabledCheckbox = item.querySelector('.tool-enabled-checkbox2');
-        
-        if (nameInput && promptInput) {
-            newConfig2.push({
-                id: id,
-                name: nameInput.value || `工具${idx + 1}`,
-                icon: iconInput ? iconInput.value : '🎯',
-                prompt: promptInput.value || '',
-                enabled: enabledCheckbox ? enabledCheckbox.checked : true
-            });
+            };
+            if (toolset === '2') newConfig2.push(row);
+            else newConfig.push(row);
         }
     });
     
@@ -3477,6 +3352,5 @@ window.onload = init;
 </script>
 <script src="enhancements.js"></script>
 </body>
-
 
 
