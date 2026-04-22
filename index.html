@@ -332,10 +332,19 @@
     <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
         <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
             <h3 class="text-lg font-black text-blue-500 italic">⚙️ 工具箱配置</h3>
+            <div class="flex gap-2">
+                <button onclick="showToolSet(1)" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-600">第一套</button>
+                <button onclick="showToolSet(2)" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-600">第二套</button>
+            </div>
             <button onclick="closeToolConfig()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500 relative" style="color:var(--text-secondary); cursor:pointer;">&times;</button>
         </div>
-        <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="toolConfigList">
-            <!-- 动态生成的配置项 -->
+        <!-- 第一套工具配置列表 -->
+        <div id="toolConfigListPanel" class="flex-1 overflow-y-auto custom-scroll space-y-3">
+            <div id="toolConfigList"></div>
+        </div>
+        <!-- 第二套工具配置列表 -->
+        <div id="toolConfigList2Panel" class="flex-1 overflow-y-auto custom-scroll space-y-3 hidden">
+            <div id="toolConfigList2"></div>
         </div>
         <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
             <div class="flex gap-2">
@@ -350,6 +359,17 @@
         </div>
     </div>
 </div>
+
+// 切换显示第一套/第二套工具配置
+function showToolSet(n) {
+    if (n === 1) {
+        document.getElementById('toolConfigListPanel').classList.remove('hidden');
+        document.getElementById('toolConfigList2Panel').classList.add('hidden');
+    } else {
+        document.getElementById('toolConfigListPanel').classList.add('hidden');
+        document.getElementById('toolConfigList2Panel').classList.remove('hidden');
+    }
+}
 
 <!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
@@ -1403,8 +1423,9 @@ saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
 
 // 打开第二套工具栏配置面板
 function openToolConfig2() {
-    openToolConfig(); // 暂时共用同一配置面板，提示用户到工具箱配置
-    showToast('🎯 请在工具箱中滚动到底部管理第二套工具栏');
+    document.getElementById('toolConfigModal').classList.remove('hidden');
+    renderToolConfigList(); // 先渲染第一套
+    renderToolConfigList2(); // 再渲染第二套
 }
 
 // 渲染第二套底部工具栏（完全独立）
@@ -2203,6 +2224,72 @@ function renderToolConfigList() {
     });
     
     console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
+}
+
+// 渲染第二套工具配置列表（完全独立）
+function renderToolConfigList2() {
+    const container = document.getElementById('toolConfigList2');
+    if (!container) {
+        // 如果容器不存在，创建它
+        createToolConfigModal2();
+        return;
+    }
+    container.innerHTML = '';
+    
+    console.log('🔧 渲染第二套工具配置列表，toolConfig2长度:', toolConfig2.length);
+    
+    toolConfig2.forEach((tool, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
+        item.dataset.toolId = tool.id;
+        item.style.borderColor = '#8b5cf6';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center justify-between';
+        
+        const inputsDiv = document.createElement('div');
+        inputsDiv.className = 'flex items-center gap-2 flex-1';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = tool.enabled;
+        checkbox.className = 'tool-enabled-checkbox2 accent-purple-500';
+        checkbox.onchange = () => toggleToolEnabled2(idx);
+        
+        const iconInput = document.createElement('input');
+        iconInput.type = 'text';
+        iconInput.value = tool.icon || '🎯';
+        iconInput.className = 'tool-icon-input2 w-12 text-center bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm';
+        iconInput.onchange = (e) => updateToolIcon2(idx, e.target.value);
+        
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = tool.name || '未命名';
+        nameInput.className = 'tool-name-input2 flex-1 bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm font-bold';
+        nameInput.style.color = '#8b5cf6';
+        nameInput.onchange = (e) => updateToolName2(idx, e.target.value);
+        
+        inputsDiv.appendChild(checkbox);
+        inputsDiv.appendChild(iconInput);
+        inputsDiv.appendChild(nameInput);
+        headerDiv.appendChild(inputsDiv);
+        
+        const promptTextarea = document.createElement('textarea');
+        promptTextarea.value = tool.prompt || '';
+        promptTextarea.className = 'tool-prompt-input2 w-full bg-transparent border rounded p-2 text-xs';
+        promptTextarea.style.borderColor = '#8b5cf6';
+        promptTextarea.onchange = (e) => updateToolPrompt2(idx, e.target.value);
+        
+        item.appendChild(headerDiv);
+        item.appendChild(promptTextarea);
+        container.appendChild(item);
+    });
+    
+    console.log('✅ 第二套工具配置列表渲染完成，共', toolConfig2.length, '个工具');
+}
+
+function createToolConfigModal2() {
+    // 创建第二套配���弹窗
 }
 
 window.toggleToolEnabled2 = function(idx) {
