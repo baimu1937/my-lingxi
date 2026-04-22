@@ -351,6 +351,29 @@
     </div>
 </div>
 
+<!-- 第二套工具配置弹窗 -->
+<div id="toolConfigModal2" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[300]">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black" style="color:#8b5cf6;">🎯 工具栏2 配置</h3>
+            <button onclick="closeToolConfig2()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500 relative" style="color:var(--text-secondary); cursor:pointer;">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="toolConfigList2">
+            <!-- 动态生成的第二套配置项 -->
+        </div>
+        <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
+            <div class="flex gap-2">
+                <button onclick="resetToDefaultTools2()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-2 rounded-lg text-xs transition" title="恢复默认">🔄 重置默认</button>
+                <button onclick="addNewTool2()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增工具</button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeToolConfig2()" class="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">✕ 关闭</button>
+                <button onclick="saveToolConfig2()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
@@ -2035,6 +2058,113 @@ window.openToolConfig = function() {
 
 window.closeToolConfig = function() {
     document.getElementById('toolConfigModal').classList.add('hidden');
+};
+
+// 关闭第二套工具配置弹窗
+window.closeToolConfig2 = function() {
+    document.getElementById('toolConfigModal2').classList.add('hidden');
+};
+
+// 渲染第二套工具配置列表
+function renderToolConfigList2() {
+    const container = document.getElementById('toolConfigList2');
+    container.innerHTML = '';
+    
+    toolConfig2.forEach((tool, idx) => {
+        const item = document.createElement('div');
+        item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
+        item.dataset.toolId = tool.id;
+        item.style.borderColor = 'var(--border-color)';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center justify-between';
+        
+        const inputsDiv = document.createElement('div');
+        inputsDiv.className = 'flex items-center gap-2 flex-1';
+        
+        // Checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = tool.enabled;
+        checkbox.className = 'accent-purple-500';
+        checkbox.onchange = () => {
+            toolConfig2[idx].enabled = checkbox.checked;
+        };
+        
+        // Icon input
+        const iconInput = document.createElement('input');
+        iconInput.type = 'text';
+        iconInput.value = tool.icon || '🔧';
+        iconInput.className = 'tool-icon-input w-12 text-center bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm';
+        iconInput.onchange = (e) => {
+            toolConfig2[idx].icon = e.target.value;
+        };
+        
+        // Name input
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = tool.name || '未命名';
+        nameInput.className = 'tool-name-input flex-1 bg-transparent border-b border-transparent hover:border-purple-300 focus:border-purple-500 outline-none text-sm font-bold';
+        nameInput.onchange = (e) => {
+            toolConfig2[idx].name = e.target.value;
+        };
+        
+        inputsDiv.appendChild(checkbox);
+        inputsDiv.appendChild(iconInput);
+        inputsDiv.appendChild(nameInput);
+        headerDiv.appendChild(inputsDiv);
+        
+        // 删除按钮（config工具除外）
+        if (tool.id !== 't2_config') {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.onclick = () => {
+                if (!confirm(`确认删除【${tool.name}】吗？`)) return;
+                toolConfig2.splice(idx, 1);
+                saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+                renderToolConfigList2();
+                renderBottomToolButtons2();
+                showToast(`🗑️ 已删除：${tool.name}`);
+            };
+            deleteBtn.className = 'text-red-400/50 hover:text-red-400 transition text-xs ml-4 px-2 py-1 rounded hover:bg-red-500/10';
+            deleteBtn.textContent = '删除';
+            deleteBtn.title = '点击删除此工具';
+            headerDiv.appendChild(deleteBtn);
+        }
+        
+        // Prompt textarea
+        const promptTextarea = document.createElement('textarea');
+        promptTextarea.className = 'tool-prompt-input w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll';
+        promptTextarea.rows = 2;
+        promptTextarea.style.borderColor = 'var(--border-color)';
+        promptTextarea.style.color = 'var(--text-primary)';
+        promptTextarea.value = tool.prompt || '';
+        promptTextarea.placeholder = '输入填充内容...';
+        promptTextarea.onchange = (e) => {
+            toolConfig2[idx].prompt = e.target.value;
+        };
+        
+        item.appendChild(headerDiv);
+        item.appendChild(promptTextarea);
+        container.appendChild(item);
+    });
+}
+
+// 保存第二套工具配置
+window.saveToolConfig2 = function() {
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderBottomToolButtons2();
+    closeToolConfig2();
+    showToast('💾 第二套工具已保存');
+};
+
+// 重置第二套工具为默认
+window.resetToDefaultTools2 = function() {
+    if (!confirm('确认重置为默认配置吗？')) return;
+    toolConfig2 = [...DEFAULT_TOOLS2];
+    saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+    renderToolConfigList2();
+    renderBottomToolButtons2();
+    showToast('🔄 已重置为默认');
 };
 
 // 渲染配置列表
