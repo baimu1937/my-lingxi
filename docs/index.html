@@ -2518,14 +2518,15 @@ window.deleteTool = function(toolId) {
         return;
     }
     
-    if (!confirm('确认删除此工具？此操作不可恢复。')) return;
-    
     const index = toolConfig.findIndex(t => t.id === toolId);
     if (index > -1) {
         const toolName = toolConfig[index].name;
+        console.log(`🗑️ 删除工具: ${toolConfig[index].icon} ${toolName}`);
         toolConfig.splice(index, 1);
-        linkedToolIds.delete(toolId); // 同时取消关联
+        linkedToolIds.delete(toolId);
         saveJSON('lingxi_tool_config', toolConfig);
+        renderToolConfigList();
+        renderToolButtons();
         renderBottomToolButtons();
         showToast(`🗑️ 已删除：${toolName}`);
     }
