@@ -3155,6 +3155,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     }
 
     const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
+    console.debug('streamCallAI → URL:', url, '| Model:', model, '| Key:', key ? '已填' : '空');
     try {
         const res = await fetch(url, {
             method: 'POST',
