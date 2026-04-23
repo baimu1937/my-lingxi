@@ -3078,20 +3078,14 @@ function escHtml(str) {
 }
 
 function updateModelDropdowns() {
-   const official = [];
-
-    // 只添加已配置Key的厂商基础模型提示
-    if (flowConfig.km_key) official.push({value:'moonshot-v1-8k', label:'Kimi (moonshot-v1-8k)'});
-    if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
-    // 所有模型都从自定义配置中读取
-    const proxy = flowConfig.proxy_models 
-        ? flowConfig.proxy_models
-            .split(/[,，\n]+/)
-            .map(s => s.trim())
-            .filter(Boolean)
-            .map(m => ({value: m, label: m}))
-        : [];
-    const all = [...official, ...proxy];
+    const all = [];
+    const _allBrands = loadJSON(SK.brandList) || [];
+    _allBrands.forEach(b => {
+        if (!b.name && !b.key && !b.proxy) return;
+        const models = (b.models || '').split('\n').map(s => s.trim()).filter(Boolean);
+        if (!models.length) models.push(b.name || 'default');
+        models.forEach(m => all.push({ value: m, label: `${b.name}: ${m}`, brand: b }));
+    });
     if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
     ['singleModel','modelA','modelB'].forEach(id => {
         const el = document.getElementById(id), cur = el.value;
@@ -3103,41 +3097,44 @@ function updateModelDropdowns() {
 
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
-    
-    // 智能模型识别：支持自定义名称映射到正确的API
-    const modelLower = model.toLowerCase();
-    
 
-    if (model === 'deepseek-chat' || model === 'deepseek-reasoner' || 
+    // 从brandList查找匹配的Key和Proxy
+    const _allBrands = loadJSON(SK.brandList) || [];
+    let brandMatch = null;
+    for (const b of _allBrands) {
+        const models = (b.models || '').split('\n').map(s => s.trim()).filter(Boolean);
+        if (models.some(m => m === model || model.includes(m) || m.includes(model))) {
+            brandMatch = b;
+            break;
+        }
+    }
+
+    const modelLower = model.toLowerCase();
+
+    if (brandMatch) {
+        // 品牌行匹配优先
+        url = (brandMatch.proxy || '').replace(/\/+$/,'') + '/chat/completions';
+        key = brandMatch.key;
+    } else if (model === 'deepseek-chat' || model === 'deepseek-reasoner' ||
         modelLower.includes('deepseek') || modelLower.includes('深度求索') ||
         modelLower.startsWith('the ai') || modelLower.includes('assistantsky')) {
-        url = 'https://api.deepseek.com/chat/completions';
-        key = flowConfig.ds_key;
-    } 
-    // 通义千问系列识别
-    else if (model.startsWith('qwen') || modelLower.includes('qwen') || 
+        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://api.deepseek.com/chat/completions';
+        key = flowConfig.ds_key || flowConfig.proxy_key;
+    } else if (model.startsWith('qwen') || modelLower.includes('qwen') ||
              modelLower.includes('千问') || modelLower.includes('通义')) {
-        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
         key = flowConfig.qw_key || flowConfig.proxy_key;
-    }
-    // Kimi (Moonshot) 系列识别
-    else if (modelLower.includes('moonshot') || modelLower.includes('kimi')) {
-        url = 'https://api.moonshot.cn/v1/chat/completions';
+    } else if (modelLower.includes('moonshot') || modelLower.includes('kimi')) {
+        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://api.moonshot.cn/v1/chat/completions';
         key = flowConfig.km_key || flowConfig.proxy_key;
-    }
-    // 豆包系列识别
-    else if (model.startsWith('ep-') || model.startsWith('doubao') || 
+    } else if (model.startsWith('ep-') || model.startsWith('doubao') ||
              modelLower.includes('doubao') || modelLower.includes('豆包')) {
-        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
         key = flowConfig.db_key || flowConfig.proxy_key;
-    }
-    // Google Gemini 系列识别
-    else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-        url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+    } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
         key = flowConfig.gg_key || flowConfig.proxy_key;
-    } 
-    // 其他模型使用代理URL
-    else {
+    } else {
         if (!flowConfig.proxy_url) {
             targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
             return;
@@ -3145,7 +3142,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
         url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
         key = flowConfig.proxy_key;
     }
-    
+
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
         return;
