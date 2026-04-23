@@ -2225,7 +2225,10 @@ function renderToolConfigList() {
             // 将删除按钮移到最末尾，并增加确认提示，防止误触
             if (tool.id !== 'config') {
                 const deleteBtn = document.createElement('button');
-                deleteBtn.onclick = () => deleteTool(idx);
+                deleteBtn.onclick = () => {
+                    console.log('🗑️ 删除按钮被点击，idx=', idx, 'tool=', tool);
+                    deleteTool(idx);
+                };
                 deleteBtn.className = 'text-red-400/50 hover:text-red-400 transition text-xs ml-4 px-2 py-1 rounded hover:bg-red-500/10';
                 deleteBtn.textContent = '删除';
                 deleteBtn.title = '点击删除此工具';
@@ -2511,25 +2514,44 @@ window.hideTool = function(toolId) {
     }
 };
 
-// 删除工具（从配置中彻底移除）
-window.deleteTool = function(toolId) {
-    if (toolId === 'config') {
+// 删除工具（从配置中彻底移除）- 同时支持索引和toolId
+window.deleteTool = function(id) {
+    // 判断是索引还是toolId
+    const isIndex = typeof id === 'number' || !isNaN(id);
+    let index, toolToDelete;
+    
+    if (isIndex) {
+        index = parseInt(id);
+        toolToDelete = toolConfig[index];
+    } else {
+        if (id === 'config') {
+            showToast('⚠️ 配置工具不能删除');
+            return;
+        }
+        index = toolConfig.findIndex(t => t.id === id);
+        toolToDelete = toolConfig[index];
+    }
+    
+    if (!toolToDelete) {
+        console.error('❌ 未找到要删除的工具，id=', id);
+        return;
+    }
+    
+    if (toolToDelete.id === 'config') {
         showToast('⚠️ 配置工具不能删除');
         return;
     }
     
-    const index = toolConfig.findIndex(t => t.id === toolId);
-    if (index > -1) {
-        const toolName = toolConfig[index].name;
-        console.log(`🗑️ 删除工具: ${toolConfig[index].icon} ${toolName}`);
-        toolConfig.splice(index, 1);
-        linkedToolIds.delete(toolId);
-        saveJSON('lingxi_tool_config', toolConfig);
-        renderToolConfigList();
-        renderToolButtons();
-        renderBottomToolButtons();
-        showToast(`🗑️ 已删除：${toolName}`);
-    }
+    const toolName = toolToDelete.name;
+    console.log(`🗑️ 删除工具: ${toolToDelete.icon} ${toolName} (索引:${index}, id:${toolToDelete.id})`);
+    
+    toolConfig.splice(index, 1);
+    linkedToolIds.delete(toolToDelete.id);
+    saveJSON('lingxi_tool_config', toolConfig);
+    renderToolConfigList();
+    renderToolButtons();
+    renderBottomToolButtons();
+    showToast(`🗑️ 已删除：${toolName}`);
 };
 
 // 显示所有隐藏的工具
