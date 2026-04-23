@@ -282,7 +282,7 @@
     </div>
     <div class="flex-1 overflow-y-auto custom-scroll p-5 space-y-6">
         <div class="flex bg-black/20 p-1 rounded-xl border border-white/5 gap-1">
-            <button id="modeChat" class="mode-btn mode-btn-active">✍️ 创作</button>
+            <button id="modeChat" class="mode-btn mode-btn-active">✍️ 个人创作</button>
             <button id="modePK"   class="mode-btn">⚔️ 竞技擂台</button>
         </div>
         <section>
@@ -1106,42 +1106,6 @@ window.executeDelete = function(index) {
     
     renderBookLibrary();
     showToast(`🗑️ 已删除「${bookName}」`);
-};
-
-// 双击编辑书名
-window.editBookName = function(index, element) {
-    const oldName = bookLibrary[index].name;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = oldName;
-    input.className = 'w-full bg-white/90 text-gray-800 text-sm px-2 py-1 rounded border border-blue-400 outline-none';
-    input.style.fontSize = '14px';
-    
-    element.innerHTML = '';
-    element.appendChild(input);
-    input.focus();
-    input.select();
-    
-    const saveName = () => {
-        const newName = input.value.trim() || oldName;
-        if (newName !== oldName) {
-            bookLibrary[index].name = newName;
-            saveJSON(SK.books, bookLibrary);
-            renderBookLibrary();
-            showToast(`✅ 已重命名为「${newName}」`);
-        } else {
-            element.textContent = oldName;
-        }
-    };
-    
-    input.onblur = saveName;
-    input.onkeydown = (e) => {
-        if (e.key === 'Enter') {
-            input.blur();
-        } else if (e.key === 'Escape') {
-            element.textContent = oldName;
-        }
-    };
 };
 
 window.addNewBook = function() {
