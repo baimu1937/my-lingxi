@@ -560,10 +560,10 @@
         
         <!-- 表头 -->
         <div class="grid grid-cols-12 gap-2 px-2 py-2 text-xs font-black mb-2" style="color:var(--text-secondary)">
-            <div class="col-span-2">📛 品牌</div>
+            <div class="col-span-1">📛 品牌</div>
             <div class="col-span-3">🔑 API Key</div>
             <div class="col-span-4">📡 中转地址</div>
-            <div class="col-span-2">🔮 型号（一行一个）</div>
+            <div class="col-span-3">🔮 型号（一行一个）</div>
             <div class="col-span-1"></div>
         </div>
         
@@ -3138,7 +3138,7 @@ function addNewApiBrand() {
     const uuid = 'brand_' + Date.now();
     const html = `
         <div id="${uuid}" class="grid grid-cols-12 gap-2 items-center bg-white/50 rounded-lg p-2">
-            <div class="col-span-2">
+            <div class="col-span-1">
                 <input type="text" placeholder="品牌名" class="brand-name w-full bg-transparent border rounded px-2 py-1 text-sm">
             </div>
             <div class="col-span-3">
@@ -3149,7 +3149,7 @@ function addNewApiBrand() {
                        class="brand-proxy w-full bg-transparent border rounded px-2 py-1 text-sm"
                        style="color:var(--text-secondary)">
             </div>
-            <div class="col-span-2">
+            <div class="col-span-3">
                 <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" style="min-height:50px;resize:vertical"></textarea>
             </div>
             <div class="col-span-1 text-center">
@@ -3180,8 +3180,21 @@ function updateModelDropdowns() {
             .filter(Boolean)
             .map(m => ({value: m, label: m}))
         : [];
-    const all = [...official, ...proxy];
-    if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
+    
+    // 从品牌列表中加载自定义品牌型号
+    const brandList = loadJSON(SK.brandList) || [];
+    const brandModels = [];
+    brandList.forEach(brand => {
+        if (brand.key && brand.model) {
+            const models = brand.model.split(/[\n,，]+/).map(m => m.trim()).filter(Boolean);
+            models.forEach(m => {
+                brandModels.push({value: m, label: `${brand.name}(${m})`});
+            });
+        }
+    });
+    
+    const all = [...official, ...proxy, ...brandModels];
+    if (!all.length) all.push({value:'',label:'请先配置Key'});
     ['singleModel','modelA','modelB'].forEach(id => {
         const el = document.getElementById(id), cur = el.value;
         el.innerHTML = '';
