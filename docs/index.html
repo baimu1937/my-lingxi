@@ -3126,7 +3126,27 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
 
     if (brandMatch) {
         // 品牌行匹配优先
-        url = (brandMatch.proxy || '').replace(/\/+$/,'') + '/chat/completions';
+        if (brandMatch.proxy && brandMatch.proxy.trim()) {
+            // 有中转地址
+            url = brandMatch.proxy.replace(/\/+$/,'') + '/chat/completions';
+        } else {
+            // 无中转地址，走官方直连（根据型号判断）
+            const m = model.toLowerCase();
+            if (m.includes('deepseek') || m.includes('深度求索')) {
+                url = 'https://api.deepseek.com/chat/completions';
+            } else if (m.includes('qwen') || m.includes('千问') || m.includes('通义')) {
+                url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+            } else if (m.includes('moonshot') || m.includes('kimi')) {
+                url = 'https://api.moonshot.cn/v1/chat/completions';
+            } else if (m.includes('doubao') || m.includes('豆包') || model.startsWith('ep-')) {
+                url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+            } else if (m.includes('gemini') || m.includes('google')) {
+                url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+            } else {
+                targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 型号【${model}】无法识别，请填写中转地址或使用支持的型号名</span>`;
+                return;
+            }
+        }
         key = brandMatch.key;
     } else if (model === 'deepseek-chat' || model === 'deepseek-reasoner' ||
         modelLower.includes('deepseek') || modelLower.includes('深度求索') ||
