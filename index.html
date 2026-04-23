@@ -561,8 +561,9 @@
         <!-- 表头 -->
         <div class="grid grid-cols-12 gap-2 px-2 py-2 text-xs font-black mb-2" style="color:var(--text-secondary)">
             <div class="col-span-3">📛 品牌</div>
-            <div class="col-span-4">🔑 API Key</div>
-            <div class="col-span-4">🔮 型号（一行一个）</div>
+            <div class="col-span-3">🔑 API Key</div>
+            <div class="col-span-3">📡 中转地址</div>
+            <div class="col-span-2">🔮 型号（一行一个）</div>
             <div class="col-span-1"></div>
         </div>
         
@@ -3120,11 +3121,16 @@ function addNewApiBrand() {
             <div class="col-span-3">
                 <input type="text" placeholder="品牌名" class="brand-name w-full bg-transparent border rounded px-2 py-1 text-sm">
             </div>
-            <div class="col-span-4">
+            <div class="col-span-3">
                 <input type="password" placeholder="API Key" class="brand-key w-full bg-transparent border rounded px-2 py-1 text-sm">
             </div>
-            <div class="col-span-4">
-                <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm rows="2"></textarea>
+            <div class="col-span-3">
+                <input type="text" placeholder="留空则直连，中转填写格式：https://你的中转域名/v1" 
+                       class="brand-proxy w-full bg-transparent border rounded px-2 py-1 text-sm"
+                       style="color:var(--text-secondary)">
+            </div>
+            <div class="col-span-2">
+                <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" rows="2"></textarea>
             </div>
             <div class="col-span-1 text-center">
                 <button onclick="removeApiBrand('${uuid}')" class="text-red-500 hover:text-red-700 font-bold text-lg">×</button>
