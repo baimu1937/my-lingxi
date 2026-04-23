@@ -570,6 +570,11 @@
                 <input id="gg_key"  type="password" placeholder="Google AI (Gemini) Key" class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
+        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
+                    <span class="text-sm font-bold text-blue-700">+ 新增自定义品牌</span>
+                    <button onclick="addNewApiBrand()" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-3 py-1.5 rounded-lg transition">+ 添加</button>
+                </div>
+                <div id="apiConfigList" class="flex-1 overflow-y-auto custom-scroll space-y-2 mb-4" style="max-height:50vh"></div>
                 <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
                 <input id="proxy_url" type="text"     placeholder="Base URL (含/v1)"   class="modal-input text-sm">
                 <input id="proxy_key" type="password" placeholder="中转 Key"           class="modal-input text-sm">
@@ -664,7 +669,7 @@ const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风�
 请用简洁的语言归纳，便于后续仿写参考。`;
 
 const SK = {
-    flow:'lingxi_flow', prompts:'lingxi_prompts',
+    flow:'lingxi_flow', prompts:'lingxi_prompts', brandList:'lingxi_brand_list',
     history:'lingxi_history', workspace:'lingxi_workspace', theme:'lingxi_theme',
     sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
@@ -3015,6 +3020,9 @@ function initConfigInputs() {
     ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
+    // 加载新增的品牌列表
+    const savedBrands = loadJSON(SK.brandList) || [];
+    savedBrands.forEach(b => addNewApiBrand(b));
 }
 function saveConfig() {
     flowConfig = {};
@@ -3022,10 +3030,50 @@ function saveConfig() {
         flowConfig[id] = document.getElementById(id).value.trim();
     });
     saveJSON(SK.flow, flowConfig);
+    
+    // 保存新增的品牌列表
+    const brandList = [];
+    const container = document.getElementById('apiConfigList');
+    if (container) {
+        const rows = container.querySelectorAll('[id^="brand_"]');
+        rows.forEach(row => {
+            const name = row.querySelector('.brand-name')?.value.trim();
+            const key = row.querySelector('.brand-key')?.value.trim();
+            const proxy = row.querySelector('.brand-proxy')?.value.trim();
+            const modelNames = row.querySelector('.brand-model')?.value.trim();
+            if (name || key) {
+                brandList.push({ name, key, proxy, model: modelNames });
+            }
+        });
+    }
+    saveJSON(SK.brandList, brandList);
+    
     updateModelDropdowns();
     showToast('✅ 配置已保存并激活');
     document.getElementById('settingsModal').classList.add('hidden');
 }
+// 新增品牌行
+function addNewApiBrand(brand = {}) {
+    const container = document.getElementById('apiConfigList');
+    if (!container) return;
+    
+    const uuid = 'brand_' + Date.now();
+    const div = document.createElement('div');
+    div.id = uuid;
+    div.className = 'rounded-xl border p-3 space-y-2';
+    div.style.cssText = 'border-color:var(--border-color);background:var(--bg-main)';
+    div.innerHTML = `
+        <div class="flex items-center gap-2">
+            <input type="text" placeholder="品牌名称，如：我的API" value="${brand.name||''}" class="brand-name modal-input text-sm font-bold flex-1">
+            <button onclick="this.closest('[id^=\\'brand_\']').remove()" class="text-red-400 hover:text-red-600 font-black text-lg w-6 h-6 flex items-center justify-center transition">&times;</button>
+        </div>
+        <input type="text" placeholder="API Key" value="${brand.key||''}" class="brand-key modal-input text-xs">
+        <input type="text" placeholder="自定义Base URL（可选，覆盖默认）" value="${brand.proxy||''}" class="brand-proxy modal-input text-xs">
+        <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" style="min-height:50px;resize:vertical">${brand.model || ''}</textarea>
+    `;
+    container.appendChild(div);
+}
+
 function updateModelDropdowns() {
    const official = [];
 
@@ -3056,43 +3104,56 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     // 智能模型识别：支持自定义名称映射到正确的API
     const modelLower = model.toLowerCase();
     
+    // 从brandList查找匹配的Key和Proxy
+    let brandKey = '';
+    let brandProxy = '';
+    const _allBrands = loadJSON(SK.brandList) || [];
+    for (const b of _allBrands) {
+        const modelLines = (b.model || '').split('\n').map(m => m.trim()).filter(Boolean);
+        if (modelLines.some(m => m === model || model.startsWith(m) || m.startsWith(model))) {
+            brandKey = b.key || '';
+            brandProxy = b.proxy || '';
+            break;
+        }
+    }
+    
     // DeepSeek系列识别
     if (model === 'deepseek-chat' || model === 'deepseek-reasoner' || 
         modelLower.includes('deepseek') || modelLower.includes('深度求索') ||
         modelLower.startsWith('the ai') || modelLower.includes('assistantsky')) {
-        url = 'https://api.deepseek.com/chat/completions';
-        key = flowConfig.ds_key;
+        url = brandProxy || 'https://api.deepseek.com/chat/completions';
+        key = brandKey || flowConfig.ds_key;
     } 
     // 通义千问系列识别
     else if (model.startsWith('qwen') || modelLower.includes('qwen') || 
              modelLower.includes('千问') || modelLower.includes('通义')) {
-        url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-        key = flowConfig.qw_key;
+        url = brandProxy || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        key = brandKey || flowConfig.qw_key || flowConfig.proxy_key;
     }
     // Kimi (Moonshot) 系列识别
     else if (modelLower.includes('moonshot') || modelLower.includes('kimi')) {
-        url = 'https://api.moonshot.cn/v1/chat/completions';
-        key = flowConfig.km_key;
+        url = brandProxy || 'https://api.moonshot.cn/v1/chat/completions';
+        key = brandKey || flowConfig.km_key || flowConfig.proxy_key;
     }
     // 豆包系列识别
     else if (model.startsWith('ep-') || model.startsWith('doubao') || 
              modelLower.includes('doubao') || modelLower.includes('豆包')) {
-        url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-        key = flowConfig.db_key;
+        url = brandProxy || 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+        key = brandKey || flowConfig.db_key || flowConfig.proxy_key;
     }
     // Google Gemini 系列识别
     else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-        url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-        key = flowConfig.gg_key;
+        url = brandProxy || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+        key = brandKey || flowConfig.gg_key || flowConfig.proxy_key;
     } 
     // 其他模型使用代理URL
     else {
-        if (!flowConfig.proxy_url) {
+        if (!flowConfig.proxy_url && !brandProxy) {
             targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
             return;
         }
-        url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
-        key = flowConfig.proxy_key;
+        url = (brandProxy || flowConfig.proxy_url).replace(/\/+$/,'') + '/chat/completions';
+        key = brandKey || flowConfig.proxy_key;
     }
     
     if (!key || !key.trim()) {
