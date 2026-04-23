@@ -2249,14 +2249,8 @@ function renderToolConfigList() {
         }
     });
 
-    // 第二套工具栏配置（可改名/删减/修改内容）
-    const divider = document.createElement('div');
-    divider.className = 'pt-2 mt-2 border-t';
-    divider.style.borderColor = 'var(--border-color)';
-    divider.innerHTML = '<div class="text-xs font-black text-purple-500 mb-2">🎯 第二套工具栏（点击填充输入框）</div>';
-    container.appendChild(divider);
-
-    toolConfig2.forEach((tool, idx) => {
+    console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
+}
         try {
             const item = document.createElement('div');
             item.className = 'tool-config-item bg-white/5 border rounded-lg p-3 space-y-2';
@@ -2314,11 +2308,7 @@ function renderToolConfigList() {
             item.appendChild(promptTextarea);
             container.appendChild(item);
         } catch (err) {
-            console.error(`❌ 渲染第二套工具[${idx}]失败:`, err, tool);
-        }
-    });
-    
-    console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
+            console.log('✅ 工具配置列表渲染完成，共', toolConfig.length, '个工具');
 }
 
 window.toggleToolEnabled2 = function(idx) {
