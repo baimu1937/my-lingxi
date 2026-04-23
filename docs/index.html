@@ -3097,74 +3097,67 @@ function updateModelDropdowns() {
 
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
-    console.debug('[streamCallAI] START model=', model);
+    console.log('[streamCallAI] ===== START ===== model=', model);
 
-    // 从brandList查找匹配的Key和Proxy
+    // 检查flowConfig
+    console.log('[streamCallAI] flowConfig=', flowConfig);
+    console.log('[streamCallAI] proxy_url=', flowConfig.proxy_url);
+    console.log('[streamCallAI] ds_key=', flowConfig.ds_key ? '已填'+flowConfig.ds_key.slice(0,8) : '空');
+
+    // 检查brandList
     const _allBrands = loadJSON(SK.brandList) || [];
-    console.debug('[streamCallAI] brandList=', _allBrands);
-    let brandMatch = null;
-    for (const b of _allBrands) {
-        const models = (b.models || '').split('\n').map(s => s.trim()).filter(Boolean);
-        if (models.some(m => m === model || model.includes(m) || m.includes(model))) {
-            brandMatch = b;
-            console.debug('[streamCallAI] MATCHED brand:', b.name);
-            break;
-        }
-    }
-    console.debug('[streamCallAI] brandMatch=', brandMatch);
+    console.log('[streamCallAI] brandList count=', _allBrands.length);
+    _allBrands.forEach((b,i) => console.log('[streamCallAI] brand',i,'=', b.name, 'key=', b.key ? b.key.slice(0,8)+'...' : '空', 'proxy=', b.proxy));
 
-    const modelLower = model.toLowerCase();
-
-    if (brandMatch) {
-        // 品牌行匹配优先
-        if (brandMatch.proxy && brandMatch.proxy.trim()) {
-            url = brandMatch.proxy.replace(/\/+$/,'') + '/chat/completions';
+    const firstBrandWithKey = _allBrands.find(b => b.key && b.key.trim());
+    console.log('[streamCallAI] firstBrandWithKey=', firstBrandWithKey);
+    
+    if (firstBrandWithKey) {
+        key = firstBrandWithKey.key;
+        // 根据model名判断官方端点
+        const m = model.toLowerCase();
+        if (m.includes('deepseek') || m.includes('深度求索')) {
+            url = 'https://api.deepseek.com/v1/chat/completions';
+        } else if (m.includes('qwen') || m.includes('千问') || m.includes('通义')) {
+            url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        } else if (m.includes('moonshot') || m.includes('kimi')) {
+            url = 'https://api.moonshot.cn/v1/chat/completions';
+        } else if (m.startsWith('ep-') || m.includes('doubao') || m.includes('豆包')) {
+            url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+        } else if (m.includes('gemini') || m.includes('google')) {
+            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
         } else {
-            const m = model.toLowerCase();
-            if (m.includes('deepseek') || m.includes('深度求索')) {
-                url = 'https://api.deepseek.com/chat/completions';
-            } else if (m.includes('qwen') || m.includes('千问') || m.includes('通义')) {
-                url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-            } else if (m.includes('moonshot') || m.includes('kimi')) {
-                url = 'https://api.moonshot.cn/v1/chat/completions';
-            } else if (m.includes('doubao') || m.includes('豆包') || model.startsWith('ep-')) {
-                url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-            } else if (m.includes('gemini') || m.includes('google')) {
-                url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-            } else {
-                url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : '';
-            }
+            url = 'https://api.deepseek.com/v1/chat/completions'; // 默认
         }
-        key = brandMatch.key;
-    } else if (model === 'deepseek-chat' || model === 'deepseek-reasoner' ||
-        modelLower.includes('deepseek') || modelLower.includes('深度求索') ||
-        modelLower.startsWith('the ai') || modelLower.includes('assistantsky')) {
-        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://api.deepseek.com/chat/completions';
-        key = flowConfig.ds_key || flowConfig.proxy_key;
-    } else if (model.startsWith('qwen') || modelLower.includes('qwen') ||
-             modelLower.includes('千问') || modelLower.includes('通义')) {
-        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-        key = flowConfig.qw_key || flowConfig.proxy_key;
-    } else if (modelLower.includes('moonshot') || modelLower.includes('kimi')) {
-        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://api.moonshot.cn/v1/chat/completions';
-        key = flowConfig.km_key || flowConfig.proxy_key;
-    } else if (model.startsWith('ep-') || model.startsWith('doubao') ||
-             modelLower.includes('doubao') || modelLower.includes('豆包')) {
-        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-        key = flowConfig.db_key || flowConfig.proxy_key;
-    } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-        url = flowConfig.proxy_url ? flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions' : 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-        key = flowConfig.gg_key || flowConfig.proxy_key;
     } else {
-        if (!flowConfig.proxy_url) {
-            targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置中转 Base URL，请前往 ⚙️ 配置中心填写</span>';
-            return;
+        // 无品牌key时尝试旧配置
+        const modelLower = model.toLowerCase();
+        if (modelLower.includes('deepseek') || modelLower.includes('深度求索')) {
+            url = 'https://api.deepseek.com/v1/chat/completions';
+            key = flowConfig.ds_key || flowConfig.proxy_key;
+        } else if (modelLower.includes('qwen') || modelLower.includes('千问') || modelLower.includes('通义')) {
+            url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+            key = flowConfig.qw_key || flowConfig.proxy_key;
+        } else if (modelLower.includes('moonshot') || modelLower.includes('kimi')) {
+            url = 'https://api.moonshot.cn/v1/chat/completions';
+            key = flowConfig.km_key || flowConfig.proxy_key;
+        } else if (model.startsWith('ep-') || modelLower.includes('doubao') || modelLower.includes('豆包')) {
+            url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+            key = flowConfig.db_key || flowConfig.proxy_key;
+        } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+            key = flowConfig.gg_key || flowConfig.proxy_key;
+        } else {
+            if (!flowConfig.proxy_url) {
+                targetEl.innerHTML = '<span style="color:#ef4444">⚠️ 未配置 Key，请在配置中心添加品牌行并填写 API Key</span>';
+                return;
+            }
+            url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
+            key = flowConfig.proxy_key;
         }
-        url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
-        key = flowConfig.proxy_key;
     }
 
-    console.debug('[streamCallAI] FINAL url=', url, 'key=', key ? key.substring(0,8)+'...' : '(empty)');
+    console.debug('[streamCallAI] url=', url, 'key=', key ? key.substring(0,8)+'...' : '(empty)');
 
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
