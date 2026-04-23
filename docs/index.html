@@ -3020,7 +3020,9 @@ function initConfigInputs() {
     ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
-    // 加载新增的品牌列表
+    // 清空并重新加载品牌列表
+    const container = document.getElementById('apiConfigList');
+    if (container) container.innerHTML = '';
     const savedBrands = loadJSON(SK.brandList) || [];
     savedBrands.forEach(b => addNewApiBrand(b));
 }
@@ -3702,6 +3704,7 @@ function bindEvents() {
             console.log('⚙️ 设置按钮被点击');
             const modal = document.getElementById('settingsModal');
             if (modal) modal.classList.remove('hidden');
+            initConfigInputs(); // 打开时加载配置和品牌列表
         };
     } else {
         console.error('❌ 找不到 openSettings 按钮元素');
