@@ -560,9 +560,9 @@
         
         <!-- 表头 -->
         <div class="grid grid-cols-12 gap-2 px-2 py-2 text-xs font-black mb-2" style="color:var(--text-secondary)">
-            <div class="col-span-3">📛 品牌</div>
+            <div class="col-span-2">📛 品牌</div>
             <div class="col-span-3">🔑 API Key</div>
-            <div class="col-span-3">📡 中转地址</div>
+            <div class="col-span-4">📡 中转地址</div>
             <div class="col-span-2">🔮 型号（一行一个）</div>
             <div class="col-span-1"></div>
         </div>
@@ -663,7 +663,7 @@ const GENE_PROMPT = `作为顶级编辑，请深度解构该文本并生成风�
 请用简洁的语言归纳，便于后续仿写参考。`;
 
 const SK = {
-    flow:'lingxi_flow', prompts:'lingxi_prompts',
+    flow:'lingxi_flow', prompts:'lingxi_prompts', brandList:'lingxi_brand_list',
     history:'lingxi_history', workspace:'lingxi_workspace', theme:'lingxi_theme',
     sidebarDark:'lingxi_sidebar_dark', autoBackup:'lingxi_auto_backup', books:'lingxi_books'
 };
@@ -3100,11 +3100,31 @@ function initSettings() {
 }
 
 function saveConfig() {
+    // 保存原有的旧版配置
     flowConfig = {};
     ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
-        flowConfig[id] = document.getElementById(id).value.trim();
+        const el = document.getElementById(id);
+        if (el) flowConfig[id] = el.value.trim();
     });
     saveJSON(SK.flow, flowConfig);
+    
+    // 保存新增的品牌列表
+    const brandList = [];
+    const container = document.getElementById('apiConfigList');
+    if (container) {
+        const rows = container.querySelectorAll('[id^="brand_"]');
+        rows.forEach(row => {
+            const name = row.querySelector('.brand-name')?.value.trim();
+            const key = row.querySelector('.brand-key')?.value.trim();
+            const proxy = row.querySelector('.brand-proxy')?.value.trim();
+            const model = row.querySelector('.brand-model')?.value.trim();
+            if (name || key) {
+                brandList.push({ name, key, proxy, model });
+            }
+        });
+    }
+    saveJSON(SK.brandList, brandList);
+    
     updateModelDropdowns();
     showToast('✅ 配置已保存并激活');
     document.getElementById('settingsModal').classList.add('hidden');
@@ -3118,19 +3138,19 @@ function addNewApiBrand() {
     const uuid = 'brand_' + Date.now();
     const html = `
         <div id="${uuid}" class="grid grid-cols-12 gap-2 items-center bg-white/50 rounded-lg p-2">
-            <div class="col-span-3">
+            <div class="col-span-2">
                 <input type="text" placeholder="品牌名" class="brand-name w-full bg-transparent border rounded px-2 py-1 text-sm">
             </div>
             <div class="col-span-3">
                 <input type="password" placeholder="API Key" class="brand-key w-full bg-transparent border rounded px-2 py-1 text-sm">
             </div>
-            <div class="col-span-3">
+            <div class="col-span-4">
                 <input type="text" placeholder="留空则直连，中转填写格式：https://你的中转域名/v1" 
                        class="brand-proxy w-full bg-transparent border rounded px-2 py-1 text-sm"
                        style="color:var(--text-secondary)">
             </div>
             <div class="col-span-2">
-                <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" rows="2"></textarea>
+                <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" style="min-height:50px;resize:vertical"></textarea>
             </div>
             <div class="col-span-1 text-center">
                 <button onclick="removeApiBrand('${uuid}')" class="text-red-500 hover:text-red-700 font-bold text-lg">×</button>
