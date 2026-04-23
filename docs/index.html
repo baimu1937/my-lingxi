@@ -3076,28 +3076,69 @@ function addNewApiBrand(brand = {}) {
     container.appendChild(div);
 }
 
+// 自动获取中转站模型列表
+let proxyModelCache = null;
+let proxyModelCacheKey = '';
+async function fetchProxyModels(url, key) {
+    if (!url || !key) return [];
+    const cacheKey = url + '|' + key;
+    if (proxyModelCache && proxyModelCacheKey === cacheKey) return proxyModelCache;
+    try {
+        const res = await fetch(url.replace(/\/+$/,'') + '/models', {
+            headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const models = (data.data || data.models || []).map(m => m.id || m.id || m).filter(Boolean);
+        proxyModelCache = models;
+        proxyModelCacheKey = cacheKey;
+        return models;
+    } catch (e) {
+        console.warn('获取模型列表失败:', e);
+        return [];
+    }
+}
+
 function updateModelDropdowns() {
    const official = [];
 
     // 只添加已配置Key的厂商基础模型提示
     if (flowConfig.km_key) official.push({value:'moonshot-v1-8k', label:'Kimi (moonshot-v1-8k)'});
     if (flowConfig.db_key && flowConfig.db_model) official.push({value:flowConfig.db_model, label:`豆包(${flowConfig.db_model})`});
-    // 所有模型都从自定义配置中读取
-    const proxy = flowConfig.proxy_models 
-        ? flowConfig.proxy_models
+    
+    // 从中转站获取模型列表
+    let proxy = [];
+    if (flowConfig.proxy_url && flowConfig.proxy_key) {
+        proxyModelCache = null; // 清除缓存强制刷新
+        proxyModelCacheKey = '';
+        // 异步获取中转站模型（不阻塞UI）
+        fetchProxyModels(flowConfig.proxy_url, flowConfig.proxy_key).then(models => {
+            if (models.length) {
+                proxy = models.map(m => ({value: m, label: m}));
+                renderModelDropdown();
+            }
+        });
+    }
+    // 备用：从手动配置的proxy_models读取
+    if (!proxy.length && flowConfig.proxy_models) {
+        proxy = flowConfig.proxy_models
             .split(/[,，\n]+/)
             .map(s => s.trim())
             .filter(Boolean)
-            .map(m => ({value: m, label: m}))
-        : [];
-    const all = [...official, ...proxy];
-    if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
-    ['singleModel','modelA','modelB'].forEach(id => {
-        const el = document.getElementById(id), cur = el.value;
-        el.innerHTML = '';
-        all.forEach(({value,label}) => { const o=document.createElement('option'); o.value=value; o.textContent=label; el.appendChild(o); });
-        if (cur && all.find(m=>m.value===cur)) el.value = cur;
-    });
+            .map(m => ({value: m, label: m}));
+    }
+    
+    function renderModelDropdown() {
+        const all = [...official, ...proxy];
+        if (!all.length) all.push({value:'deepseek-chat',label:'DeepSeek(请先配置Key)'});
+        ['singleModel','modelA','modelB'].forEach(id => {
+            const el = document.getElementById(id), cur = el.value;
+            el.innerHTML = '';
+            all.forEach(({value,label}) => { const o=document.createElement('option'); o.value=value; o.textContent=label; el.appendChild(o); });
+            if (cur && all.find(m=>m.value===cur)) el.value = cur;
+        });
+    }
+    renderModelDropdown();
 }
 
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
