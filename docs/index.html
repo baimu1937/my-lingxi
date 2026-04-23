@@ -570,11 +570,6 @@
                 <input id="gg_key"  type="password" placeholder="Google AI (Gemini) Key" class="modal-input text-sm">
             </div>
             <div class="space-y-2.5 text-sm">
-        <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
-                    <span class="text-sm font-bold text-blue-700">+ 新增自定义品牌</span>
-                    <button onclick="addNewApiBrand()" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-3 py-1.5 rounded-lg transition">+ 添加</button>
-                </div>
-                <div id="apiConfigList" class="flex-1 overflow-y-auto custom-scroll space-y-2 mb-4" style="max-height:50vh"></div>
                 <h4 class="text-[11px] font-black text-purple-600 border-l-4 border-purple-500 pl-2 uppercase">中转 / 其他</h4>
                 <input id="proxy_url" type="text"     placeholder="Base URL (含/v1)"   class="modal-input text-sm">
                 <input id="proxy_key" type="password" placeholder="中转 Key"           class="modal-input text-sm">
@@ -2984,11 +2979,6 @@ function initConfigInputs() {
     ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
         document.getElementById(id).value = flowConfig[id] || '';
     });
-    // 清空并重新加载品牌列表
-    const container = document.getElementById('apiConfigList');
-    if (container) container.innerHTML = '';
-    const savedBrands = loadJSON(SK.brandList) || [];
-    savedBrands.forEach(b => addNewApiBrand(b));
 }
 function saveConfig() {
     flowConfig = {};
@@ -2996,71 +2986,8 @@ function saveConfig() {
         flowConfig[id] = document.getElementById(id).value.trim();
     });
     saveJSON(SK.flow, flowConfig);
-    
-    // 保存新增的品牌列表
-    const brandList = [];
-    const container = document.getElementById('apiConfigList');
-    if (container) {
-        const rows = container.querySelectorAll('[id^="brand_"]');
-        rows.forEach(row => {
-            const name = row.querySelector('.brand-name')?.value.trim();
-            const key = row.querySelector('.brand-key')?.value.trim();
-            const proxy = row.querySelector('.brand-proxy')?.value.trim();
-            const modelNames = row.querySelector('.brand-model')?.value.trim();
-            if (name || key) {
-                brandList.push({ name, key, proxy, model: modelNames });
-            }
-        });
-    }
-    saveJSON(SK.brandList, brandList);
-    
-    updateModelDropdowns();
     showToast('✅ 配置已保存并激活');
     document.getElementById('settingsModal').classList.add('hidden');
-}
-// 新增品牌行
-function addNewApiBrand(brand = {}) {
-    const container = document.getElementById('apiConfigList');
-    if (!container) return;
-    
-    const uuid = 'brand_' + Date.now();
-    const div = document.createElement('div');
-    div.id = uuid;
-    div.className = 'rounded-xl border p-3 space-y-2';
-    div.style.cssText = 'border-color:var(--border-color);background:var(--bg-main)';
-    div.innerHTML = `
-        <div class="flex items-center gap-2">
-            <input type="text" placeholder="品牌名称，如：我的API" value="${brand.name||''}" class="brand-name modal-input text-sm font-bold flex-1">
-            <button onclick="this.closest('[id^=\\'brand_\']').remove()" class="text-red-400 hover:text-red-600 font-black text-lg w-6 h-6 flex items-center justify-center transition">&times;</button>
-        </div>
-        <input type="text" placeholder="API Key" value="${brand.key||''}" class="brand-key modal-input text-xs">
-        <input type="text" placeholder="自定义Base URL（可选，覆盖默认）" value="${brand.proxy||''}" class="brand-proxy modal-input text-xs">
-        <textarea placeholder="型号（一行一个）" class="brand-model w-full bg-transparent border rounded px-2 py-1 text-sm" style="min-height:50px;resize:vertical">${brand.model || ''}</textarea>
-    `;
-    container.appendChild(div);
-}
-
-// 自动获取中转站模型列表
-let proxyModelCache = null;
-let proxyModelCacheKey = '';
-async function fetchProxyModels(url, key) {
-    if (!url || !key) return [];
-    const cacheKey = url + '|' + key;
-    if (proxyModelCache && proxyModelCacheKey === cacheKey) return proxyModelCache;
-    try {
-        const res = await fetch(url.replace(/\/+$/,'') + '/models', {
-            headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' }
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const models = (data.data || data.models || []).map(m => m.id || m.id || m).filter(Boolean);
-        proxyModelCache = models;
-        proxyModelCacheKey = cacheKey;
-        return models;
-    } catch (e) {
-        console.warn('获取模型列表失败:', e);
-        return [];
-    }
 }
 
 function updateModelDropdowns() {
