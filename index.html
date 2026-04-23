@@ -3069,7 +3069,8 @@ function renderSelect() {
 
 function initConfigInputs() {
     ['ds_key','qw_key','km_key','db_key','db_model','proxy_url','proxy_key','proxy_models','gg_key'].forEach(id => {
-        document.getElementById(id).value = flowConfig[id] || '';
+        const el = document.getElementById(id);
+        if (el) el.value = flowConfig[id] || '';
     });
 }
 
