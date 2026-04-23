@@ -3052,7 +3052,7 @@ function addBrandRow(brand = {}) {
     div.className = 'brand-row flex items-center gap-2';
     div.innerHTML = `
         <input type="text" value="${escHtml(brand.name||'')}" placeholder="千问" class="brand-name border rounded-lg px-2 py-1.5 text-sm flex-shrink-0 outline-none" style="width:70px;background:var(--bg-main);border-color:#bbf7d0;color:var(--text-primary)">
-        <input type="password" value="${escHtml(brand.key||'')}" placeholder="填写 Key" class="brand-key border rounded-lg px-2 py-1.5 text-sm flex-1 outline-none" style="background:var(--bg-main);border-color:#bbf7d0;color:var(--text-primary)">
+        <input type="text" value="${escHtml(brand.key||'')}" placeholder="填写 Key" class="brand-key border rounded-lg px-2 py-1.5 text-sm flex-1 outline-none" style="background:var(--bg-main);border-color:#bbf7d0;color:var(--text-primary)">
         <input type="text" value="${escHtml(brand.proxy||'')}" placeholder="留空则直连" class="brand-proxy border rounded-lg px-2 py-1.5 text-sm flex-1 outline-none" style="background:var(--bg-main);border-color:#bbf7d0;color:var(--text-primary)">
         <textarea placeholder="型号（一行一个）" class="brand-models border rounded-lg px-2 py-1.5 text-xs flex-1 resize-none outline-none" style="min-height:34px;background:var(--bg-main);border-color:#bbf7d0;color:var(--text-primary)">${escHtml(brand.models||'')}</textarea>
         <button type="button" onclick="this.closest('.brand-row').remove()" class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 font-black text-lg transition" style="width:36px">×</button>
@@ -3067,7 +3067,7 @@ function renderBrandTable() {
     const saved = loadJSON(SK.brandList) || [];
     if (!saved.length) {
         // 默认一条空行
-        addBrandRow({ name: '千问', key: '', proxy: '', models: 'qwen-plus\nqwen3.6-plus' });
+        addBrandRow({ name: '', key: '', proxy: '', models: '' });
     } else {
         saved.forEach(b => addBrandRow(b));
     }
