@@ -1751,6 +1751,19 @@ function normalizeQuickFillList2(raw) {
     return out.length ? out : null;
 }
 
+function normalizeQuickFillList(raw) {
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+    const out = [];
+    for (let i = 0; i < raw.length; i++) {
+        const it = raw[i];
+        if (!it || typeof it.name !== 'string' || typeof it.content !== 'string') continue;
+        let id = typeof it.id === 'string' && it.id ? it.id : ('qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7));
+        if (!id.startsWith('qf_') || id.startsWith('qf2_')) id = 'qf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
+        out.push({ id, name: it.name.trim(), content: it.content });
+    }
+    return out.length ? out : null;
+}
+
 function loadQuickFillItemsFromStorage() {
     // 清除旧缓存数据（已删除的快捷填充按钮）
     const oldIds = ['qf_link', 'qf_channel', 'qf_tomb', 'qf_plot', 'qf_body', 'qf_title'];
