@@ -3124,20 +3124,21 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     const _allBrands = loadJSON(SK.brandList) || [];
     console.log('[streamCallAI] brandList count=', _allBrands.length);
     
-    // 根据模型名自动匹配品牌
-    let matchedBrand = null;
-    const modelLower = model.toLowerCase();
-    for (const [k, v] of Object.entries(modelBrandMap)) {
-        if (modelLower.includes(k)) { matchedBrand = v; break; }
-    }
-    // 在品牌配置中找到对应Key
+    // 遍历所有配置，用型号列表匹配当前模型
     let brandWithKey = null;
-    if (matchedBrand) {
-        brandWithKey = _allBrands.find(b => b.name === matchedBrand && b.key && b.key.trim());
+    const modelLower = model.toLowerCase();
+    for (const b of _allBrands) {
+        if (!b.key || !b.key.trim()) continue;
+        const brandModels = (b.models || '').toLowerCase().split('\n').map(s => s.trim()).filter(s => s);
+        for (const m of brandModels) {
+            if (modelLower.includes(m) || m.includes(modelLower)) {
+                brandWithKey = b;
+                break;
+            }
+        }
+        if (brandWithKey) break;
     }
-    // 没匹配到则用第一个有key的品牌
-    brandWithKey = brandWithKey || _allBrands.find(b => b.key && b.key.trim());
-    console.log('[streamCallAI] matchedBrand=', matchedBrand, 'brandWithKey=', brandWithKey);
+    console.log('[streamCallAI] brandWithKey=', brandWithKey);
     
     if (brandWithKey) {
         key = brandWithKey.key;
@@ -3156,7 +3157,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
             } else if (m.startsWith('ep-') || m.includes('doubao') || m.includes('豆包')) {
                 url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
             } else if (m.includes('gemini') || m.includes('google')) {
-                url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions?key=' + key.trim();
+                url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
             } else {
                 url = 'https://api.deepseek.com/v1/chat/completions'; // 默认
             }
@@ -3177,7 +3178,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
             url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
             key = flowConfig.db_key || flowConfig.proxy_key;
         } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions?key=' + (flowConfig.gg_key || flowConfig.proxy_key || '').trim();
+            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
             key = flowConfig.gg_key || flowConfig.proxy_key;
         } else {
             if (!flowConfig.proxy_url) {
@@ -3204,8 +3205,8 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
 
     const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
     console.debug('streamCallAI → URL:', url, '| Model:', model, '| Key:', key ? '已填' : '空');
-    const isGemini = url.includes('generativelanguage.googleapis.com');
-    const authHeader = isGemini ? {} : { 'Authorization':`Bearer ${key.trim()}` };
+    const isGemini = model.toLowerCase().includes('gemini') || model.toLowerCase().includes('google');
+    const authHeader = isGemini ? { 'x-goog-api-key': key.trim() } : { 'Authorization':`Bearer ${key.trim()}` };
     try {
         const res = await fetch(url, {
             method: 'POST',
