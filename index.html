@@ -374,6 +374,29 @@
     </div>
 </div>
 
+<!-- 快捷填充工具栏配置弹窗 -->
+<div id="fillToolModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[300]">
+    <div class="modal-box rounded-[24px] p-6 w-full max-w-2xl shadow-2xl flex flex-col" style="height:80vh;background:var(--card-bg)">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b" style="border-color:var(--border-color)">
+            <h3 class="text-lg font-black" style="color:#f97316;">📋 快捷填充 配置</h3>
+            <button onclick="closeFillToolPanel()" class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xl transition hover:bg-red-50 hover:text-red-500 relative" style="color:var(--text-secondary); cursor:pointer;">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto custom-scroll space-y-3" id="fillToolList">
+            <!-- 动态生成的配置项 -->
+        </div>
+        <div class="mt-4 pt-4 border-t flex justify-between" style="border-color:var(--border-color)">
+            <div class="flex gap-2">
+                <button onclick="resetToDefaultFillTools()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-3 py-2 rounded-lg text-xs transition" title="恢复默认">🔄 重置默认</button>
+                <button onclick="addNewFillTool()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">+ 新增填充项</button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeFillToolPanel()" class="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">✕ 关闭</button>
+                <button onclick="saveFillToolConfig()" class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-6 py-2 rounded-lg text-xs transition">💾 保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 主内容区 -->
 <div class="flex-1 flex flex-col overflow-hidden">
     <header class="h-[66px] flex items-center px-6 justify-between z-10 flex-shrink-0">
@@ -474,6 +497,10 @@
                     </div>
                     <div id="bottomToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
                         <!-- 由 renderBottomToolButtons() 动态生成所有按钮 -->
+                    </div>
+                    <!-- 第三套：快捷填充工具栏（点击直接填充输入框） -->
+                    <div id="fillToolButtons" class="flex gap-2 mb-2.5 flex-wrap">
+                        <!-- 由 renderFillToolButtons() 动态生成所有按钮 -->
                     </div>
                     <div class="relative rounded-[20px] border transition-all shadow-sm focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10" style="background:var(--card-bg);border-color:var(--border-color)">
                         <textarea id="userInput"
@@ -688,6 +715,7 @@ function init() {
     renderToolButtons();
     renderBottomToolButtons();
     renderBottomToolButtons2();
+    renderFillToolButtons();
     console.log('✅ 底部工具栏初始化完成，当前按钮数:', document.getElementById('bottomToolButtons').children.length);
     initQuickFillUI();
 }
@@ -1411,6 +1439,217 @@ if (configTool2Index === -1) {
     toolConfig2[configTool2Index].enabled = true;
 }
 saveJSON(TOOL_CONFIG_KEY2, toolConfig2);
+
+// ========== 第三套：快捷填充工具栏（点击直接填充输入框）==========
+const FILL_TOOLS_KEY = 'fillTools';
+
+// 默认快捷填充配置
+const DEFAULT_FILL_TOOLS = [
+    { id: 'fill_config', icon: '📋', name: '快捷填充', prompt: '', enabled: true },
+    { id: 'fill_style', icon: '✨', name: '风格', prompt: '请按照以下风格要求生成内容：', enabled: true },
+    { id: 'fill_expand', icon: '📖', name: '扩展', prompt: '请对以下内容进行扩展，丰富细节和描写：', enabled: true },
+    { id: 'fill_shorten', icon: '✂️', name: '精简', prompt: '请对以下内容进行精简，去除冗余：', enabled: true }
+];
+
+// 从localStorage加载快捷填充配置
+let savedFillConfig = loadJSON(FILL_TOOLS_KEY);
+let isValidFillConfig = savedFillConfig && Array.isArray(savedFillConfig) && savedFillConfig.length >= 1;
+if (isValidFillConfig) {
+    const hasConfigFill = savedFillConfig.some(t => t.id === 'fill_config');
+    if (!hasConfigFill) {
+        isValidFillConfig = false;
+    } else {
+        const configFill = savedFillConfig.find(t => t.id === 'fill_config');
+        if (!configFill.enabled) {
+            configFill.enabled = true;
+        }
+    }
+}
+let fillToolConfig = isValidFillConfig ? savedFillConfig : [...DEFAULT_FILL_TOOLS];
+
+const configFillIndex = fillToolConfig.findIndex(t => t.id === 'fill_config');
+if (configFillIndex === -1) {
+    fillToolConfig.unshift({ id: 'fill_config', icon: '📋', name: '快捷填充', prompt: '', enabled: true });
+} else if (!fillToolConfig[configFillIndex].enabled) {
+    fillToolConfig[configFillIndex].enabled = true;
+}
+saveJSON(FILL_TOOLS_KEY, fillToolConfig);
+
+// 打开快捷填充配置面板
+function openFillToolPanel() {
+    document.getElementById('fillToolModal').classList.remove('hidden');
+    renderFillToolList();
+}
+
+// 关闭快捷填充配置面板
+function closeFillToolPanel() {
+    document.getElementById('fillToolModal').classList.add('hidden');
+}
+
+// 渲染快捷填充工具栏
+function renderFillToolButtons() {
+    const container = document.getElementById('fillToolButtons');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const enabledFillTools = fillToolConfig.filter(t => t.enabled && t.id !== 'fill_config');
+    const configFillTool = fillToolConfig.find(t => t.id === 'fill_config');
+
+    // 添加配置按钮（锁定）
+    if (configFillTool && configFillTool.enabled) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag locked-tool';
+        btn.style.background = '#f97316'; // 橙色区分
+        btn.style.color = 'white';
+        btn.style.cursor = 'default';
+        btn.title = '快捷填充配置（锁定）';
+        btn.onclick = () => openFillToolPanel();
+        btn.innerHTML = `${configFillTool.icon} ${configFillTool.name}`;
+        container.appendChild(btn);
+    }
+
+    // 添加其他启用的填充按钮（点击后直接填充输入框）
+    enabledFillTools.forEach(tool => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-tag removable-tool';
+        btn.style.background = '#fb923c'; // 橙色背景
+        btn.style.color = 'white';
+        btn.dataset.toolId = tool.id;
+        btn.onclick = () => applyFillToolToInput(tool);
+        btn.innerHTML = `${tool.icon} ${tool.name}`;
+        container.appendChild(btn);
+    });
+}
+
+// 将填充内容写入输入框
+function applyFillToolToInput(tool) {
+    if (!tool || !tool.prompt) {
+        showToast('⚠️ 该填充项未配置内容');
+        return;
+    }
+    const ta = dom.userInput || document.getElementById('userInput');
+    if (!ta) return;
+    ta.value = tool.prompt;
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    const cc = document.getElementById('charCount');
+    if (cc) cc.textContent = ta.value.length + '字';
+    ta.focus();
+    showToast(`📝 已填充：${tool.name}`);
+}
+
+// 渲染快捷填充配置列表
+function renderFillToolList() {
+    const container = document.getElementById('fillToolList');
+    container.innerHTML = '';
+
+    fillToolConfig.forEach((tool, idx) => {
+        const item = document.createElement('div');
+        item.className = 'p-3 rounded-xl border';
+        item.style.background = 'var(--bg-main)';
+        item.style.borderColor = 'var(--border-color)';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'flex items-center gap-2 mb-2';
+
+        // 启用复选框
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = tool.enabled;
+        checkbox.className = 'w-4 h-4 accent-orange-500';
+        checkbox.onchange = (e) => {
+            fillToolConfig[idx].enabled = e.target.checked;
+        };
+        headerDiv.appendChild(checkbox);
+
+        // 图标输入
+        const iconInput = document.createElement('input');
+        iconInput.type = 'text';
+        iconInput.value = tool.icon || '📋';
+        iconInput.className = 'w-12 text-center bg-transparent border-b border-transparent hover:border-orange-300 focus:border-orange-500 outline-none text-sm';
+        iconInput.onchange = (e) => {
+            fillToolConfig[idx].icon = e.target.value;
+        };
+        headerDiv.appendChild(iconInput);
+
+        // 名称输入
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = tool.name || '未命名';
+        nameInput.className = 'flex-1 bg-transparent border-b border-transparent hover:border-orange-300 focus:border-orange-500 outline-none text-sm font-bold';
+        nameInput.style.color = 'var(--text-primary)';
+        nameInput.onchange = (e) => {
+            fillToolConfig[idx].name = e.target.value;
+        };
+        headerDiv.appendChild(nameInput);
+
+        // 删除按钮
+        if (tool.id !== 'fill_config') {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.onclick = () => {
+                console.log(`🗑️ 删除填充工具: ${tool.icon} ${tool.name}`);
+                fillToolConfig.splice(idx, 1);
+                saveJSON(FILL_TOOLS_KEY, fillToolConfig);
+                renderFillToolList();
+                renderFillToolButtons();
+                showToast(`🗑️ 已删除：${tool.name}`);
+            };
+            deleteBtn.className = 'text-red-400/50 hover:text-red-400 transition text-xs ml-4 px-2 py-1 rounded hover:bg-red-500/10';
+            deleteBtn.textContent = '删除';
+            headerDiv.appendChild(deleteBtn);
+        }
+
+        item.appendChild(headerDiv);
+
+        // 填充内容 textarea
+        const promptTextarea = document.createElement('textarea');
+        promptTextarea.className = 'w-full bg-black/20 border rounded px-2 py-1.5 text-xs resize-none custom-scroll';
+        promptTextarea.rows = 2;
+        promptTextarea.style.borderColor = 'var(--border-color)';
+        promptTextarea.style.color = 'var(--text-primary)';
+        promptTextarea.value = tool.prompt || '';
+        promptTextarea.placeholder = '点击按钮时填入输入框的内容...';
+        promptTextarea.onchange = (e) => {
+            fillToolConfig[idx].prompt = e.target.value;
+        };
+        item.appendChild(promptTextarea);
+
+        container.appendChild(item);
+    });
+}
+
+// 新增快捷填充项
+function addNewFillTool() {
+    const newId = 'fill_' + Date.now();
+    const newTool = {
+        id: newId,
+        icon: '✨',
+        name: '新填充项',
+        prompt: '',
+        enabled: true
+    };
+    fillToolConfig.push(newTool);
+    saveJSON(FILL_TOOLS_KEY, fillToolConfig);
+    renderFillToolList();
+    showToast('✅ 已新增填充项');
+}
+
+// 保存快捷填充配置
+function saveFillToolConfig() {
+    saveJSON(FILL_TOOLS_KEY, fillToolConfig);
+    renderFillToolButtons();
+    closeFillToolPanel();
+    showToast('💾 快捷填充配置已保存');
+}
+
+// 重置为默认快捷填充
+function resetToDefaultFillTools() {
+    fillToolConfig = [...DEFAULT_FILL_TOOLS];
+    saveJSON(FILL_TOOLS_KEY, fillToolConfig);
+    renderFillToolList();
+    renderFillToolButtons();
+    showToast('🔄 已重置为默认');
+}
 
 // 第二套工具栏：点击即填充，不参与关联状态
 
