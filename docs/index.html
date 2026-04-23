@@ -3097,17 +3097,21 @@ function updateModelDropdowns() {
 
 async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     let url, key;
+    console.debug('[streamCallAI] START model=', model);
 
     // 从brandList查找匹配的Key和Proxy
     const _allBrands = loadJSON(SK.brandList) || [];
+    console.debug('[streamCallAI] brandList=', _allBrands);
     let brandMatch = null;
     for (const b of _allBrands) {
         const models = (b.models || '').split('\n').map(s => s.trim()).filter(Boolean);
         if (models.some(m => m === model || model.includes(m) || m.includes(model))) {
             brandMatch = b;
+            console.debug('[streamCallAI] MATCHED brand:', b.name);
             break;
         }
     }
+    console.debug('[streamCallAI] brandMatch=', brandMatch);
 
     const modelLower = model.toLowerCase();
 
@@ -3159,6 +3163,8 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
         url = flowConfig.proxy_url.replace(/\/+$/,'') + '/chat/completions';
         key = flowConfig.proxy_key;
     }
+
+    console.debug('[streamCallAI] FINAL url=', url, 'key=', key ? key.substring(0,8)+'...' : '(empty)');
 
     if (!key || !key.trim()) {
         targetEl.innerHTML = `<span style="color:#ef4444">⚠️ 模型【${model}】未配置 API Key，请前往 ⚙️ 配置中心填写</span>`;
