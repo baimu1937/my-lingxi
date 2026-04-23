@@ -2416,19 +2416,15 @@ window.deleteTool = function(idx) {
         return;
     }
     
-    if (!confirm(`确认删除工具【${toolToDelete.name}】吗？`)) return;
-    
     console.log(`🗑️ 删除工具: ${toolToDelete.icon} ${toolToDelete.name} (${toolToDelete.id})`);
     
     toolConfig.splice(idx, 1);
     
-    // 立即保存到localStorage
     saveJSON('lingxi_tool_config', toolConfig);
-    console.log('💾 已保存删除后的配置');
     
     renderToolConfigList();
-    renderToolButtons(); // 立即更新顶部按钮
-    renderBottomToolButtons(); // 立即更新底部按钮
+    renderToolButtons();
+    renderBottomToolButtons();
     
     showToast(`✅ 已删除工具: ${toolToDelete.name}`);
 };
