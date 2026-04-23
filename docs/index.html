@@ -3104,30 +3104,62 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
     console.log('[streamCallAI] proxy_url=', flowConfig.proxy_url);
     console.log('[streamCallAI] ds_key=', flowConfig.ds_key ? '已填'+flowConfig.ds_key.slice(0,8) : '空');
 
-    // 检查brandList
+    // 模型→品牌映射表（硬编码，自动匹配）
+    const modelBrandMap = {
+        // DeepSeek
+        'deepseek': 'DS', 'deepseek-coder': 'DS', 'deepseek-chat': 'DS', 'deepseek-reasoner': 'DS',
+        // 阿里通义
+        'qwen': '千问', 'qwen-turbo': '千问', 'qwen-plus': '千问', 'qwen-max': '千问', 'qwen-long': '千问', 'qwen3': '千问', 'qwen3.5': '千问',
+        // 月薪/Kimi
+        'moonshot': '月薪', 'kimi': '月薪', 'kimi-k2': '月薪', 'kimi-k2.5': '月薪', 'kimix': '月薪',
+        // 字节豆包
+        'ep-': '字节', 'doubao': '字节', '豆包': '字节',
+        // 谷歌Gemini
+        'gemini': '谷歌', 'gemini-2': '谷歌', 'gemini-1': '谷歌',
+        // OpenAI
+        'gpt': 'OpenAI', 'chatgpt': 'OpenAI',
+        // Anthropic
+        'claude': 'Anthropic', 'sonnet': 'Anthropic', 'haiku': 'Anthropic'
+    };
     const _allBrands = loadJSON(SK.brandList) || [];
     console.log('[streamCallAI] brandList count=', _allBrands.length);
-    _allBrands.forEach((b,i) => console.log('[streamCallAI] brand',i,'=', b.name, 'key=', b.key ? b.key.slice(0,8)+'...' : '空', 'proxy=', b.proxy));
-
-    const firstBrandWithKey = _allBrands.find(b => b.key && b.key.trim());
-    console.log('[streamCallAI] firstBrandWithKey=', firstBrandWithKey);
     
-    if (firstBrandWithKey) {
-        key = firstBrandWithKey.key;
-        // 根据model名判断官方端点
-        const m = model.toLowerCase();
-        if (m.includes('deepseek') || m.includes('深度求索')) {
-            url = 'https://api.deepseek.com/v1/chat/completions';
-        } else if (m.includes('qwen') || m.includes('千问') || m.includes('通义')) {
-            url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-        } else if (m.includes('moonshot') || m.includes('kimi')) {
-            url = 'https://api.moonshot.cn/v1/chat/completions';
-        } else if (m.startsWith('ep-') || m.includes('doubao') || m.includes('豆包')) {
-            url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
-        } else if (m.includes('gemini') || m.includes('google')) {
-            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+    // 根据模型名自动匹配品牌
+    let matchedBrand = null;
+    const modelLower = model.toLowerCase();
+    for (const [k, v] of Object.entries(modelBrandMap)) {
+        if (modelLower.includes(k)) { matchedBrand = v; break; }
+    }
+    // 在品牌配置中找到对应Key
+    let brandWithKey = null;
+    if (matchedBrand) {
+        brandWithKey = _allBrands.find(b => b.name === matchedBrand && b.key && b.key.trim());
+    }
+    // 没匹配到则用第一个有key的品牌
+    brandWithKey = brandWithKey || _allBrands.find(b => b.key && b.key.trim());
+    console.log('[streamCallAI] matchedBrand=', matchedBrand, 'brandWithKey=', brandWithKey);
+    
+    if (brandWithKey) {
+        key = brandWithKey.key;
+        // 优先使用品牌配置的中转地址
+        if (brandWithKey.proxy && brandWithKey.proxy.trim()) {
+            url = brandWithKey.proxy.trim().replace(/\/+$/, '') + '/chat/completions';
         } else {
-            url = 'https://api.deepseek.com/v1/chat/completions'; // 默认
+            // 根据model名判断官方端点
+            const m = model.toLowerCase();
+            if (m.includes('deepseek') || m.includes('深度求索')) {
+                url = 'https://api.deepseek.com/v1/chat/completions';
+            } else if (m.includes('qwen') || m.includes('千问') || m.includes('通义')) {
+                url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+            } else if (m.includes('moonshot') || m.includes('kimi')) {
+                url = 'https://api.moonshot.cn/v1/chat/completions';
+            } else if (m.startsWith('ep-') || m.includes('doubao') || m.includes('豆包')) {
+                url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+            } else if (m.includes('gemini') || m.includes('google')) {
+                url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions?key=' + key.trim();
+            } else {
+                url = 'https://api.deepseek.com/v1/chat/completions'; // 默认
+            }
         }
     } else {
         // 无品牌key时尝试旧配置
@@ -3145,7 +3177,7 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
             url = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
             key = flowConfig.db_key || flowConfig.proxy_key;
         } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
-            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+            url = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions?key=' + (flowConfig.gg_key || flowConfig.proxy_key || '').trim();
             key = flowConfig.gg_key || flowConfig.proxy_key;
         } else {
             if (!flowConfig.proxy_url) {
@@ -3172,10 +3204,12 @@ async function streamCallAI(model, sysPrompt, messages, targetEl, temp) {
 
     const msgArray = Array.isArray(messages) ? messages : [{ role:'user', content:messages }];
     console.debug('streamCallAI → URL:', url, '| Model:', model, '| Key:', key ? '已填' : '空');
+    const isGemini = url.includes('generativelanguage.googleapis.com');
+    const authHeader = isGemini ? {} : { 'Authorization':`Bearer ${key.trim()}` };
     try {
         const res = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${key.trim()}` },
+            headers: { 'Content-Type':'application/json', ...authHeader },
             body: JSON.stringify({
                 model,
                 messages: [{ role:'system', content:sysPrompt }, ...msgArray],
