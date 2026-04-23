@@ -3072,24 +3072,33 @@ function updateModelDropdowns() {
     
     // 从中转站获取模型列表
     let proxy = [];
+    console.log('【调试】updateModelDropdowns触发');
+    console.log('【调试】proxy_url:', flowConfig.proxy_url, 'proxy_key:', flowConfig.proxy_key ? '已填' : '空');
     if (flowConfig.proxy_url && flowConfig.proxy_key) {
-        proxyModelCache = null; // 清除缓存强制刷新
+        proxyModelCache = null;
         proxyModelCacheKey = '';
-        // 异步获取中转站模型（不阻塞UI）
         fetchProxyModels(flowConfig.proxy_url, flowConfig.proxy_key).then(models => {
+            console.log('【调试】fetchProxyModels返回:', models.length, '个模型', models);
             if (models.length) {
                 proxy = models.map(m => ({value: m, label: m}));
                 renderModelDropdown();
+            } else {
+                console.log('【调试】��型列表为空，尝试备用方案');
+                if (flowConfig.proxy_models) {
+                    proxy = flowConfig.proxy_models.split(/[,，\n]+/).map(s => s.trim()).filter(Boolean).map(m => ({value: m, label: m}));
+                    renderModelDropdown();
+                }
+            }
+        }).catch(e => {
+            console.error('【调试】fetchProxyModels异常:', e);
+            if (flowConfig.proxy_models) {
+                proxy = flowConfig.proxy_models.split(/[,，\n]+/).map(s => s.trim()).filter(Boolean).map(m => ({value: m, label: m}));
+                renderModelDropdown();
             }
         });
-    }
-    // 备用：从手动配置的proxy_models读取
-    if (!proxy.length && flowConfig.proxy_models) {
-        proxy = flowConfig.proxy_models
-            .split(/[,，\n]+/)
-            .map(s => s.trim())
-            .filter(Boolean)
-            .map(m => ({value: m, label: m}));
+    } else if (flowConfig.proxy_models) {
+        console.log('【调试】使用手动配置的proxy_models');
+        proxy = flowConfig.proxy_models.split(/[,，\n]+/).map(s => s.trim()).filter(Boolean).map(m => ({value: m, label: m}));
     }
     
     function renderModelDropdown() {
